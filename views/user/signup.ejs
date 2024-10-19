@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Zahra</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Cursive', sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        /* Sign Up Section */
+        .sign-up-section {
+            height: 100vh;
+            background-color: #59342e;
+        }
+
+        .form-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h2 {
+            color: #59342e;
+            font-size: 28px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #59342e;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-signup {
+            background-color: #f4aaaa;
+            color: #59342e;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .btn-signup:hover {
+            background-color: #f8f8f8;
+            color: #59342e;
+        }
+
+        .link {
+            color: #f4aaaa;
+            font-weight: bold;
+        }
+
+        .link:hover {
+            color: #f8f8f8;
+        }
+
+        .or-separator {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #59342e;
+            position: relative;
+        }
+
+        .or-separator::before,
+        .or-separator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #ccc;
+        }
+
+        .or-separator::before {
+            left: 0;
+        }
+
+        .or-separator::after {
+            right: 0;
+        }
+
+        .google-signin {
+            background-color: #4285F4;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .google-signin:hover {
+            background-color: #357ae8;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.75rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sign Up Form -->
+    <section class="sign-up-section d-flex justify-content-center align-items-center">
+        <div class="form-container p-5">
+            <h2 class="text-center mb-4">Create an Account</h2>
+            <form method="post" action="/signup" id="signupform">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" name="name" id="username" required>
+                    <div id="error1" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" name="email" id="email" required>
+                    <div id="error2" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="phone-number" class="form-label">Phone Number</label>
+                    <input type="number" class="form-control" name="phone" id="phone">
+                    <div id="error3" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" id="password" required>
+                    <div id="error4" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="confirm-password" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" name="cPassword" id="confirm-password" required>
+                    <div id="error5" class="error-message"></div>
+                </div>
+                <button type="submit" class="btn btn-signup w-100">Sign Up</button>
+                <p class="text-center mt-3">Already have an account? <a href="login.html" class="link">Sign in here</a></p>
+
+                <!-- OR separator -->
+                <div class="or-separator">
+                    <span>or</span>
+                </div>
+
+                <!-- Google Sign In Button -->
+                <div class="google-signin">
+                    Sign in with Google
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const nameId = document.getElementById("username");
+        const emailId = document.getElementById("email");
+        const phoneId = document.getElementById("phone");
+        const passId = document.getElementById("password");
+        const cpassId = document.getElementById("confirm-password");
+        const error1 = document.getElementById("error1");
+        const error2 = document.getElementById("error2");
+        const error3 = document.getElementById("error3");
+        const error4 = document.getElementById("error4");
+        const error5 = document.getElementById("error5");
+        const signupform = document.getElementById("signupform");
+
+        function nameValidationChecking() {
+            const nameVal = nameId.value.trim();
+            const namePattern = /^[A-Za-z\s]+$/;
+
+            if (nameVal === "") {
+                error1.style.display = "block";
+                error1.innerHTML = "Please enter a valid name";
+            } else if (!namePattern.test(nameVal)) {
+                error1.style.display = "block";
+                error1.innerHTML = "Name can only contain alphabets and spaces";
+            } else {
+                error1.style.display = "none";
+                error1.innerHTML = "";
+            }
+        }
+
+        function emailValidationChecking() {
+            const emailVal = emailId.value.trim();
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+            if (!emailPattern.test(emailVal)) {
+                error2.style.display = "block";
+                error2.innerHTML = "Invalid Format";
+            } else {
+                error2.style.display = "none";
+                error2.innerHTML = "";
+            }
+        }
+
+        function phoneValidationChecking() {
+            const phoneVal = phoneId.value.trim();
+
+            if (phoneVal === "") {
+                error3.style.display = "block";
+                error3.innerHTML = "Enter Valid Phone Number";
+            } else if (phoneVal.length !== 10) {
+                error3.style.display = "block";
+                error3.innerHTML = "Enter 10 digits";
+            } else {
+                error3.style.display = "none";
+                error3.innerHTML = "";
+            }
+        }
+
+        function passValidationChecking() {
+            const passVal = passId.value.trim();
+            const cpassVal = cpassId.value.trim();
+            const alpha = /[a-zA-Z]/;
+            const digit = /\d/;
+
+            if (passVal.length < 8) {
+                error4.style.display = "block";
+                error4.innerHTML = "Should contain at least 8 characters";
+            } else if (!alpha.test(passVal) || !digit.test(passVal)) {
+                error4.style.display = "block";
+                error4.innerHTML = "Should contain numbers and alphabets";
+            } else {
+                error4.style.display = "none";
+                error4.innerHTML = "";
+            }
+
+            if (passVal !== cpassVal) {
+                error5.style.display = "block";
+                error5.innerHTML = "Passwords do not match";
+            } else {
+                error5.style.display = "none";
+                error5.innerHTML = "";
+            }
+        }
+
+        signupform.addEventListener("submit", function (e) {
+            nameValidationChecking();
+            emailValidationChecking();
+            phoneValidationChecking();
+            passValidationChecking();
+
+            if (error1.innerHTML !== "" || error2.innerHTML !== "" || error3.innerHTML !== "" || error4.innerHTML !== "" || error5.innerHTML !== "") {
+                e.preventDefault();  // Prevent form submission if there are errors
+            }
+        });
+
+        nameId.addEventListener("input", nameValidationChecking);
+        emailId.addEventListener("input", emailValidationChecking);
+        phoneId.addEventListener("input", phoneValidationChecking);
+        passId.addEventListener("input", passValidationChecking);
+        cpassId.addEventListener("input", passValidationChecking);
+    </script>
+
+</body>
+</html>
