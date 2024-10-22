@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Zahra</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Cursive', sans-serif;
+            background-color: #f8f8f8;
+        }
+
+        /* Login Section */
+        .login-section {
+            height: 100vh;
+            background-color: #59342e;
+        }
+
+        .form-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h2 {
+            color: #59342e;
+            font-size: 28px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #59342e;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-login {
+            background-color: #f4aaaa;
+            color: #59342e;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .btn-login:hover {
+            background-color: #f8f8f8;
+            color: #59342e;
+        }
+
+        .link {
+            color: #f4aaaa;
+            font-weight: bold;
+        }
+
+        .link:hover {
+            color: #f8f8f8;
+        }
+
+        .or-separator {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #59342e;
+            position: relative;
+        }
+
+        .or-separator::before,
+        .or-separator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #ccc;
+        }
+
+        .or-separator::before {
+            left: 0;
+        }
+
+        .or-separator::after {
+            right: 0;
+        }
+
+        .google-signin {
+            background-color: #4285F4;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .google-signin:hover {
+            background-color: #357ae8;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.75rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Form -->
+    <section class="login-section d-flex justify-content-center align-items-center">
+        <div class="form-container p-5">
+            <h2 class="text-center mb-4">Login to Your Account</h2>
+            <form method="post" action="/login" id="loginform">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" name="email" id="email" required>
+                    <div id="login-error1" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" id="password" required>
+                    <div id="login-error2" class="error-message"></div>
+                </div>
+                <%if(locals.message && message.length > 0){%>
+                  <div class="alert alert-danger text-center">
+
+                    <%=message%>
+
+                  </div>
+                <%}%>
+                <button type="submit" class="btn btn-login w-100">Log In</button>
+                <p class="text-center mt-3">Don't have an account? <a href="/signup" class="link">Sign up here</a></p>
+
+                <!-- OR separator -->
+                <div class="or-separator">
+                    <span>or</span>
+                </div>
+
+                <div class="social btns">
+                    <a href="/auth/google" type="button" class="btn btn-outline-danger">
+                        <img
+                        src="img/google-logo.webp"
+                        alt="Google Logo"
+                        style="width: 24px; height:24px"
+                        />
+                        <p>Login with Google</p>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const emailId = document.getElementById("email");
+        const passId = document.getElementById("password");
+        const loginError1 = document.getElementById("login-error1");
+        const loginError2 = document.getElementById("login-error2");
+        const loginForm = document.getElementById("loginform");
+
+        function emailValidationChecking() {
+            const emailVal = emailId.value.trim();
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+            if (!emailPattern.test(emailVal)) {
+                loginError1.style.display = "block";
+                loginError1.innerHTML = "Invalid Email Format";
+            } else {
+                loginError1.style.display = "none";
+                loginError1.innerHTML = "";
+            }
+        }
+
+        function passValidationChecking() {
+            const passVal = passId.value.trim();
+            if (passVal.length < 8) {
+                loginError2.style.display = "block";
+                loginError2.innerHTML = "Password must be at least 8 characters";
+            } else {
+                loginError2.style.display = "none";
+                loginError2.innerHTML = "";
+            }
+        }
+
+        loginForm.addEventListener("submit", function (e) {
+            emailValidationChecking();
+            passValidationChecking();
+
+            if (loginError1.innerHTML !== "" || loginError2.innerHTML !== "") {
+                e.preventDefault(); // Prevent form submission if there are errors
+            }
+        });
+
+        emailId.addEventListener("input", emailValidationChecking);
+        passId.addEventListener("input", passValidationChecking);
+    </script>
+
+</body>
+</html>

@@ -129,7 +129,7 @@
                     <div id="otpTimer" class="otp-timer">
                         <span id="timerValue">60</span>
                     </div>
-                    <button type="button" class="btn btn-secondary">Resend OTP</button>
+                    <button type="button" class="btn btn-secondary" onclick="resendOTP()">Resend OTP</button>
                 </div>
                 <% if (locals.message && message.length > 0) { %>
                 <div class="alert alert-danger"><%= message %></div>
@@ -198,6 +198,45 @@
         })
         return false;
     }
+
+    function resendOTP() {
+    clearInterval(timerInterval); // Stop the current timer
+    timer = 60; // Reset the timer to 60 seconds
+    document.getElementById("otp").disabled = false; // Enable OTP input
+    document.getElementById("timerValue").classList.remove("expired"); // Remove expired class
+    document.getElementById("timerValue").textContent = timer; // Reset timer display
+    startTimer(); // Start the timer again
+
+    $.ajax({
+        type: "POST",
+        url: "/resend-otp",
+        success: function (response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "OTP Resent Successfully",
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An error occurred while resending OTP. Please try again.",
+                });
+            }
+        },
+        error: function () {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "An error occurred while resending OTP. Please try again.",
+            });
+        }
+    });
+
+    return false;
+}
 
 
 </script>

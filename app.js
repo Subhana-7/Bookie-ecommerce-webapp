@@ -3,6 +3,7 @@ const app = express();
 const path = require("path");
 const env = require("dotenv").config();
 const session = require("express-session");
+const passport = require("./config/passport");
 const db = require("./config/db");
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
@@ -20,6 +21,11 @@ app.use(session({
     maxAge:72*60*60*1000
   }
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 app.use((req,res,next) => {
   res.set("cache-control","no-store")
   next();
@@ -31,6 +37,7 @@ app.use(express.static(path.join(__dirname,"public"))); //fetch the data in the 
 
 
 app.use("/", userRouter);
+app.use("/admin",adminRouter);
 
 PORT = 7000 || process.env.PORT
 app.listen(PORT,() => {

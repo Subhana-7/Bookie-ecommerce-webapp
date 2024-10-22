@@ -144,6 +144,13 @@
                     <input type="password" class="form-control" name="cPassword" id="confirm-password" required>
                     <div id="error5" class="error-message"></div>
                 </div>
+                <%if(locals.message && message.length > 0){%>
+                    <div class="alert alert-danger text-center">
+  
+                      <%=message%>
+  
+                    </div>
+                  <%}%>
                 <button type="submit" class="btn btn-signup w-100">Sign Up</button>
                 <p class="text-center mt-3">Already have an account? <a href="login.html" class="link">Sign in here</a></p>
 
@@ -152,10 +159,21 @@
                     <span>or</span>
                 </div>
 
-                <!-- Google Sign In Button -->
+                <div class="social btns">
+                    <a href="/auth/google" type="button" class="btn btn-outline-danger">
+                        <img
+                        src="img/google-logo.webp"
+                        alt="Google Logo"
+                        style="width: 24px; height:24px"
+                        />
+                        <p>Sign up with Google</p>
+                    </a>
+                </div>
+
+                <!--
                 <div class="google-signin">
                     Sign in with Google
-                </div>
+                </div>-->
             </form>
         </div>
     </section>
