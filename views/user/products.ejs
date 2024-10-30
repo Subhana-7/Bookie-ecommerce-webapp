@@ -1,0 +1,191 @@
+<%-include("../../views/partials/user/header")%>
+  <style>
+/* Reset and Body Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f7f7f7;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  margin-bottom: 20px;
+}
+
+.breadcrumbs a {
+  color: maroon;
+  text-decoration: none;
+}
+
+.breadcrumbs span {
+  color: #555;
+}
+
+/* Layout: Sidebar and Main Content */
+.content {
+  display: flex;
+}
+
+.sidebar {
+  width: 25%;
+  padding: 20px;
+  background-color: maroon;
+  color: white;
+  margin-right: 20px;
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section h3 {
+  margin-bottom: 10px;
+}
+
+.filter-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.filter-section li {
+  margin-bottom: 10px;
+}
+
+/* Main Content */
+.product-list {
+  width: 75%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+}
+
+.product-list h2 {
+  margin-bottom: 20px;
+}
+
+/* Product Cards */
+.products {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.product-card {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 10px;
+  padding: 15px;
+  width: calc(33.333% - 20px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.product-card img {
+  max-width: 100%;
+  height: auto;
+}
+
+.product-card h3 {
+  margin: 10px 0;
+}
+
+.product-card .price {
+  font-size: 1.2em;
+  color: maroon;
+}
+
+.product-card button {
+  background-color: maroon;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.product-card button:hover {
+  background-color: darkred;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-card {
+    width: calc(50% - 20px);
+  }
+}
+
+@media (max-width: 480px) {
+  .product-card {
+    width: 100%;
+  }
+
+  .sidebar {
+    display: none; /* Optionally hide sidebar on mobile */
+  }
+}
+
+
+  </style>
+
+<div class="container">
+    <nav class="breadcrumbs">
+      <a href="/">Home</a> &gt; <span>Products</span>
+    </nav>
+
+    <div class="content">
+      <aside class="sidebar">
+        <h2>Filter & Sort</h2>
+        
+        <!-- Sort Options -->
+        <div class="filter-section">
+          <h3>Sort By</h3>
+          <select id="sortOptions">
+            <option value="default">Default</option>
+            <option value="priceAsc">Price: Low to High</option>
+            <option value="priceDesc">Price: High to Low</option>
+            <option value="newest">Newest Arrivals</option>
+          </select>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="filter-section">
+          <h3>Categories</h3>
+          <ul>
+            <li><input type="checkbox" id="fiction" /><label for="fiction">Fiction</label></li>
+            <li><input type="checkbox" id="nonFiction" /><label for="nonFiction">Non-Fiction</label></li>
+            <li><input type="checkbox" id="mystery" /><label for="mystery">Mystery</label></li>
+            <li><input type="checkbox" id="fantasy" /><label for="fantasy">Fantasy</label></li>
+            <li><input type="checkbox" id="science" /><label for="science">Science</label></li>
+          </ul>
+        </div>
+      </aside>
+
+      <main class="product-list">
+        <h2>Product List</h2>
+        <div class="products">
+          <!-- Sample Product Card -->
+          <div class="product-list">
+            <% products.forEach(product => { %>
+              <div class="product-card">
+                <img src="uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" />
+                <h3><%= product.productName %></h3>
+                <p>Author: <%= product.author %></p>
+                <p>Publisher: <%= product.publisher %></p>
+                <p class="price">$<%= product.salePrice %></p>
+              </div>
+            <% }) %>
+          </div>
+          
+          
+          <!-- Add more product cards as needed -->
+        </div>
+      </main>
+    </div>
+  </div>

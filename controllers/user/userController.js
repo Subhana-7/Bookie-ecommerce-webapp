@@ -1,4 +1,6 @@
 const User = require("../../models/userSchema");
+const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
@@ -132,12 +134,21 @@ const verifyOtp = async(req,res) => {
 const loadHomePage = async(req,res) => {
   try{
     const user = req.session.user;
-    if(user) {
+    const categories = await Category.find({isListed:true});
+    let productData = await Product.find(
+      {isBlocked:false,
+        category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
+      }
+    )
 
+    productData.sort((a,b)=>new Date(b,createdOn)-new Date(a.createdOn));
+    productData = productData.slice(0,4);
+
+    if(user) {
       const userData = await User.findOne({_id:user._id});
-      return res.render("home",{user:userData});
+      return res.render("home",{user:userData,products:productData});
     }else {
-      return res.render("home");
+      return res.render("home",{products:productData});
     }
     
   }catch(error) {

@@ -3,6 +3,7 @@ const app = express();
 const path = require("path");
 const env = require("dotenv").config();
 const session = require("express-session");
+const flash = require('express-flash');
 const passport = require("./config/passport");
 const db = require("./config/db");
 const userRouter = require("./routes/userRouter");
@@ -21,6 +22,14 @@ app.use(session({
     maxAge:72*60*60*1000
   }
 }))
+
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.messages = req.flash(); // Make flash messages available in all views
+  next();
+});
+
+
 
 app.use(passport.initialize());
 app.use(passport.session());

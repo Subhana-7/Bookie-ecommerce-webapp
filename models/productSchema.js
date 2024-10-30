@@ -11,7 +11,7 @@ const productSchema = new Schema({
         type :String,
         required:true,
     },
-    brand: {
+    author: {
         type:String,
         required:true,
     },
@@ -26,7 +26,7 @@ const productSchema = new Schema({
     },
     salePrice:{
         type:Number,
-        required:true
+        required:true,
     },
     productOffer : {
         type:Number,
@@ -34,9 +34,9 @@ const productSchema = new Schema({
     },
     quantity:{
         type:Number,
-        default:true
+        required:true
     },
-    color: {
+    publisher: {
         type:String,
         required:true
     },
@@ -54,7 +54,17 @@ const productSchema = new Schema({
         required:true,
         default:"Available"
     },
-},{timestamps:true});
+    createdOn: {
+        type: Date,
+        default: Date.now
+    },
+    rating: {
+        type:Number,
+        default:0,
+        min:0,
+        max:5,
+    }
+});
 
 const Product = mongoose.model("Product",productSchema);
 
