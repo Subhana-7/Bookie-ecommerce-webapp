@@ -62,15 +62,15 @@
                             </td>
                             <td><%= data[i].quantity %></td>
                             <td>
-                                <%if(data[i].isBlocked === false) {%>
-                                <button class="btn btn-danger" style="width: 80px;">
-                                    <a href="/admin/blockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Block</a>
-                                </button>
-                                <%}else{%>
-                                <button class="btn btn-success" style="width: 80px;">
-                                    <a href="/admin/UnblockProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Unblock</a>
-                                </button>
-                                <%}%>
+                                <% if (data[i].isBlocked === false) { %>
+                                    <button class="btn btn-danger" style="width: 80px;" onclick="blockProduct('<%= data[i]._id %>')">
+                                        Block
+                                    </button>
+                                <% } else { %>
+                                    <button class="btn btn-success" style="width: 80px;" onclick="unblockProduct('<%= data[i]._id %>')">
+                                        Unblock
+                                    </button>
+                                <% } %>
                             </td>
                             <td>
                                 <button class="btn btn-info" style="width: 80px;">
@@ -78,8 +78,8 @@
                                 </button>
                             </td>
                             <td>
-                                <button class="btn btn-danger" style="width: 80px;">
-                                    <a href="/admin/deleteProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Delete</a>
+                                <button class="btn btn-danger" style="width: 80px;" onclick="deleteProduct('<%= data[i]._id %>')">
+                                    Delete
                                 </button>
                             </td>
                         </tr>
@@ -191,6 +191,88 @@
                 console.error(error);
             }
         }
+
+        function blockProduct(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This product will be blocked!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, block it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/admin/blockProduct?id=${productId}`,
+                method: "GET",
+                success: (response) => {
+                    Swal.fire("Blocked!", "The product has been blocked.", "success").then(() => {
+                        location.reload();
+                    });
+                },
+                error: (error) => {
+                    Swal.fire("Error", "Failed to block the product.", "error");
+                }
+            });
+        }
+    });
+}
+
+function unblockProduct(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This product will be unblocked!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, unblock it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/admin/unblockProduct?id=${productId}`,
+                method: "GET",
+                success: (response) => {
+                    Swal.fire("Unblocked!", "The product has been unblocked.", "success").then(() => {
+                        location.reload();
+                    });
+                },
+                error: (error) => {
+                    Swal.fire("Error", "Failed to unblock the product.", "error");
+                }
+            });
+        }
+    });
+}
+
+function deleteProduct(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This product will be deleted permanently!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/admin/deleteProduct?id=${productId}`,
+                method: "GET",
+                success: (response) => {
+                    Swal.fire("Deleted!", "The product has been deleted.", "success").then(() => {
+                        location.reload();
+                    });
+                },
+                error: (error) => {
+                    Swal.fire("Error", "Failed to delete the product.", "error");
+                }
+            });
+        }
+    });
+}
+
 
 
     </script>

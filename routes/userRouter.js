@@ -11,7 +11,7 @@ router.get("/signup",userController.loadSignup);
 router.post("/signup",userController.signup);
 router.post("/verify-otp",userController.verifyOtp);
 router.post("/resend-otp",userController.resendOtp);
-router.get("/",userController.loadHomePage);
+router.get("/",userAuth,userController.loadHomePage);
 
 router.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
 router.get("/auth/google/callback",passport.authenticate("google",{failureRedirect:"/signup"}),(req,res) => {
@@ -20,8 +20,10 @@ router.get("/auth/google/callback",passport.authenticate("google",{failureRedire
 
 router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
-router.get("/logout",userController.logout);
+router.get("/logout",userAuth,userController.logout);
 
-router.get("/products",userProductController.getProducts)
+router.get("/products",userAuth,userProductController.getProducts);
+router.get("/product-details/:id",userAuth,userProductController.productDetails);
+
 
 module.exports = router;

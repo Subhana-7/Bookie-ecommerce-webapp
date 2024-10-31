@@ -55,7 +55,7 @@ const userBlocked = async(req,res) => {
     console.log("Blocking user ID: ", id);
     const result  = await User.updateOne({_id:id},{$set:{isBlocked:true}});
     console.log("Update result:", result);
-    res.redirect("/admin/users");
+    res.redirect("/admin/users?status=blocked");
   } catch (error) {
     res.redirect("/pageError",error);
   }
@@ -67,7 +67,7 @@ const userUnBlocked = async(req,res) => {
     console.log("unBlocking user ID: ", id)
     const result = await User.updateOne({_id:id},{$set:{isBlocked:false}});
     console.log("Update result:", result);
-    res.redirect("/admin/users");
+    res.redirect("/admin/users?status=unblocked");
   } catch (error) {
     res.redirect("/pageError",error);
   }

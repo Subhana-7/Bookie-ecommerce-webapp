@@ -141,7 +141,7 @@ const loadHomePage = async(req,res) => {
       }
     )
 
-    productData.sort((a,b)=>new Date(b,createdOn)-new Date(a.createdOn));
+    productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn));
     productData = productData.slice(0,4);
 
     if(user) {

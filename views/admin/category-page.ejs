@@ -219,7 +219,7 @@
         </td>
 
         <td>
-          <button class="btn btn-danger" style="width: 80px;">
+          <button class="btn btn-danger" style="width: 80px" onclick="deleteCategory('<%= category._id %>')">
             <a href="/admin/deleteCategory?id=<%=category._id%>" class="text-white" style="text-decoration: none;">Delete</a>
         </button>
         </td>
@@ -281,9 +281,15 @@
     return response.json();
   })
   .then(data => {
-    console.log("Category added successfully", data);
+  console.log("Category added successfully", data);
+  Swal.fire({
+    icon: "success",
+    title: "Success",
+    text: "Category added successfully!",
+  }).then(() => {
     location.reload();
-  })
+  });
+})
   .catch(error => {
     console.error("Error adding category:", error);
     if (error.message === "Category Already exists") {
@@ -430,6 +436,36 @@ async function removeOffer(categoryId) {
     console.log("Error removing offer", error);
   }
 }
+
+function deleteCategory(categoryId) {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This will permanently delete the category.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/admin/deleteCategory?id=${categoryId}`, {
+        method: "DELETE"
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire("Deleted!", "The category has been deleted.", "success").then(() => {
+            location.reload();
+          });
+        } else {
+          Swal.fire("Error", "Could not delete category.", "error");
+        }
+      })
+      .catch(error => Swal.fire("Error", "Failed to delete the category.", "error"));
+    }
+  });
+}
+
 
 
   </script>

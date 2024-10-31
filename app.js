@@ -10,8 +10,10 @@ const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
 db();
 
-app.use(express.json()); //parse incoming requests 
+ 
 app.use(express.urlencoded({extended:true})); //parse url queries
+app.use(express.json()); //parse incoming requests
+
 app.use(session({
   secret:process.env.SESSION_SECRET,
   resave:false,
