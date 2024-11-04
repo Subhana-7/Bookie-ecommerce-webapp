@@ -146,10 +146,11 @@
 
         <!-- Search Form just above the table -->
         <div class="card search-form">
-          <form>
-            <input class="form-control d-inline" type="search" placeholder="Search" aria-label="Search">
+          <form method="get" action="/admin/category">
+            <input class="form-control d-inline" type="search" name="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-primary d-inline" type="submit">Search</button>
           </form>
+          
         </div>  
 
         <!-- Categories Table -->
@@ -181,7 +182,7 @@
           <% } %>
         </td>
         <td>
-          <% if (category.categoryOffer == 0) { %> <!-- Allow type coercion with == -->
+          <% if (category.categoryOffer == 0) { %> 
             <button class="btn btn-info" style="width:100px">
               <a href="#" class="text-white" onclick="addOffer('<%- category._id %>')">Add Offer</a>
             </button> 
@@ -200,12 +201,10 @@
         </td>
         <td>
           <% if (category.isListed) { %>
-            <!-- If the category is listed, show the Unlist button -->
             <button class="btn btn-danger" style="width:70px">
               <a href="/admin/unlistCategory?id=<%= category._id %>" class="text-white" onclick="unlistCategory('<%= category._id %>')">Unlist</a>
             </button>
           <% } else { %>
-            <!-- If the category is not listed, show the List button -->
             <button class="btn btn-success" style="width:70px">
               <a href="/admin/listCategory?id=<%= category._id %>" class="text-white" onclick="listCategory('<%= category._id %>')">List</a>
             </button>
@@ -224,7 +223,7 @@
         </button>
         </td>
       </tr>
-    <% }) %> <!-- Close the forEach loop properly -->
+    <% }) %> 
   </tbody>
 </table>
 
@@ -256,7 +255,6 @@
   console.log("Form submit event triggered");
 
   if (!validateForm()) {
-    // Stop form submission if validation fails
     return;
   }
 
@@ -353,11 +351,11 @@ async function addOffer(categoryId) {
     inputPlaceholder: "%",
     inputAttributes: {
       min: 1, 
-      max: 100, // Limit to realistic range
+      max: 100, 
       step: 1
     },
   });
-  // Validate the input
+
   if (!amount || isNaN(amount) || amount <= 0 || amount > 100) {
     console.log("working");
     Swal.fire("Invalid Input", "Please enter a valid percentage", "error");
@@ -376,11 +374,10 @@ async function addOffer(categoryId) {
       }),
     });
 
-    // Log the entire response object for inspection
     console.log("Response status:", response.status);
 
     if (!response.ok) {
-      console.error("Response not OK:", response.status); // Log response status if not successful
+      console.error("Response not OK:", response.status); 
     }
 
     //
@@ -432,7 +429,7 @@ async function removeOffer(categoryId) {
       "Error",
       "An error occurred while removing the offer",
       "error"
-    ); // Corrected syntax
+    );
     console.log("Error removing offer", error);
   }
 }

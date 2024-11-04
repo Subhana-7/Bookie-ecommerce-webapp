@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user/userController");
 const passport = require("passport");
-const userProductController = require("../controllers/user/userProductController")
+const userProductController = require("../controllers/user/userProductController");
+const profileController = require("../controllers/user/profileController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
 
@@ -24,6 +25,14 @@ router.get("/logout",userAuth,userController.logout);
 
 router.get("/products",userAuth,userProductController.getProducts);
 router.get("/product-details/:id",userAuth,userProductController.productDetails);
+
+//user profile
+
+router.get("/profile",userAuth,profileController.getProfile);
+router.get("/edit-profile",userAuth,profileController.loadEditProfile);
+router.post("/edit-profile",userAuth,profileController.editProfile);
+router.get("/add-address",userAuth,profileController.loadAddAddress);
+router.post("/add-address",userAuth,profileController.addAddress);
 
 
 module.exports = router;

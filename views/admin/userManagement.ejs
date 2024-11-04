@@ -28,7 +28,7 @@
   <div class="row mb-3">
     <div class="col-md-4">
       <!-- Wrap search in a form -->
-      <form method="GET" action="/admin/userManagement">
+      <form method="GET" action="/admin/users">
         <input type="text" class="form-control search-bar" name="search" value="<%= search %>" placeholder="Search users by name or email...">
       </form>
     </div>
@@ -100,18 +100,16 @@
 
 <script>
  document.addEventListener("DOMContentLoaded", function() {
-  // Check URL for the status parameter
   const urlParams = new URLSearchParams(window.location.search);
   const status = urlParams.get('status');
 
-  // Display appropriate SweetAlert based on the status
   if (status === 'blocked') {
     Swal.fire({
       title: "User Blocked",
       text: "The user has been successfully blocked.",
       icon: "success",
       confirmButtonText: "OK",
-      backdrop: true // Ensure a backdrop to center the alert visually
+      backdrop: true 
     });
   } else if (status === 'unblocked') {
     Swal.fire({

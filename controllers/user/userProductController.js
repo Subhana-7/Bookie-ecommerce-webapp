@@ -9,12 +9,15 @@ const sharp = require("sharp");
 
 const getProducts = async (req, res) => {
   try {
+    const searchQuery = req.query.search || '';
+
       const validCategories = await Category.find({ isListed: true });
       const validCategoryIds = validCategories.map(category => category._id);
 
       const products = await Product.find({
          category: { $in: validCategoryIds },
-         isBlocked:false
+         isBlocked:false,
+         productName: { $regex: searchQuery, $options: 'i' }
         }); 
       
       res.render('products', { products }); 

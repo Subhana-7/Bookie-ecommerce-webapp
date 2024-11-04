@@ -40,6 +40,7 @@ async function sendVerificationEmail(email,otp) {
       }
     })
 
+
     const info = await transporter.sendMail({
       from:process.env.NODEMAILER_EMAIL,
       to:email,

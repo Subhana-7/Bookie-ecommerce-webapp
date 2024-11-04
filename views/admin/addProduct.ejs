@@ -18,37 +18,37 @@
        }
 
        .form-control {
-           border: 1px solid #ced4da; /* Default Bootstrap border */
-           border-radius: .25rem; /* Rounded corners */
+           border: 1px solid #ced4da; 
+           border-radius: .25rem;
        }
 
        .form-label {
-           font-weight: bold; /* Bold labels for clarity */
+           font-weight: bold; 
        }
 
        .content-main {
-           background-color: #f8f9fa; /* Light background for the main content */
-           padding: 20px; /* Spacing around the content */
-           border-radius: .25rem; /* Rounded corners for the main content */
-           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+           background-color: #f8f9fa;
+           padding: 20px; 
+           border-radius: .25rem; 
+           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
        }
 
        .sidebar {
-           background-color: #343a40; /* Dark background for sidebar */
-           color: white; /* White text for visibility */
+           background-color: #343a40; 
+           color: white;
        }
 
        .sidebar .nav-link {
-           color: #adb5bd; /* Light text color for links */
+           color: #adb5bd;
        }
 
        .sidebar .nav-link.active {
-           color: white; /* White text for the active link */
+           color: white;
        }
 
        .sidebar .nav-link:hover {
-           color: #ffffff; /* Change color on hover */
-           background-color: #495057; /* Darker background on hover */
+           color: #ffffff; 
+           background-color: #495057; 
        }
 
 
@@ -144,7 +144,7 @@
                                       <div class="mb-4">
                                           <label class="form-label">Author</label>
                                           <input placeholder="Author" name="author" type="text" class="form-control">
-                                          <div id="quantity-error" class="error-message"></div>
+                                          <div id="author-error" class="error-message"></div>
                                       </div>
                                   </div>
                                     <div class="mb-4">
@@ -179,7 +179,7 @@
                                       <div class="mb-4">
                                           <label class="form-label">Publisher</label>
                                           <input placeholder="publisher" name="publisher" type="text" class="form-control">
-                                          <div id="quantity-error" class="error-message"></div>
+                                          <div id="publisher-error" class="error-message"></div>
                                       </div>
                                   </div>
                                     <div class="card mb-4">
@@ -369,94 +369,104 @@
 
 
 
-      function validateForm() {
-              clearErrorMessages();
-              const name = document.getElementsByName('productName')[0].value;
-              const description = document.getElementById('descriptionid').value;
-              const brand = document.getElementsByName('brand')[0].value;
-              const price = document.getElementsByName('regularPrice')[0].value;
-              const saleprice = document.getElementsByName('salePrice')[0].value;
-              const color = document.getElementsByName('color')[0].value;
-              const category = document.getElementsByName('category')[0].value;
-              const images = document.getElementById('input1')
-              const quantity=document.getElementsByName('quantity')
-              let isValid = true
-              if (name.trim() === "") {
-      displayErrorMessage('productName-error', 'Please enter a product name.');
-      isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-      displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-      isValid = false;
-   }
-            
-   if (description.trim() === "") {
-      displayErrorMessage('description-error', 'Please enter a product description.');
-      isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
-      displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
-      isValid = false;
-   }
-  
-  
-           
-  
-  
-              if ( parseInt(quantity) < 0) {
-                  displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                  isValid = false;
-              }
-  
-  
-  
-  
-              if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                  displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                  isValid = false;
-              }
-  
-  
-  
-  
-              if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                  displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                  isValid = false;
-              }
-              if (parseFloat(price) <= parseFloat(saleprice)) {
-      displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-      isValid = false;
-   }
-  
-  
-              if (color.trim() === "") {
-                  displayErrorMessage('color-error', 'Please enter a color.');
-                  isValid = false;
-              }
-  
-  
-              if (images.files.length === 0) {
-                  displayErrorMessage("images-error",'Please select an image.');
-                  isValid = false;
-              }
-              return isValid;
-          }
+    function validateForm() {
+    clearErrorMessages();
+
+    const name = document.getElementsByName('productName')[0].value;
+    const author = document.getElementsByName('author')[0].value;
+    const description = document.getElementById('descriptionid').value;
+    const regularPrice = document.getElementsByName('regularPrice')[0].value;
+    const salePrice = document.getElementsByName('salePrice')[0].value;
+    const quantity = document.getElementsByName('quantity')[0].value;
+    const publisher = document.getElementsByName('publisher')[0].value;
+    const category = document.getElementsByName('category')[0].value;
+    const images = document.getElementById('input1');
+    let isValid = true;
+
+    // Validate Product Name
+    if (name.trim() === "") {
+        displayErrorMessage('productName-error', 'Please enter a product name.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+    if (name.trim() === "") {
+        displayErrorMessage('author-error', 'Please enter a author name.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+        displayErrorMessage('author-error', 'author should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+    if (publisher.trim() === "") {
+        displayErrorMessage('publisher-error', 'Please enter a publisher name.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+        displayErrorMessage('publisher-error', 'publisher should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+ 
+
+    // Validate Description
+    if (description.trim() === "") {
+        displayErrorMessage('description-error', 'Please enter a product description.');
+        isValid = false;
+    }
+
+    // Validate Quantity
+    if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
+        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+        isValid = false;
+    }
+
+    // Validate Regular Price
+    if (!/^\d+(\.\d{1,2})?$/.test(regularPrice) || parseFloat(regularPrice) < 0) {
+        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+        isValid = false;
+    }
+
+    // Validate Sale Price
+    if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
+        displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
+        isValid = false;
+    } else if (parseFloat(regularPrice) <= parseFloat(salePrice)) {
+        displayErrorMessage('salePrice-error', 'Sale price must be less than the regular price.');
+        isValid = false;
+    }
+
+    // Validate Category Selection
+    if (!category) {
+        displayErrorMessage('category-error', 'Please select a category.');
+        isValid = false;
+    }
+
+    // Validate Image Selection
+    if (images.files.length === 0) {
+        displayErrorMessage('images-error', 'Please select at least one image.');
+        isValid = false;
+    }
+
+    return isValid;
+}
 
 
-          function displayErrorMessage(elementId, message) {
-              var errorElement = document.getElementById(elementId);
-              errorElement.innerText = message;
-              errorElement.style.display = "block";
-          }
-  
-  
-          function clearErrorMessages() {
-              const errorElements = document.getElementsByClassName('error-message');
-              Array.from(errorElements).forEach(element => {
-                  element.innerText = '';
-              });
-              const errorMessage = document.getElementById('errorMessage');
-  
-  
-          }
+function displayErrorMessage(elementId, message) {
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerText = message;
+    errorElement.style.display = "block";
+}
+
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+        element.style.display = 'none';
+    });
+}
+
 
 
     </script>

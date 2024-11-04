@@ -65,9 +65,11 @@
     <main class="product-list col-md-9">
       <h2>Product List</h2>
       <!-- Search Bar -->
-      <div class="search-bar">
+      <div class="search-bar d-flex">
         <input type="text" placeholder="Search products..." class="form-control search-input" />
+        <button class="btn btn-primary ml-2 search-btn">Search</button>
       </div>
+      
 
       <div class="row">
         <% products.forEach(product => { %>
@@ -106,3 +108,12 @@
     </main>
   </div>
 </div>
+
+<script>
+  document.querySelector('.search-btn').addEventListener('click', function() {
+    const searchValue = document.querySelector('.search-input').value.trim();
+      if (searchValue) {
+          window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
+      }
+  });
+</script>

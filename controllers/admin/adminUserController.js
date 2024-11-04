@@ -4,7 +4,7 @@ const userInfo = async (req, res) => {
   try {
     let search = "";
     if (req.query.search) {
-      search = req.query.search;  // Fixed typo: `search` instead of `searAch`
+      search = req.query.search;  
     }
 
     let page = 1;
@@ -13,19 +13,18 @@ const userInfo = async (req, res) => {
     }
 
     const limit = 5;
-    // Fetch user data with search query and pagination
     const userData = await User.find({
-      isAdmin: false,  // Only fetch regular users, not admins
+      isAdmin: false,  
       $or: [
-        { name: { $regex: ".*" + search + ".*", $options: 'i' } },  // Case-insensitive search
+        { name: { $regex: ".*" + search + ".*", $options: 'i' } },  
         { email: { $regex: ".*" + search + ".*", $options: 'i' } }
       ],
     })
-      .limit(limit * 1)  // Limit the number of results per page
-      .skip((page - 1) * limit)  // Skip results according to the page number
+      .limit(limit * 1) 
+      .skip((page - 1) * limit)  
       .exec();
 
-    // Get the total number of users for pagination
+   
     const count = await User.find({
       isAdmin: false,
       $or: [
@@ -34,17 +33,17 @@ const userInfo = async (req, res) => {
       ],
     }).countDocuments();
 
-    // Render the userManagement view and pass required data
+    
     res.render("userManagement", {
-      data: userData,        // Pass the fetched user data
-      totalPages: Math.ceil(count / limit),  // Calculate total pages
-      currentPage: parseInt(page),  // Current page
-      search: search         // The current search query (if any)
+      data: userData,        
+      totalPages: Math.ceil(count / limit),  
+      currentPage: parseInt(page),  
+      search: search        
     });
 
   } catch (error) {
     console.log("Error in user management page", error);
-    res.redirect("/pageError");  // Redirect to error page in case of any issues
+    res.redirect("/pageError");  
   }
 };
 

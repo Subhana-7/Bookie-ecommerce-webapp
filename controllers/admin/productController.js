@@ -1,6 +1,4 @@
-//edit product
-//delete product
-const mongoose = require("mongoose");
+
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
@@ -80,7 +78,7 @@ const getProductManagementPage = async(req, res) => {
   try {
     const search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = 6;
+    const limit = 10;
 
     
     const productData = await Product.find({
@@ -120,33 +118,27 @@ const addProductOffer = async(req, res) => {
   try {
     const { productId, percentage } = req.body;
 
-    // Find the product
     const findProduct = await Product.findOne({ _id: productId });
     if (!findProduct) {
       return res.status(404).json({ status: false, message: "Product not found" });
     }
 
-    // Find the category associated with the product
     const findCategory = await Category.findOne({ _id: findProduct.category });
     if (!findCategory) {
       return res.status(404).json({ status: false, message: "Category not found" });
     }
 
-    // Check if the category already has an offer
     if (findCategory.categoryOffer > percentage) {
       return res.json({ status: false, message: "This product's category already has a category offer" });
     }
 
-    // Calculate and set the sale price
     findProduct.salePrice = Math.floor(findProduct.regularPrice * (percentage / 100));
     findProduct.productOffer = parseInt(percentage);
     
-    // Save the product and the category
     await findProduct.save();
-    findCategory.categoryOffer = 0; // Reset category offer
+    findCategory.categoryOffer = 0; 
     await findCategory.save();
 
-    // Send successful response
     return res.json({ status: true });
   } catch (error) {
     console.error("Error in addProductOffer:", error);
@@ -202,10 +194,10 @@ const deleteProduct = async(req,res) => {
     const findProduct = await Product.findOne({_id:id});
     await findProduct.deleteOne({_id:id});
     res.redirect("/admin/productManagement");
-    req.flash('success', 'Product deleted successfully'); // Set flash message
+    req.flash('success', 'Product deleted successfully'); 
    } catch (error) {
     console.log("product not found");
-    req.flash('error', 'An error occurred while deleting the product'); // Set flash message
+    req.flash('error', 'An error occurred while deleting the product'); 
     res.redirect("pageNotFound");
    }
 

@@ -11,8 +11,8 @@ const adminRouter = require("./routes/adminRouter");
 db();
 
  
-app.use(express.urlencoded({extended:true})); //parse url queries
-app.use(express.json()); //parse incoming requests
+app.use(express.urlencoded({extended:true})); 
+app.use(express.json()); 
 
 app.use(session({
   secret:process.env.SESSION_SECRET,
@@ -27,7 +27,7 @@ app.use(session({
 
 app.use(flash());
 app.use((req, res, next) => {
-  res.locals.messages = req.flash(); // Make flash messages available in all views
+  res.locals.messages = req.flash(); 
   next();
 });
 
@@ -44,7 +44,7 @@ app.use((req,res,next) => {
 
 app.set("view engine","ejs");
 app.set("views",[path.join(__dirname,"views/user"),path.join(__dirname,"views/admin")])
-app.use(express.static(path.join(__dirname,"public"))); //fetch the data in the public folder
+app.use(express.static(path.join(__dirname,"public"))); 
 
 
 app.use("/", userRouter);

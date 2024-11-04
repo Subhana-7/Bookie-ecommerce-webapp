@@ -205,9 +205,8 @@
 
 function validateForm() {
     console.log("clicked");
-    clearErrorMessages(); // Clears any previous errors before validation
+    clearErrorMessages(); 
     conosle.log("after error")
-    // Fetch input values
     const name = document.getElementsByName('productName')[0].value;
     const description = document.getElementsByName('descriptionData')[0].value;
     const quantity = document.getElementsByName('quantity')[0].value;
@@ -217,8 +216,7 @@ function validateForm() {
     const images = document.getElementById('input1');
     console.log('heh')
     let isValid = true;
-    console.log(saleprice)
-    // Validation checks
+    console.log(saleprice);
     if (name.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
