@@ -238,6 +238,13 @@ const logout = async(req,res) => {
   }
 }
 
+const getResetPassword = async(req,res) => {
+  try {
+    return res.render("reset-password");
+  } catch (error) {
+    return res.redirect("/pageNotFound");
+  }
+}
 
 module.exports = {
   loadHomePage,
@@ -248,5 +255,6 @@ module.exports = {
   resendOtp,
   loadLogin,
   login,
-  logout
+  logout,
+  getResetPassword
 }

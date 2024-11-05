@@ -191,8 +191,10 @@
             padding-left: 350px;
         }
     </style>
+   
 </head>
 <body>
+    <%- include("../../views/partials/user/header") %>
   <!-- Breadcrumbs -->
   <nav class="breadcrumbs">
     <a href="/">Home</a> &gt; 
@@ -258,7 +260,14 @@
       <p class="description"><%= product.description %></p>
 
       <!-- Add to Cart Button -->
-      <button class="add-to-cart">Add to Cart</button>
+
+      <form id="addToCartForm">
+        <input type="hidden" name="productId" value="<%= product._id %>">
+        <input type="number" name="quantity" value="1" min="1" max="<%= product.quantity %>" required>
+        <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
+    </form>
+    
+
       <button class="buy-now">Buy Now</button>
     </div>
   </div>
@@ -286,6 +295,41 @@
   </div>
 
   <script>
+async function addToCart() {
+    alert("addToCart function started"); // Inline alert for debugging
+    console.log("Button clicked");
+
+    // Get product ID and quantity directly from the variables
+    const productId = "<%= product._id %>";
+    const quantity = 1; // You can also make this dynamic if you have a quantity input
+
+    const data = {
+        productId: productId,
+        quantity: quantity
+    };
+
+    try {
+        const response = await fetch("/cart/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            console.log("Product added to cart successfully");
+            window.location.href = "/cart";
+        } else {
+            console.error("Failed to add to cart, status:", response.status);
+            const errorData = await response.json();
+            console.error("Error details:", errorData);
+        }
+    } catch (error) {
+        console.error("Error in addToCart function:", error);
+    }
+}
+
+
+
       let imageZoom = document.getElementById('imageZoom');
       
       imageZoom.addEventListener('mousemove', (event) => {
@@ -307,6 +351,8 @@
           mainImage.src = imageSrc;
           imageZoom.style.setProperty('--url', `url('${imageSrc}')`);
       }
+
+  
   </script>
 </body>
 </html>

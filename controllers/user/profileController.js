@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema");
+const Cart = require("../../models/cartSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
@@ -65,12 +66,9 @@ const loadAddAddress = async(req,res) => {
 const addAddress = async (req, res) => {
   try {
     const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
-
-    // Find the existing address document for the user
     const addressData = await Address.findOne({ userId: req.session.user });
 
     if (addressData) {
-      // If the address document exists, push the new address to the array
       addressData.address.push({
         addressType,
         name,
@@ -82,10 +80,8 @@ const addAddress = async (req, res) => {
         altPhone,
       });
 
-      // Save the updated address document
       await addressData.save();
     } else {
-      // If no address document exists, create a new one with the address array
       await Address.create({
         userId: req.session.user,
         address: [{
@@ -111,6 +107,144 @@ const addAddress = async (req, res) => {
 };
 
 
+const loadEditAddress = async(req,res) => {
+  try {
+    const user = await User.findById(req.session.user);
+    const addressId = req.params.id;
+    const address = await Address.findOne({"address._id":addressId});
+    return res.render("edit-address", { user, address: address.address.id(addressId) });
+  } catch (error) {
+    return res.redirect("/pageNotFound");
+  }
+}
+
+const editAddress = async(req,res) => {
+  try {
+    const addressId = req.params.id;
+    const { addressType, name, city, landMark, state, pincode, phone, altPhone } = req.body;
+    const updatedAddress = await Address.updateOne({"address._id": addressId},
+      {
+        $set: {
+          "address.$.addressType": addressType,
+          "address.$.name": name,
+          "address.$.city": city,
+          "address.$.landMark": landMark,
+          "address.$.state": state,
+          "address.$.pincode": pincode,
+          "address.$.phone": phone,
+          "address.$.altPhone": altPhone,
+        }
+      }
+    );
+    if (updatedAddress.modifiedCount > 0) {
+      return res.redirect("/profile");
+    } else {
+      return res.status(404).json({ error: "Address not found or no changes made." });
+    }
+  } catch (error) {
+    return res.redirect("/pageNotFound");
+  }
+}
+
+
+const deleteAddress = async(req,res) => {
+  try {
+    const addressId = req.params.id;
+    const result = await Address.updateOne(
+      { "address._id": addressId },
+      { $pull: { address: { _id: addressId } } }
+  );
+  if (result.modifiedCount > 0) {
+    return res.status(200).json({ message: "Address deleted successfully." });
+} else {
+    return res.status(404).json({ error: "Address not found." });
+}
+  } catch (error) {
+    return res.redirect("pageNotFound");
+  }
+}
+
+const cart = async (req, res) => {
+  try {
+    const userId = req.session.user; // Correctly extract userId from session
+
+    // Find the cart for the user
+    const cart = await Cart.findOne({ userId }).populate("items.productId");
+
+    // Check if the cart exists
+    if (!cart || !cart.items.length) {
+      // If there is no cart or no items, render the cart page with an empty message
+      return res.render("cart", { cart: [], message: "Your cart is empty." });
+    }
+
+    // Render the cart view with the cart items
+    return res.render("cart", { cart: cart.items, message: null }); // Pass the items to the view
+  } catch (error) {
+    console.error("Error fetching cart:", error); // Log error for debugging
+    return res.redirect("pageNotFound");
+  }
+}
+
+
+const addItemToCart = async (req, res) => {
+  try {
+    console.log("yrying")
+    const userId = req.session.user;
+    const { productId, quantity } = req.body;
+
+    // Ensure `quantity` is a number and greater than 0
+    const parsedQuantity = parseInt(quantity, 10);
+    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+      return res.status(400).json({ message: "Invalid quantity provided" });
+    }
+
+    // Find the product and validate its existence and price
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    if (typeof product.price !== "number") {
+      return res.status(500).json({ message: "Product price is invalid" });
+    }
+
+    // Calculate total price based on the quantity
+    const totalPrice = product.price * parsedQuantity;
+
+    // Check if a cart already exists for the user, otherwise create one
+    let cart = await Cart.findOne({ userId });
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    // Find if the item already exists in the cart
+    const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+    if (existingItemIndex > -1) {
+      // Update quantity and totalPrice if the item exists
+      cart.items[existingItemIndex].quantity += parsedQuantity;
+      cart.items[existingItemIndex].totalPrice += totalPrice;
+    } else {
+      // Add the item to the cart if it doesn't exist
+      cart.items.push({
+        productId,
+        quantity: parsedQuantity,
+        price: product.price,
+        totalPrice,
+      });
+    }
+
+    // Save the cart to the database
+    await cart.save();
+    return res.redirect("cart");
+  } catch (error) {
+    console.error("Error adding item to cart:", error);
+    return res.redirect("/pageNotFound");
+  }
+};
+
+
+
+
+
 
 
 module.exports = {
@@ -118,5 +252,10 @@ module.exports = {
   loadEditProfile,
   editProfile,
   loadAddAddress,
-  addAddress
+  addAddress,
+  loadEditAddress,
+  editAddress,
+  deleteAddress,
+  cart,
+  addItemToCart,
 }

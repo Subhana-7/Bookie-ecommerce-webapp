@@ -19,6 +19,9 @@ router.get("/auth/google/callback",passport.authenticate("google",{failureRedire
   res.redirect("/")
 });
 
+//reset password
+router.get("/reset-password",userController.getResetPassword);
+
 router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
 router.get("/logout",userAuth,userController.logout);
@@ -33,6 +36,12 @@ router.get("/edit-profile",userAuth,profileController.loadEditProfile);
 router.post("/edit-profile",userAuth,profileController.editProfile);
 router.get("/add-address",userAuth,profileController.loadAddAddress);
 router.post("/add-address",userAuth,profileController.addAddress);
+router.get("/edit-address/:id",userAuth,profileController.loadEditAddress);
+router.post("/edit-address/:id",userAuth,profileController.editAddress);
+router.delete("/delete-address/:id",userAuth,profileController.deleteAddress);
+
+router.get("/cart",userAuth,profileController.cart);
+router.post("/cart/add",userAuth,profileController.addItemToCart);
 
 
 module.exports = router;
