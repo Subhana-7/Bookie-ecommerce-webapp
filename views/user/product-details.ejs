@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= product.productName %> - Book Details</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> 
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -238,7 +239,8 @@
             <% if (product.quantity <= 0) { %>
                 <span style="color: red;">Out of Stock</span>
             <% } else { %>
-                <span style="color: green;">In Stock</span>
+                <span style="color: green;">In Stock</span><br>
+                <span style="color: green;"><%=product.quantity%> Stocks left</span>
             <% } %>
         </p>
       </div>
@@ -253,19 +255,24 @@
         <% } %>
       </div>
 
-      <!-- Stock Status -->
-      <p class="stock-status"><%= product.stockStatus ? 'In Stock' : 'Out of Stock' %></p>
+
 
       <!-- Description -->
       <p class="description"><%= product.description %></p>
 
       <!-- Add to Cart Button -->
 
-      <form id="addToCartForm">
+ 
+    <form id="addToCartForm">
         <input type="hidden" name="productId" value="<%= product._id %>">
-        <input type="number" name="quantity" value="1" min="1" max="<%= product.quantity %>" required>
-        <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
+        <% if (product.quantity <= 0) { %>
+            <p style="color: red; font-weight: bold;">Sold Out</p>
+        <% } else { %>
+            <input type="number" name="quantity" value="1" min="1" max="<%= product.quantity %>" required>
+            <button type="button" class="btn btn-primary" onclick="addToCart()">Add to Cart</button>
+        <% } %>
     </form>
+
     
 
       <button class="buy-now">Buy Now</button>
@@ -280,7 +287,7 @@
         <% relatedProducts.forEach(product => { %>
             <div class="col-md-3 col-sm-6 mb-4"> 
                 <div class="card h-100"> 
-                    <img src="/uploads/product-images/<%= product.productImage[0] %>" class="card-img-top" alt="<%= product.productName %>">
+                    <img src="<%= product.productImage[0] %>" alt="Product Image" style="width: 50px; height: auto; margin-right: 10px;">
                     <div class="card-body">
                         <h5 class="card-title"><%= product.productName %></h5>
                         <p class="card-text">by <%= product.author %></p>
@@ -294,15 +301,110 @@
     </div>
   </div>
 
-  <script>
-async function addToCart() {
-    alert("addToCart function started"); // Inline alert for debugging
-    console.log("Button clicked");
+  <div id="product-data"
+    data-available-stock="<%= product.quantity %>"
+    data-product-id="<%= product._id %>"></div>
 
-    // Get product ID and quantity directly from the variables
-    const productId = "<%= product._id %>";
-    const quantity = 1; // You can also make this dynamic if you have a quantity input
+<script>
+    async function addToCart() {
+        console.log("addtocart");
 
+        // Get product data from data attributes
+        const productData = document.getElementById('product-data');
+        const availableStock = parseInt(productData.getAttribute('data-available-stock'), 10);
+        const productId = productData.getAttribute('data-product-id');
+
+        const quantityInput = document.querySelector('input[name="quantity"]');
+        const quantity = parseInt(quantityInput.value, 10);
+
+        console.log("Quantity:", quantity);
+        console.log("Available Stock:", availableStock);
+
+        // Check if the requested quantity exceeds available stock
+        if (quantity > availableStock) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Insufficient Stock',
+                text: `Only ${availableStock} item(s) available in stock. Please reduce the quantity.`,
+            });
+            return;
+        }
+
+        // Check if the quantity exceeds the limit of 12
+        if (quantity > 12) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Limit Exceeded',
+                text: 'You can only add a maximum of 12 of the same product to the cart.',
+            });
+            return;
+        }
+
+        const data = {
+            productId: productId,
+            quantity: quantity
+        };
+
+        try {
+            const response = await fetch("/cart/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                console.log("Product added to cart successfully");
+                window.location.href = "/cart";
+            } else {
+                const errorData = await response.json();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorData.message || 'An error occurred while adding the item to your cart.',
+                });
+            }
+        } catch (error) {
+            console.error("Error in addToCart function:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An unexpected error occurred. Please try again later.',
+            });
+        }
+    }
+
+
+
+/*async function addToCart() {
+    console.log("addtocart")
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    const quantity = parseInt(quantityInput.value, 10);
+    console.log(quantity);
+    const availableStock =  // Use EJS to inject `product.quantity`
+    const productId = // Use EJS to inject `product._id`
+    console.log("Available Stock:", availableStock);
+
+    // Check if the requested quantity exceeds available stock
+    if (quantity > availableStock) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Stock',
+            text: `Only ${availableStock} item(s) available in stock. Please reduce the quantity.`,
+        });
+        return; // Stop further execution if quantity exceeds available stock
+    }
+
+    // Check if the quantity exceeds the limit of 12
+    if (quantity > 12) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Limit Exceeded',
+            text: 'You can only add a maximum of 12 of the same product to the cart.',
+        });
+        return; // Stop further execution if limit is exceeded
+    }
+
+    const productId = ";
     const data = {
         productId: productId,
         quantity: quantity
@@ -317,16 +419,30 @@ async function addToCart() {
 
         if (response.ok) {
             console.log("Product added to cart successfully");
-            window.location.href = "/cart";
+            window.location.href = "/cart"; // Redirect to cart on success
         } else {
             console.error("Failed to add to cart, status:", response.status);
             const errorData = await response.json();
             console.error("Error details:", errorData);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorData.message || 'An error occurred while adding the item to your cart.',
+            });
         }
     } catch (error) {
         console.error("Error in addToCart function:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred. Please try again later.',
+        });
     }
-}
+}*/
+
+
+
 
 
 
@@ -354,5 +470,8 @@ async function addToCart() {
 
   
   </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
 </body>
 </html>

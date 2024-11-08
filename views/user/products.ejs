@@ -43,23 +43,50 @@
       <div class="filter-section">
         <h3>Sort By</h3>
         <select id="sortOptions" class="form-control">
-          <option value="default">Default</option>
-          <option value="priceAsc">Price: Low to High</option>
-          <option value="priceDesc">Price: High to Low</option>
-          <option value="newest">Newest Arrivals</option>
+            <option value="default">Default</option>
+            <option value="popularity">Popularity</option>
+            <option value="priceAsc">Price: Low to High</option>
+            <option value="priceDesc">Price: High to Low</option>
+            <option value="averageRating">Average Ratings</option>
+            <option value="featured">Featured</option>
+            <option value="newest">Newest Arrivals</option>
+            <option value="aToZ">A - Z</option>
+            <option value="zToA">Z - A</option>
         </select>
-      </div>
+    </div>
+    
 
-      <div class="filter-section">
-        <h3>Categories</h3>
-        <ul class="list-unstyled">
-          <li><input type="checkbox" id="fiction" /><label for="fiction">Fiction</label></li>
-          <li><input type="checkbox" id="nonFiction" /><label for="nonFiction">Non-Fiction</label></li>
-          <li><input type="checkbox" id="mystery" /><label for="mystery">Mystery</label></li>
-          <li><input type="checkbox" id="fantasy" /><label for="fantasy">Fantasy</label></li>
-          <li><input type="checkbox" id="science" /><label for="science">Science</label></li>
-        </ul>
-      </div>
+    <div class="filter-section">
+      <h3>Categories</h3>
+      <ul class="list-unstyled">
+        <li>
+          <input type="checkbox" id="in-stock" onchange="applyFilters()" />
+          <label for="in-stock">Show only in-stock Books</label>
+        </li>
+        <li>
+          <input type="checkbox" id="fiction" onchange="applyFilters()" />
+          <label for="fiction">Fiction</label>
+        </li>
+        <li>
+          <input type="checkbox" id="nonFiction" onchange="applyFilters()" />
+          <label for="nonFiction">Non-Fiction</label>
+        </li>
+        <li>
+          <input type="checkbox" id="mystery" onchange="applyFilters()" />
+          <label for="mystery">Mystery</label>
+        </li>
+        <li>
+          <input type="checkbox" id="fantasy" onchange="applyFilters()" />
+          <label for="fantasy">Fantasy</label>
+        </li>
+        <li>
+          <input type="checkbox" id="science" onchange="applyFilters()" />
+          <label for="science">Science</label>
+        </li>
+      </ul>
+    </div>
+
+    
     </aside>
 
     <main class="product-list col-md-9">
@@ -87,7 +114,8 @@
                   <% if (product.quantity <= 0) { %>
                       <span style="color: red;">Out of Stock</span>
                   <% } else { %>
-                      <span style="color: green;">In Stock</span>
+                      <span style="color: green;" ><%=product.quantity%> Stock left</span><br>
+                      <span style="color: green;">-In Stock</span>
                   <% } %>
               </p>
                 <p class="price">₹<%= product.salePrice %></p>
@@ -116,4 +144,29 @@
           window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
       }
   });
+
+  document.getElementById('sortOptions').addEventListener('change', function() {
+    const sortValue = this.value;
+    window.location.href = `/products?sort=${sortValue}`;
+});
+
+    
+
+function applyFilters() {
+  let filters = new URLSearchParams();
+
+  // Check if 'in-stock' filter is checked
+  const inStockChecked = document.getElementById('in-stock').checked;
+  filters.set('inStock', inStockChecked ? 'true' : 'false');
+
+  // Add other filters here, e.g., for categories, if needed.
+  // Example for category:
+  const fictionChecked = document.getElementById('fiction').checked;
+  if (fictionChecked) filters.append('category', 'fiction');
+
+  // Redirect or send AJAX request with filters
+  window.location.href = '/products?' + filters.toString();
+}
+    
+
 </script>

@@ -1,35 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Custom Styling */
-        .cart-container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .btn-maroon {
-            background-color: #800000;
-            color: white;
-        }
-        .btn-maroon:hover {
-            background-color: #a00000;
-        }
-        .main-content {
-            display: flex;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
+<!-- Updated code -->
+<%- include("../../views/partials/user/header") %>
+<title>Shopping Cart</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    /* Custom Styling */
+    .cart-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .btn-maroon {
+        background-color: #800000;
+        color: white;
+    }
+    .btn-maroon:hover {
+        background-color: #a00000;
+    }
+    .main-content {
+        display: flex;
+        margin-top: 20px;
+    }
+</style>
 
+<body>
 <div class="container">
     <div class="main-content">
         <!-- Sidebar Navigation -->
@@ -57,12 +55,15 @@
                     <tbody>
                         <% cart.forEach(item => { %>
                         <tr>
-                            <td><%= item.productId.name %></td>
-                            <td>$<%= item.price.toFixed(2) %></td>
                             <td>
-                                <input type="number" class="form-control quantity-input" min="1" value="<%= item.quantity %>" data-id="<%= item.productId._id %>">
+                                
+                                <%= item.productId.productName %>
                             </td>
-                            <td>$<%= (item.price * item.quantity).toFixed(2) %></td>
+                            <td>₹<%= item.price.toFixed(2) %></td>
+                            <td>
+                                <input type="number" class="form-control quantity-input" min="1" max="12" value="<%= item.quantity %>" data-id="<%= item.productId._id %>">
+                            </td>
+                            <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
                             <td>
                                 <button class="btn btn-sm btn-danger remove-btn" data-id="<%= item.productId._id %>">Remove</button>
                             </td>
@@ -72,8 +73,11 @@
                 </table>
                 
                 <div class="d-flex justify-content-between">
-                    <h5>Total Amount: $<span id="totalAmount"><%= cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) %></span></h5>
-                    <a href="/checkout" class="btn btn-maroon">Proceed to Checkout</a>
+                    <h5>Total Amount: ₹<span id="totalAmount"><%= cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) %></span></h5>
+                    <button class="btn btn-success">
+                        <a href="/order" class="text-white">Proceed to Checkout</a>
+                    </button>
+                   
                 </div>
             <% } %>
         </div>
@@ -83,42 +87,95 @@
 <!-- Optional JavaScript -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Update quantity and total when quantity is changed
-        $('.quantity-input').on('change', function() {
-            const newQty = $(this).val();
-            const productId = $(this).data('id');
+$(document).ready(function() {
+    $('.quantity-input').on('change', function() {
+        const newQty = $(this).val();
+        const productId = $(this).data('id');
+        const row = $(this).closest('tr'); // Get the current row of the table
+        const inputElement = $(this); // Store the input element for later reference
 
-            $.ajax({
-                url: '/cart/update', 
-                method: 'POST',
-                data: { productId: productId, quantity: newQty },
-                success: function(response) {
-                    $('#totalAmount').text(response.cartTotal.toFixed(2));
-                },
-                error: function(err) {
-                    console.log(err);
-                }
+        // Limit to max of 12 per item
+        if (newQty > 12) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Quantity cannot exceed 12!',
             });
-        });
+            inputElement.val(12); // Reset to max value
+            return;
+        }
 
-        // Remove item from cart
-        $('.remove-btn').on('click', function() {
-            const productId = $(this).data('id');
+        $.ajax({
+            url: '/cart/update', 
+            method: 'POST',
+            data: { productId: productId, quantity: newQty },
+            success: function(response) {
+                // Update the row total for the specific item
+                const price = parseFloat(row.find('td:nth-child(2)').text().replace('₹', ''));
+                const newRowTotal = (price * newQty).toFixed(2);
+                row.find('td:nth-child(4)').text(`₹${newRowTotal}`);
 
-            $.ajax({
-                url: '/cart/remove',
-                method: 'POST',
-                data: { productId: productId },
-                success: function(response) {
-                    location.reload();
-                },
-                error: function(err) {
+                // Update the overall cart total amount
+                $('#totalAmount').text(response.cartTotal.toFixed(2));
+
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: 'Quantity updated successfully!',
+                });
+            },
+            error: function(err) {
+                // Check if the error response is due to stock limit
+                if (err.responseJSON && err.responseJSON.message.includes("stock")) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Insufficient Stock',
+                        text: err.responseJSON.message,
+                    });
+                    // Reset the quantity to the maximum available stock
+                    inputElement.val(err.responseJSON.availableStock);
+                } else {
                     console.log(err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to update quantity.',
+                    });
                 }
-            });
+            }
         });
     });
+
+    // Remove item from cart
+    $('.remove-btn').on('click', function() {
+        const productId = $(this).data('id');
+        
+        $.ajax({
+            url: '/cart/remove',
+            method: 'POST',
+            data: { productId: productId },
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed!',
+                    text: 'Item removed from cart successfully!',
+                }).then(() => {
+                    location.reload(); // Reload the page after successful removal
+                });
+            },
+            error: function(err) {
+                console.log(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to remove item.',
+                });
+            }
+        });
+    });
+});
+
 </script>
 
 </body>

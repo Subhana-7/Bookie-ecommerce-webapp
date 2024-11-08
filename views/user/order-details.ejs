@@ -1,0 +1,199 @@
+<title>Order Details</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Header styling */
+    .header {
+        background-color: maroon;
+        color: white;
+        padding: 10px 0;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+
+    /* Main content styling */
+    .main-content {
+        padding: 20px;
+    }
+
+    .order-details {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: maroon;
+    }
+
+    .card-text {
+        color: #6c757d;
+    }
+
+    .order-items h6 {
+        margin-top: 10px;
+        color: maroon;
+        font-weight: bold;
+    }
+
+    .order-items .list-group-item {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+
+    .btn-info {
+        background-color: maroon;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #8b0000;
+    }
+
+    .order-summary p {
+        font-size: 1.2rem;
+        color: maroon;
+        font-weight: bold;
+    }
+</style>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="container mt-5">
+        <div class="order-details">
+            <% if (order) { %>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Order ID: <%= order._id %></h5>
+                        <p class="card-text">Order Date: <%= order.createdOn.toDateString() %></p>
+                        <p class="card-text">Status: <span class="badge badge-<%= order.status === 'delivered' ? 'success' : order.status === 'cancelled' ? 'danger' : 'warning' %>"><%= order.status %></span></p>
+            
+                        <div class="order-items">
+                            <h6>Items:</h6>
+                            <ul class="list-group">
+                                <% order.orderedItems.forEach(item => { %>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <%= item.product.productName %> - Qty: <%= item.quantity %>
+                                        <span class="badge badge-primary badge-pill">₹<%= item.price * item.quantity %></span>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </div>
+            
+                        <div class="order-summary mt-3">
+                            <p><strong>Total Price:</strong> ₹<%= order.totalPrice %></p>
+                            <% if (order.discount) { %>
+                                <p><strong>Discount:</strong> ₹<%= order.discount %></p>
+                            <% } %>
+                            <p><strong>Final Amount:</strong> ₹<%= order.finalAmount %></p>
+                        </div>
+            
+                        <div class="order-address mt-4">
+                            <h6>Delivery Address:</h6>
+                            <% if (order.address) { %>
+                                <p><%= order.address.name %></p>
+                                <p><%= order.address.streetName %>, <%= order.address.locality %></p>
+                                <p><%= order.address.city %>, <%= order.address.state %> - <%= order.address.pin %></p>
+                                <p>Contact: <%= order.address.contactNo %></p>
+                            <% } else { %>
+                                <p>Address not available</p>
+                            <% } %>
+                        </div>
+            
+                        <div class="order-payment-method mt-3">
+                            <h6>Payment Method:</h6>
+                            <p>Cash on Delivery (COD)</p>
+                        </div>
+
+                        <!-- ONLY Show the Cancel Order Button if the status is not 'delivered' or 'cancelled' -->
+                        <% if (order.status !== 'delivered' && order.status !== 'cancelled') { %>
+                            <button id="cancel-order-btn" class="btn btn-danger btn-sm">Cancel Order</button>
+                        <% } %>
+            
+                        <a href="/orders-list" class="btn btn-info btn-sm">Back to Orders List</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <p>Order not found.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Order Confirmation Modal -->
+<div id="cancelOrderModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this order?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirm-cancel">Confirm Cancellation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Show cancel order confirmation modal
+    $('#cancel-order-btn').click(function () {
+        $('#cancelOrderModal').modal('show');
+    });
+
+    // Confirm cancellation action
+    $('#confirm-cancel').click(function () {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You are about to cancel your order!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send cancel request (without the cancellation reason)
+                $.ajax({
+                    url: '/cancel-order/<%= order._id %>',
+                    method: 'POST',
+                    success: function () {
+                        Swal.fire(
+                            'Cancelled!',
+                            'Your order has been cancelled.',
+                            'success'
+                        );
+                        location.reload(); // Reload page to reflect the cancellation
+                    },
+                    error: function () {
+                        Swal.fire(
+                            'Error!',
+                            'There was an issue cancelling your order.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
+</script>

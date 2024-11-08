@@ -36,6 +36,9 @@
         .btn-maroon:hover {
             background-color: #a00000 !important;
         }
+        label {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -43,56 +46,55 @@
 <div class="container">
     <h2 class="header">Add New Address</h2>
     <form action="/add-address" method="POST">
-        <!-- Address Type Field -->
         <div class="form-group">
-            <label for="addressType">Address Type</label>
-            <input type="text" class="form-control" id="addressType" name="addressType" placeholder="Home, Office, etc." required>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" class="form-control" required>
         </div>
 
-        <!-- Name Field -->
         <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="Recipient's Name" required>
+            <label for="addressType">Address Type:</label>
+            <select id="addressType" name="addressType" class="form-control" required>
+                <option value="Home">Home</option>
+                <option value="Office">Office</option>
+            </select>
         </div>
 
-        <!-- City Field -->
         <div class="form-group">
-            <label for="city">City</label>
-            <input type="text" class="form-control" id="city" name="city" placeholder="City" required>
+            <label for="streetName">Street Name:</label>
+            <input type="text" id="streetName" name="streetName" class="form-control" required>
         </div>
 
-        <!-- Landmark Field -->
         <div class="form-group">
-            <label for="landMark">Landmark</label>
-            <input type="text" class="form-control" id="landMark" name="landMark" placeholder="Nearby Landmark" required>
+            <label for="landmark">Landmark:</label>
+            <input type="text" id="landmark" name="landmark" class="form-control" required>
         </div>
 
-        <!-- State Field -->
         <div class="form-group">
-            <label for="state">State</label>
-            <input type="text" class="form-control" id="state" name="state" placeholder="State" required>
+            <label for="locality">Locality:</label>
+            <input type="text" id="locality" name="locality" class="form-control" required>
         </div>
 
-        <!-- Pincode Field -->
         <div class="form-group">
-            <label for="pincode">Pincode</label>
-            <input type="number" class="form-control" id="pincode" name="pincode" placeholder="Pincode" required>
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" class="form-control" required>
         </div>
 
-        <!-- Phone Field -->
         <div class="form-group">
-            <label for="phone">Phone</label>
-            <input type="text" class="form-control" id="phone" name="phone" placeholder="Primary Phone Number" required>
+            <label for="state">State:</label>
+            <input type="text" id="state" name="state" class="form-control" required>
         </div>
 
-        <!-- Alternate Phone Field -->
         <div class="form-group">
-            <label for="altPhone">Alternate Phone</label>
-            <input type="text" class="form-control" id="altPhone" name="altPhone" placeholder="Alternate Phone Number">
+            <label for="pin">Pin Code:</label>
+            <input type="text" id="pin" name="pin" class="form-control" required>
         </div>
 
-        <!-- Save Address Button -->
-        <button type="submit" class="btn btn-maroon btn-block">Save Address</button>
+        <div class="form-group">
+            <label for="contactNo">Contact Number:</label>
+            <input type="text" id="contactNo" name="contactNo" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-maroon btn-block">Add Address</button>
     </form>
 
     <!-- Cancel Button -->

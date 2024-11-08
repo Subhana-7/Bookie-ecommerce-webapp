@@ -1,0 +1,165 @@
+
+  <title>Admin Order Details</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      display: flex;
+    }
+
+    .header, .sidebar, .card-header, .btn-maroon {
+      background-color: #800000;
+      color: white;
+    }
+
+    .btn-maroon:hover {
+      background-color: #660000;
+    }
+
+    .sidebar {
+      width: 200px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      padding-top: 20px;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 10px;
+    }
+
+    .sidebar a:hover {
+      background-color: #660000;
+    }
+
+    .main-content {
+      margin-left: 200px;
+      padding: 20px;
+      width: calc(100% - 200px);
+    }
+
+    .order-details {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #800000;
+    }
+
+    .cancel-reason {
+      display: none;
+    }
+  </style>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <h4 class="text-center">Admin Panel</h4>
+  <a href="/admin/dashboard">Dashboard</a>
+  <a href="/admin/orders">Orders</a>
+  <a href="/admin/products">Products</a>
+  <a href="/admin/categories">Categories</a>
+  <a href="/admin/users">Users</a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <!-- Order Details Card -->
+  <div class="container">
+    <div class="card">
+      <div class="card-header text-center">
+        <h3>Order Details</h3>
+      </div>
+      <div class="card-body">
+        
+        <!-- User Details Section -->
+        <div class="order-details">
+          <h5 class="section-title">User Details</h5>
+          <p><strong>Name:</strong> <%= order.userId.name %></p>
+          <p><strong>Email:</strong> <%= order.userId.email %></p>
+          <p><strong>Phone:</strong> <%= order.userId.phone %></p>
+        </div>
+
+        <!-- Order Details Section -->
+        <div class="order-details">
+          <h5 class="section-title">Order Details</h5>
+          <p><strong>Order ID:</strong> <%= order.orderId %></p>
+          <p><strong>Total Amount:</strong> ₹<%= order.totalPrice.toFixed(2) %></p>
+          
+          <!-- Order Status Update Form -->
+          <form action="/admin/order-management/<%= order._id %>" method="POST">
+            <div class="form-group">
+              <label for="status">Order Status:</label>
+              <select class="form-control" id="status" name="status" onchange="toggleCancelReason(this)">
+                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+              </select>
+            </div>
+            
+            <!-- Cancellation Reason -->
+            <div class="form-group cancel-reason" id="cancelReasonDiv">
+              <label for="cancellationReason">Cancellation Reason:</label>
+              <textarea class="form-control" id="cancellationReason" name="cancellationReason" rows="3" placeholder="Enter reason for cancellation (if applicable)"><%= order.cancellationReason %></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-maroon btn-block">Update Status</button>
+          </form>
+        </div>
+
+        <!-- Shipping Address Section -->
+        <div class="order-details">
+          <h5 class="section-title">Shipping Address</h5>
+          <% if (order.address) { %>
+            <p><strong>Street:</strong> <%= order.address.streetName %></p>
+            <p><strong>City:</strong> <%= order.address.city %></p>
+            <p><strong>State:</strong> <%= order.address.state %></p>
+            <p><strong>Pin:</strong> <%= order.address.pin %></p>
+          <% } else { %>
+            <p>Address information not available.</p>
+          <% } %>
+        </div>
+
+        <!-- Product Details Section -->
+        <div class="order-details">
+          <h5 class="section-title">Product Details</h5>
+          <% order.orderedItems.forEach(item => { %>
+            <div class="address-details mb-3">
+              <p><strong>Product Name:</strong> <%= item.product.productName %></p>
+              <p><strong>Quantity:</strong> <%= item.quantity %></p>
+              <p><strong>Price:</strong> ₹<%= item.price.toFixed(2) %></p>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleCancelReason(select) {
+    const cancelReasonDiv = document.getElementById("cancelReasonDiv");
+    cancelReasonDiv.style.display = select.value === "Cancelled" ? "block" : "none";
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    toggleCancelReason(document.getElementById("status"));
+  });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

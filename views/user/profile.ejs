@@ -99,12 +99,13 @@
             <div class="address-block">
                 <p><strong>Type:</strong> <%= addr.addressType %></p>
                 <p><strong>Name:</strong> <%= addr.name %></p>
-                <p><strong>City:</strong> <%= addr.city %></p>
+                <p><strong>Street Name:</strong> <%= addr.streetName %></p>
                 <p><strong>Landmark:</strong> <%= addr.landMark %></p>
+                <p><strong>Locality:</strong> <%= addr.locality %></p>
+                <p><strong>City:</strong> <%= addr.city %></p>
                 <p><strong>State:</strong> <%= addr.state %></p>
-                <p><strong>Zip Code:</strong> <%= addr.pincode %></p>
-                <p><strong>Phone:</strong> <%= addr.phone %></p>
-                <p><strong>Alt Phone:</strong> <%= addr.altPhone %></p>
+                <p><strong>Pin Code:</strong> <%= addr.pin %></p>
+                <p><strong>Phone:</strong> <%= addr.contactNo %></p>
                 <button class="btn btn-maroon mt-2">
                     <a href="/edit-address/<%= addr._id %>" style="color: white; text-decoration: none;">Edit Address</a>
                 </button>

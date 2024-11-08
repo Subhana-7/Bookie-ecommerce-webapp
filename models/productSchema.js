@@ -63,7 +63,15 @@ const productSchema = new Schema({
         default:0,
         min:0,
         max:5,
-    }
+    },
+    popularity: {
+        type: Number,
+        default: 0 
+    }, 
+    featured: {
+        type: Boolean,
+        default: false 
+    }, 
 });
 
 const Product = mongoose.model("Product",productSchema);
