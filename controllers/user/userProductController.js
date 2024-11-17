@@ -5,14 +5,15 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const mongoose = require("mongoose");
+const { console } = require("inspector");
 
 
-
-const getProducts = async (req, res) => {
+/*const getProducts = async (req, res) => {
   try {
+
       const searchQuery = req.query.search || '';
       const sortOption = req.query.sort || 'default';
-      const inStock = req.query.inStock === 'true'; // Check if in-stock filter is applied
+      const inStock = req.query.inStock === 'true'; 
 
       const validCategories = await Category.find({ isListed: true });
       const validCategoryIds = validCategories.map(category => category._id);
@@ -23,9 +24,8 @@ const getProducts = async (req, res) => {
           productName: { $regex: searchQuery, $options: 'i' },
       };
 
-      // Apply in-stock filter if checked
       if (inStock) {
-          query.quantity = { $gt: 0 }; // Only show products with quantity > 0
+          query.quantity = { $gt: 0 }; 
       }
 
       let sortCriteria = {};
@@ -60,12 +60,125 @@ const getProducts = async (req, res) => {
       }
 
       const products = await Product.find(query).sort(sortCriteria);
-      res.render('products', { products });
+      res.render('products', { products ,searchQuery});
   } catch (error) {
       console.error(error);
       res.status(500).send('Server Error');
   }
+};*/
+
+
+
+/*const getProducts = async (req, res) => {
+  try {
+    const categories = await Category.find();
+
+    const searchQuery = req.query.search || '';
+    const sortOption = req.query.sort || 'default';
+    const inStock = req.query.inStock === 'true';
+    const categoryFilter = req.query.category || '';  
+
+    const filter = {};
+    if (searchQuery) filter.productName = new RegExp(searchQuery, 'i');
+    if (inStock) filter.quantity = { $gt: 0 };
+    //if (categoryFilter) filter.category = categoryFilter;
+
+    if (categoryFilter) {
+      const selectedCategories = categoryFilter.split(',');
+      filter.category = { $in: selectedCategories };
+    }
+
+
+    const sortOptions = {
+      popularity: { popularity: -1 },
+      priceAsc: { salePrice: 1 },
+      priceDesc: { salePrice: -1 },
+      averageRating: { rating: -1 },
+      featured: { featured: -1 },
+      newest: { createdOn: -1 },
+      aToZ: { productName: 1 },
+      zToA: { productName: -1 },
+    };
+    const sort = sortOptions[sortOption] || {};
+
+    const products = await Product.find(filter).sort(sort);
+
+    res.render('products', {
+      products,
+      categories,
+      searchQuery,
+      sortOption,
+      inStock,
+      categoryFilter,  
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("An error occurred while retrieving products.");
+  }
 };
+*/
+
+const getProducts = async (req, res) => {
+  try {
+    const categories = await Category.find(); // Assuming Category model is set up
+    const searchQuery = req.query.search || '';
+    const sortOption = req.query.sort || 'default';
+    const inStock = req.query.inStock === 'true';
+    const categoryFilter = req.query.category || ''; // Get the selected categories from the query
+
+    const filter = {};
+
+    // Handle search query
+    if (searchQuery) {
+      filter.productName = new RegExp(searchQuery, 'i');
+    }
+
+    // Handle in-stock filter
+    if (inStock) {
+      filter.quantity = { $gt: 0 };  // Only show products that are in stock
+    }
+
+    // Handle category filter (check if categoryFilter exists and process it)
+    if (categoryFilter) {
+      const selectedCategories = categoryFilter.split(',');
+      filter.category = { $in: selectedCategories };  // Use ObjectId matching with $in
+    }
+
+    console.log("Filter:", filter); // Log filter to debug
+
+    // Sorting logic
+    const sortOptions = {
+      popularity: { popularity: -1 },
+      priceAsc: { salePrice: 1 },
+      priceDesc: { salePrice: -1 },
+      averageRating: { rating: -1 },
+      featured: { featured: -1 },
+      newest: { createdOn: -1 },
+      aToZ: { productName: 1 },
+      zToA: { productName: -1 },
+    };
+    const sort = sortOptions[sortOption] || {};
+
+    // Find products with the filter and sort options
+    const products = await Product.find(filter).sort(sort);
+
+    res.render('products', {
+      products,
+      categories,
+      searchQuery,
+      sortOption,
+      inStock,
+      categoryFilter,  // Pass categoryFilter to the view to retain selected categories
+    });
+  } catch (error) {
+    console.error("Error retrieving products:", error); // Log the error to identify issues
+    res.status(500).send("An error occurred while retrieving products.");
+  }
+};
+
+
+
+
 
 
 

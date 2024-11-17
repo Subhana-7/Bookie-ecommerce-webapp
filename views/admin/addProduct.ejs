@@ -1,6 +1,6 @@
 <%- include("../../views/partials/admin/header") %>
 
-<head>
+
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
    <style>
@@ -112,13 +112,11 @@
    }
 
    </style>
-</head>
 
-<body>
-    <!-- Wrapper -->
+
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
+           
             <%- include("../../views/partials/admin/sidebar") %>
 
             <section class="content-main col-md-9 col-lg-10">
@@ -218,7 +216,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Repeat for additional image inputs as needed -->
                                         <div class="row">
                                             <div class="card-body align-items-center" style="margin-bottom: 20px;">
                                                 <img src="" alt="" id="imgView2">
@@ -230,7 +227,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Additional image inputs as needed -->
                                         <div class="row">
                                             <div class="card-body align-items-center" style="margin-bottom: 20px;">
                                                 <img src="" alt="" id="imgView3">
@@ -383,7 +379,6 @@
     const images = document.getElementById('input1');
     let isValid = true;
 
-    // Validate Product Name
     if (name.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
@@ -409,26 +404,21 @@
     }
 
  
-
-    // Validate Description
     if (description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
     }
 
-    // Validate Quantity
     if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
         displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
         isValid = false;
     }
 
-    // Validate Regular Price
     if (!/^\d+(\.\d{1,2})?$/.test(regularPrice) || parseFloat(regularPrice) < 0) {
         displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
         isValid = false;
     }
 
-    // Validate Sale Price
     if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
         displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
         isValid = false;
@@ -437,13 +427,11 @@
         isValid = false;
     }
 
-    // Validate Category Selection
     if (!category) {
         displayErrorMessage('category-error', 'Please select a category.');
         isValid = false;
     }
 
-    // Validate Image Selection
     if (images.files.length === 0) {
         displayErrorMessage('images-error', 'Please select at least one image.');
         isValid = false;
@@ -470,4 +458,4 @@ function clearErrorMessages() {
 
 
     </script>
-</body>
+

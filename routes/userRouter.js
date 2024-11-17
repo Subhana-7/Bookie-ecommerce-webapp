@@ -5,6 +5,8 @@ const passport = require("passport");
 const userProductController = require("../controllers/user/userProductController");
 const profileController = require("../controllers/user/profileController");
 const orderController = require("../controllers/user/orderController");
+const wishlistController = require("../controllers/user/wishlistController");
+const walletController = require("../controllers/user/walletController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
 
@@ -52,7 +54,13 @@ router.get("/order", userAuth, orderController.loadCheckOut);
 router.post("/order", userAuth, orderController.checkOut);
 router.get("/payment", userAuth, orderController.loadPlaceOrderPage);
 router.post("/payment", userAuth, orderController.placeOrder);
+router.post("/create-razorpay-order", userAuth, orderController.createRazorpayOrder);
+router.post("/verify-razorpay-payment",userAuth,orderController.verifyRazorpayPayment);
 router.get("/order-confirmation/:orderId", userAuth, orderController.orderConfirmation);
+
+//coupon
+
+router.get("/coupon",adminAuth,orderController.getCoupons);
 
 
 //orders view
@@ -60,5 +68,14 @@ router.get("/order-confirmation/:orderId", userAuth, orderController.orderConfir
 router.get("/orders-list",userAuth,orderController.loadListOrders);
 router.get("/order-details/:orderId",userAuth,orderController.loadOrderDetails);
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder);
+router.post("/return-request/:orderId",userAuth,orderController.returnRequest);
+
+//wishlist
+router.get("/wishlist",userAuth,wishlistController.loadWishlist);
+router.post("/wishlist/add",userAuth,wishlistController.addItemToWishlist);
+router.post("/wishlist/remove",userAuth,wishlistController.removeItemFromWishlist);
+
+//wallet
+router.get("/wallet",userAuth,walletController.loadWallet);
 
 module.exports = router;

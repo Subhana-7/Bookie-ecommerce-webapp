@@ -144,6 +144,14 @@
                     <input type="password" class="form-control" name="cPassword" id="confirm-password" required>
                     <div id="error5" class="error-message"></div>
                 </div>
+                <div class="mb-3">
+                    <label for="referral-code" class="form-label">Referral Code (Optional)</label>
+                    <input type="text" class="form-control" name="referralCode" id="referral-code">
+                    <div id="error-referral" class="error-message"></div>
+                </div>
+                <div class="alert alert-danger text-center" id="referral-error" style="display: none;">
+                    Invalid referral code.
+                </div>
                 <%if(locals.message && message.length > 0){%>
                     <div class="alert alert-danger text-center">
   
@@ -277,6 +285,23 @@
         phoneId.addEventListener("input", phoneValidationChecking);
         passId.addEventListener("input", passValidationChecking);
         cpassId.addEventListener("input", passValidationChecking);
+
+        //referal code
+        const referralCodeInput = document.getElementById('referral-code');
+        const referralError = document.getElementById('error-referral');
+
+        function validateReferralCode() {
+            const referralCode = referralCodeInput.value.trim();
+            if (referralCode && referralCode.length < 6) {  // Example condition
+                referralError.style.display = "block";
+                referralError.innerHTML = "Referral code must be at least 6 characters.";
+            } else {
+                referralError.style.display = "none";
+            }
+        }
+
+        referralCodeInput.addEventListener('input', validateReferralCode);
+
     </script>
 
 </body>

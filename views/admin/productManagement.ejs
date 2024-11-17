@@ -2,22 +2,26 @@
 
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <style>
+    .container-fluid {
+    margin-left: 170px; /* Make space for the sidebar */
+    margin-top: 20px; /* Space added for the navbar above the content */
+  }
+    </style>
 </head>
 
 <body>
-    <!-- Wrapper -->
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
             <%- include("../../views/partials/admin/sidebar") %>
-
+           <div class="align-items-center">
+            <h2 >Product Management</h2>
+           </div>
             <div class="right mt-5 col-md-9 col-lg-10">
                 <button class="btn btn-success" style="width: 300px;">
                     <a href="/admin/addProduct" class="text-white">Add product</a>
                 </button>
                 <br><br>
-
-                <!-- Search Bar -->
                 <div class="mb-3">
                     <input type="text" id="searchBar" class="form-control" placeholder="Search for products..." onkeyup="searchTable()" style="width: 300px;">
                 </div>
@@ -74,8 +78,9 @@
                             </td>
                             <td>
                                 <button class="btn btn-info" style="width: 80px;">
-                                    <a href="/admin/editProduct?id=<%=data[i]._id%>" class="text-white" style="text-decoration: none;">Edit</a>
-                                </button>
+                                    <a href="/admin/edit-product?id=<%= data[i]._id %>" class="text-white" style="text-decoration: none;">Edit</a>
+                                  </button>
+                                  
                             </td>
                             <td>
                                 <button class="btn btn-danger" style="width: 80px;" onclick="deleteProduct('<%= data[i]._id %>')">

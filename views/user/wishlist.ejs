@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("../../views/partials/user/header") %>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .wishlist-container {
+            margin-top: 30px;
+        }
+        .wishlist-item {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: white;
+        }
+        .wishlist-item img {
+            width: 100px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .wishlist-item .btn {
+            margin-right: 5px;
+        }
+        .wishlist-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container wishlist-container">
+    <div class="wishlist-header">Your Wishlist</div>
+
+    <!-- Display message if the wishlist is empty -->
+    <% if (message) { %>
+        <p class="text-center text-muted"><%= message %></p>
+    <% } else { %>
+        <!-- Loop through Wishlist items and display each one -->
+        <div class="row">
+            <% Wishlist.forEach(item => { %>
+                <div class="col-md-12">
+                    <div class="wishlist-item d-flex align-items-center">
+                        <img src="<%= item.productId.productImage %>" alt="<%= item.productId.productName %>" class="img-fluid mr-3">
+                        <div class="wishlist-details">
+                            <h5 class="mb-1"><%= item.productId.productName %></h5>
+                            <p class="text-muted mb-2">Author: <%= item.productId.author %></p>
+                            <p class="text-muted mb-2">Price: $<%= item.productId.regularPrice %></p>
+                        </div>
+                        <div class="ml-auto">
+                            <!-- Add to Cart and Remove buttons (adjust routes if necessary) -->
+                            <form action="/cart/add" method="POST" class="d-inline">
+                                <input type="hidden" name="productId" value="<%= item.productId._id %>">
+                                <button type="submit" class="btn btn-success btn-sm">Add to Cart</button>
+                            </form>
+                            <form action="/wishlist/remove" method="POST" class="d-inline">
+                                <input type="hidden" name="productId" value="<%= item.productId._id %>">
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+

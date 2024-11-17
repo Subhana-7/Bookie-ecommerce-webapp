@@ -11,82 +11,64 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa; /* Light background */
+    background-color: #f8f9fa; 
   }
 
-  /* Navbar styling */
-  .navbar-dark .navbar-brand {
-    color: white;
+  .container-fluid {
+    margin-left: 270px; /* Make space for the sidebar */
+    margin-top: 20px; /* Space added for the navbar above the content */
   }
 
-  .navbar-dark .btn-outline-light {
-    color: white;
-    border-color: white;
-  }
 
-  .navbar-dark .form-control {
-    background-color: #343a40;
-    border-color: #495057;
-  }
 
-  .navbar-dark .form-control:focus {
-    border-color: #66758d;
-  }
 
-  /* Adjust sidebar */
-  .sidebar {
-    height: 100vh;
-  }
-
-  /* Category box styling */
   .create-category-box {
-    width: 30%; /* Smaller width */
-    float: left; /* Move to the left */
+    width: 30%; 
+    float: left; 
     margin-top: 20px;
-    background-color: #fff; /* White background */
-    border: 1px solid #dee2e6; /* Light border */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-left: 320px;
+    background-color: #fff; 
+    border: 1px solid #dee2e6; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
   }
 
   .create-category-box .card-header {
-    background-color: #0d6efd; /* Bootstrap primary color */
+    background-color: #0d6efd; 
     color: white;
   }
 
-  /* Add space between category box and table */
   .table-wrapper {
     margin-left: 32%;
-    padding-top: 20px; /* Add space between add category box and the table */
+    padding-top: 20px; 
   }
 
-  /* Search form styling */
   .search-form {
-    width: 60%; /* Full width */
-    margin-bottom: 20px; /* Add margin before table */
-    padding: 10px 0; /* Add padding for spacing */
-    margin-top: 20px; /* Move down from the add category box */
-    clear: both; /* Prevent float overlapping */
+    width: 60%;
+    margin-left: 320px;
+    margin-bottom: 20px; 
+    padding: 10px 0;
+    margin-top: 20px; 
+    clear: both;
   }
 
   .search-form input[type="search"] {
-    width: 88%; /* Reduce input width */
-    padding: 10px; /* Add padding for the search bar */
+    width: 88%; 
+    padding: 10px; 
     margin-right: 10px;
-    background-color: transparent; /* Remove white background */
-    border: 1px solid #ced4da; /* Border for search */
+    background-color: transparent; 
+    border: 1px solid #ced4da; 
   }
 
   .search-form input[type="search"]:focus {
-    background-color: transparent; /* Maintain transparency on focus */
-    border-color: #0d6efd; /* Blue border on focus */
+    background-color: transparent;
+    border-color: #0d6efd; 
   }
 
   .search-form .btn {
-    background-color: #0d6efd; /* Primary color */
+    background-color: #0d6efd;
     color: white;
   }
 
-  /* Categories table styling */
   .table-striped tbody tr:nth-of-type(odd) {
     background-color: #f2f2f2;
   }
@@ -95,30 +77,38 @@
     background-color: #e9ecef;
   }
 
-  /* Table margin */
   table.table {
-    margin-top: 20px; /* Margin before the table */
+    margin-top: 20px;
+    margin-left: 320px;
   }
 
-  /* Pagination centered */
   .pagination-container {
     text-align: center;
+    margin-left: 320px;
   }
 
   .pagination {
-    justify-content: center; /* Center the pagination */
+    justify-content: center;
   }
+
+  .heading {
+    margin-left: 320px;
+  }
+
+
 </style>
 
 <body>  
   <%-include("../../views/partials/admin/header")%>
 
   <div class="container-fluid">
+    <div class="heading">
+      <h2>Category Management</h2>
+    </div>
     <div class="row">
       <%-include("../../views/partials/admin/sidebar")%>
 
       <main class="col-md-9 col-lg-10">
-        <!-- Category Creation Box -->
         <div class="card create-category-box">
           <div class="card-header">
             Create Category
@@ -128,14 +118,12 @@
               <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="Type here" value="<%= typeof category !== 'undefined' ? category.name : '' %>">
-                <!-- Error message placeholder for name -->
                 <div id="name-error" class="error-message text-danger" style="display: none;"></div>
               </div>
               
               <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
                 <input type="text" class="form-control" id="description" name="description" placeholder="Type here" value="<%= typeof category !== 'undefined' ? category.description : '' %>">
-                <!-- Error message placeholder for description -->
                 <div id="description-error" class="error-message text-danger" style="display: none;"></div>
               </div>
               
@@ -144,7 +132,6 @@
           </div>
         </div>
 
-        <!-- Search Form just above the table -->
         <div class="card search-form">
           <form method="get" action="/admin/category">
             <input class="form-control d-inline" type="search" name="search" placeholder="Search" aria-label="Search">
@@ -153,7 +140,6 @@
           
         </div>  
 
-        <!-- Categories Table -->
 <table class="table table-striped mt-3">
   <thead>
     <tr>

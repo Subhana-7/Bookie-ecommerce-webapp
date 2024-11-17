@@ -2,15 +2,12 @@
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Sidebar -->
     <%- include("../../views/partials/admin/sidebar") %>
 
-    <!-- Main content -->
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-5">
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-md-6 mt-60">
-            <!-- Heading -->
             <h3 class="mb-4">Update Category</h3>
             
             <form method="post" action="/admin/editCategory/<%=category._id%>" onsubmit="return validateForm()">
@@ -40,7 +37,6 @@
     clearErrorMessages();
     let isValid = true;
 
-    // Validate Category Name
     const categoryName = document.getElementById('categoryName').value.trim();
     if (categoryName === "") {
       displayErrorMessage('categoryName-error', 'Please enter a category name.');
@@ -50,7 +46,6 @@
       isValid = false;
     }
 
-    // Validate Description
     const description = document.getElementById('description').value.trim();
     if (description === "") {
       displayErrorMessage('description-error', 'Please enter a category description.');

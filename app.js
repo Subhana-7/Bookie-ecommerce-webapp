@@ -8,11 +8,23 @@ const passport = require("./config/passport");
 const db = require("./config/db");
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
+
+const Razorpay = require("razorpay");
+const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
+
+const razorpayInstance = new Razorpay({
+  key_id:process.env.RAZORPAY_KEY_ID,
+  key_secret:process.env.RAZORPAY_KEY_SECRET
+});
+
+app.locals.razorpayInstance = razorpayInstance;
+//process.env idk
+
 db();
 
  
 app.use(express.urlencoded({extended:true})); 
-app.use(express.json()); 
+app.use(express.json());
 
 app.use(session({
   secret:process.env.SESSION_SECRET,

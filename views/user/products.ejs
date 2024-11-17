@@ -60,31 +60,23 @@
       <h3>Categories</h3>
       <ul class="list-unstyled">
         <li>
-          <input type="checkbox" id="in-stock" onchange="applyFilters()" />
+          <input type="checkbox" id="in-stock" onchange="applyFilters()" <%= inStock ? 'checked' : '' %> />
           <label for="in-stock">Show only in-stock Books</label>
         </li>
-        <li>
-          <input type="checkbox" id="fiction" onchange="applyFilters()" />
-          <label for="fiction">Fiction</label>
-        </li>
-        <li>
-          <input type="checkbox" id="nonFiction" onchange="applyFilters()" />
-          <label for="nonFiction">Non-Fiction</label>
-        </li>
-        <li>
-          <input type="checkbox" id="mystery" onchange="applyFilters()" />
-          <label for="mystery">Mystery</label>
-        </li>
-        <li>
-          <input type="checkbox" id="fantasy" onchange="applyFilters()" />
-          <label for="fantasy">Fantasy</label>
-        </li>
-        <li>
-          <input type="checkbox" id="science" onchange="applyFilters()" />
-          <label for="science">Science</label>
-        </li>
+        <% categories.forEach(category => { %>
+          <li>
+            <input 
+              type="checkbox" 
+              id="category-<%= category.name %>" 
+              onchange="applyFilters()" 
+              <% if (categoryFilter && categoryFilter.split(',').includes(category.name)) { %> checked <% } %>
+            />
+            <label for="category-<%= category.name %>"><%= category.name %></label>
+          </li>
+        <% }) %>
       </ul>
     </div>
+       
 
     
     </aside>
@@ -92,10 +84,17 @@
     <main class="product-list col-md-9">
       <h2>Product List</h2>
       <!-- Search Bar -->
-      <div class="search-bar d-flex">
-        <input type="text" placeholder="Search products..." class="form-control search-input" />
-        <button class="btn btn-primary ml-2 search-btn">Search</button>
-      </div>
+
+    <div class="search-bar d-flex">
+      <input
+        type="text"
+        placeholder="Search products..."
+        class="form-control search-input"
+        value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+      />
+      <button class="btn btn-primary ml-2 search-btn">Search</button>
+    </div>
+
       
 
       <div class="row">
@@ -138,17 +137,29 @@
 </div>
 
 <script>
-  document.querySelector('.search-btn').addEventListener('click', function() {
-    const searchValue = document.querySelector('.search-input').value.trim();
-      if (searchValue) {
-          window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
-      }
-  });
-
-  document.getElementById('sortOptions').addEventListener('change', function() {
-    const sortValue = this.value;
-    window.location.href = `/products?sort=${sortValue}`;
+document.querySelector('.search-btn').addEventListener('click', function() {
+  const searchValue = document.querySelector('.search-input').value.trim();
+  
+  if (!searchValue) {
+    window.location.href = `/products`; 
+  } else {
+    window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
+  }
 });
+
+
+document.getElementById('sortOptions').addEventListener('change', function() {
+    const sortValue = this.value;
+
+    if (sortValue === 'default') {
+        // Reload the page without any sort query to display all products
+        window.location.href = '/products';
+    } else {
+        // Apply sorting by redirecting with the sort query parameter
+        window.location.href = `/products?sort=${sortValue}`;
+    }
+});
+
 
     
 
@@ -159,14 +170,18 @@ function applyFilters() {
   const inStockChecked = document.getElementById('in-stock').checked;
   filters.set('inStock', inStockChecked ? 'true' : 'false');
 
-  // Add other filters here, e.g., for categories, if needed.
-  // Example for category:
-  const fictionChecked = document.getElementById('fiction').checked;
-  if (fictionChecked) filters.append('category', 'fiction');
+  // Loop through all category checkboxes and add selected category ObjectIds to filters
+  const categoryCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="category-"]'); // Select all category checkboxes
+  categoryCheckboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+      filters.append('category', checkbox.value); // Make sure category checkboxes use category _id as the value
+    }
+  });
 
-  // Redirect or send AJAX request with filters
+  // Redirect with the applied filters
   window.location.href = '/products?' + filters.toString();
 }
+
     
 
 </script>

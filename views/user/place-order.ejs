@@ -55,7 +55,30 @@
           </li>
         <% }) %>
       </ul>
-      <p class="total"><strong>Total:</strong> ₹<%= cart.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) %></p>
+
+
+       <!-- Coupon Dropdown -->
+    <div class="mb-3">
+      <label for="coupon" class="form-label">Apply Coupon</label>
+      <select id="coupon" class="form-select">
+        <% if (coupons && coupons.length > 0) { %>
+          <option value="">Select a Coupon</option>
+          <% coupons.forEach(coupon => { %>
+            <option value="<%= coupon._id %>">
+              <%= coupon.name %> (₹<%= coupon.offerPrice %> off)
+            </option>
+          <% }) %>
+        <% } else { %>
+          <option value="" disabled>No coupons available</option>
+        <% } %>
+      </select>
+    </div>
+
+    <p class="total"><strong>Total:</strong> ₹<%= cart.items.reduce((sum, item)=> sum + item.totalPrice, 0).toFixed(2) %>
+    </p>
+    <p class="total"><strong>Final Price:</strong> <span id="finalPrice">₹<%= cart.items.reduce((sum, item)=> sum +
+          item.totalPrice, 0).toFixed(2) %></span></p>
+
     <% } else { %>
       <p>Your cart is empty.</p>
     <% } %>
@@ -79,18 +102,153 @@
   <!-- Payment Method Selection -->
   <div class="mb-4">
     <h5>Payment Method</h5>
-    <form action="/payment" method="POST">
+    <form id="paymentForm">
       <div class="form-check mb-2">
-        <input class="form-check-input" type="radio" name="paymentMethod" value="Cash on Delivery" id="cod" required>
-        <label class="form-check-label" for="cod">Cash on Delivery</label>
+        <input class="form-check-input" type="radio" name="paymentMethod" value="Razorpay" id="razorpay" required>
+        <label class="form-check-label" for="razorpay">Pay Now (Razorpay)</label>
       </div>
-      <button type="submit" class="btn btn-primary w-100 mt-3">Place Order</button>
+      <div class="form-check mb-2">
+        <input class="form-check-input" type="radio" name="paymentMethod" value="Cash On Delivery" id="cod" required>
+        <label class="form-check-label" for="cod">Cash On Delivery</label>
+      </div>
+      <button type="button" class="btn btn-primary w-100 mt-3" onclick="placeOrder()">Place Order</button>
     </form>
   </div>
-
 </div>
+
+<!-- Razorpay JS -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <!-- Bootstrap JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  async function placeOrder() {
+  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+  if (!paymentMethod) {
+    alert('Please select a payment method.');
+    return;
+  }
+
+  const finalAmount = parseFloat(document.getElementById("finalPrice").innerText.replace('₹', '').trim());
+
+  const orderData = {
+    addressId: "<%= selectedAddress._id %>",
+    paymentMethod: paymentMethod,
+    finalAmount: finalAmount,
+  };
+
+  try {
+    if (paymentMethod === "Razorpay") {
+      const response = await fetch('/create-razorpay-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create Razorpay order.");
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const options = {
+          key: data.keyId,
+          amount: data.amount,
+          currency: data.currency,
+          order_id: data.razorpayOrderId,
+          name: 'Zahra',
+          description: 'Order Payment',
+          handler: function(paymentResponse) {
+            verifyPayment(paymentResponse, data.orderId, data.razorpayOrderId);
+          },
+          prefill: {
+            name: "<%= selectedAddress.name %>",
+            email: "<%= user.email %>",
+            contact: "<%= selectedAddress.contactNo %>"
+          }
+        };
+
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+      } else {
+        alert('Failed to create Razorpay order.');
+      }
+    } else if (paymentMethod === "Cash On Delivery") {
+      const response = await fetch('/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.href = '/order-confirmation/' + data.orderId;
+      } else {
+        alert('Failed to place order.');
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred while processing your order.');
+  }
+}
+
+async function verifyPayment(paymentResponse, orderId, razorpayOrderId) {
+  try {
+    const response = await fetch('/verify-razorpay-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId: orderId,
+        razorpayOrderId: razorpayOrderId,
+        paymentId: paymentResponse.razorpay_payment_id,
+        signature: paymentResponse.razorpay_signature
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert('Payment successful! Order placed.');
+      window.location.href = '/order-confirmation/' + orderId;
+    } else {
+      alert('Payment verification failed.');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred while verifying payment.');
+  }
+}
+
+
+const coupons = JSON.parse('<%- JSON.stringify(coupons || []) %>'); // Parse coupons data
+
+document.getElementById("coupon").addEventListener("change", (event) => {
+  const selectedCouponId = event.target.value; // Get selected coupon ID
+  const totalPrice = parseFloat("<%= cart.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) %>"); // Total price
+
+  if (!selectedCouponId) {
+    // If no coupon selected, set final price as total price
+    document.getElementById("finalPrice").innerText = `₹${totalPrice.toFixed(2)}`;
+    return;
+  }
+
+  // Find the selected coupon by its ID
+  const selectedCoupon = coupons.find(coupon => coupon._id === selectedCouponId);
+
+  if (selectedCoupon) {
+    // Calculate discount based on the percentage
+    const discount = (selectedCoupon.offerPrice / 100) * totalPrice;
+    const finalPrice = Math.max(0, totalPrice - discount); // Ensure final price is not negative
+    document.getElementById("finalPrice").innerText = `₹${finalPrice.toFixed(2)}`; // Update the final price
+  }
+});
+
+
+</script>
 </body>
 </html>

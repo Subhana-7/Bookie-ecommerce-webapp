@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { bool } = require("sharp");
 
 const {Schema} = mongoose;
 
@@ -19,7 +20,9 @@ const couponSchema = new mongoose.Schema({
     },
     offerPrice:{
         type:Number,
-        required:true
+        required:true,
+        min:0,
+        max:100,
     },
     minimumPrice:{
         type:Number,
@@ -28,6 +31,10 @@ const couponSchema = new mongoose.Schema({
     isList:{
         type:Boolean,
         default:true
+    },
+    isDeleted: {
+        type:Boolean,
+        default:false,
     },
     userId:[{
         type:mongoose.Schema.Types.ObjectId,

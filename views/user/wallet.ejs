@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("../../views/partials/user/header") %>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .wallet-container {
+            border: 1px solid #007bff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+        }
+        .wallet-header {
+            font-size: 1.25rem;
+            color: #dc3545;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .wallet-balance-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .wallet-balance {
+            font-size: 2rem;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .btn-add-money {
+            background-color: #a64448;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .wallet-history-header {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #dc3545;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .table th {
+            background-color: #6c757d;
+            color: white;
+            font-weight: bold;
+        }
+        .table td {
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container wallet-container">
+ 
+    <div class="wallet-header">My Wallet</div>
+    
+    <!-- Display current wallet balance -->
+    <div class="wallet-balance-box">
+        <div>
+            <div>Wallet Balance</div>
+            <div class="wallet-balance">Rs. <%= wallet.transactions.reduce((acc, transaction) => transaction.type === 'Credit' ? acc + transaction.amount : acc - transaction.amount, 0) %></div>
+        </div>
+       <!-- <button class="btn btn-add-money">Add Money</button> -->
+    </div>
+    
+    <!-- Display wallet transaction history -->
+    <div class="wallet-history-header">Wallet History</div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Balance</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Loop through transactions and display each one -->
+            <% wallet.transactions.forEach(transaction => { %>
+                <tr>
+                    <td><%= transaction.date.toLocaleDateString() %></td>
+                    <td><%= transaction.type %></td>
+                    <td><%= transaction.amount %></td>
+                    <td><%= transaction.balance %></td>
+                    <td><%= transaction.description %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -13,13 +13,14 @@
 
     .content-wrapper {
       display: flex;
-      min-height: 100vh; /* Full viewport height */
+      min-height: 100vh; 
     }
 
     .content-wrapper .container {
-      flex: 1; /* Take remaining space next to sidebar */
+      flex: 1; 
       padding: 20px;
       overflow-y: auto;
+      margin-left: 330px; /* Add margin-left to push the content to the right, avoiding the sidebar */
     }
 
     .content-wrapper > * {
@@ -29,7 +30,6 @@
 </head>
 <body>
 
-  <!-- Navbar (for Admin) -->
   <%- include("../../views/partials/admin/header") %>
 
 <div class="content-wrapper">
@@ -39,7 +39,6 @@
   <div class="container mt-5">
     <h2>Order Management</h2>
 
-    <!-- Order Table -->
     <table class="table table-striped">
       <thead>
         <tr>
@@ -60,22 +59,24 @@
 
           <td><%= order.userId.name %></td> 
 
-          <td><%= order.totalPrice.toFixed(2) %></td>
+          <td>₹<%= order.totalPrice.toFixed(2) %></td>
 
           <td>
+            <!-- If status is 'Delivered' or 'Cancelled', disable the dropdown -->
             <form action="/admin/order-management/<%= order._id %>" method="POST">
-              <select class="form-control" name="status" onchange="this.form.submit()">
+              <select class="form-control" name="status" onchange="this.form.submit()"
+                      <%= (order.status === 'Delivered' || order.status === 'Cancelled' || order.status === 'Returned') ? 'disabled' : '' %>>
                 <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
                 <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                 <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                 <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                 <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
               </select>
             </form>
           </td>
 
-
-          <!-- View More Button -->
           <td>
             <a href="/admin/admin-order-details/<%= order.orderId %>" class="btn btn-info btn-sm">View More</a>
           </td>
@@ -86,8 +87,8 @@
   </div>
 </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ const userSchema = new Schema({
         type : String,
         required:true,
         unique: true,
+        sparse:true,
     },
     phone : {
         type : String,
@@ -56,10 +57,12 @@ const userSchema = new Schema({
         default:Date.now,
     },
     referalCode:{
-        type:String
+        type:String,
+        unique:true,
     },
     redeemed:{
-        type:Boolean
+        type:Boolean,
+        default:false,
     },
     redeemedUsers: [{
         type: Schema.Types.ObjectId,

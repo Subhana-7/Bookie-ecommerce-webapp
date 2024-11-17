@@ -13,21 +13,21 @@
     width: auto;
     max-width: 90%; 
 }
+.main-content {
+    margin-top: 20px; /* Space added for the navbar above the content */
+  }
 
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 
-<!-- Main Content -->
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">User Management</h1>
   </div>
 
-  <!-- Search Bar -->
   <div class="row mb-3">
     <div class="col-md-4">
-      <!-- Wrap search in a form -->
       <form method="GET" action="/admin/users">
         <input type="text" class="form-control search-bar" name="search" value="<%= search %>" placeholder="Search users by name or email...">
       </form>
@@ -37,7 +37,6 @@
     </div>
   </div>
 
-  <!-- User Table -->
   <div class="row">
     <div class="col-12">
       <table class="table user-table">
@@ -51,16 +50,13 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Loop through the users -->
           <% for (let i = 0; i < data.length; i++) { %>
             <tr>
-              <!-- Calculate user index based on pagination -->
-              <td><%= (currentPage - 1) * 5 + (i + 1) %></td> <!-- Display index as user number -->
+              <td><%= (currentPage - 1) * 5 + (i + 1) %></td> 
               <td><%= data[i].name %></td>
               <td><%= data[i].email %></td>
               <td><%= data[i].phone %></td>
 
-              <!-- Display Block/Unblock button -->
               <td>
                 <% if (!data[i].isBlocked) { %>
                   <a href="/admin/blockUser?id=<%= data[i]._id %>" class="btn btn-success">block</a>
@@ -68,7 +64,6 @@
                   <a href="/admin/unblockUser?id=<%= data[i]._id %>" class="btn btn-danger">unblock</a>
                 <% } %>
 
-                <!-- Edit and Delete buttons -->
                 <button class="btn btn-action btn-action-edit">Edit</button>
                 <button class="btn btn-action btn-action-delete">Delete</button>
               </td>
@@ -79,7 +74,6 @@
     </div>
   </div>
 
-  <!-- Pagination -->
   <div class="container mt-3">
     <nav aria-label="page navigation">
       <ul class="pagination justify-content-center mb-20" style="margin-right: 200px;">

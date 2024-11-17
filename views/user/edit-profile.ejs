@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+    <%-include("../../views/partials/user/header")%>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        /* Maroon Theme */
         body {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
@@ -43,29 +43,24 @@
 <div class="container">
     <h2 class="header">Edit Profile</h2>
     <form action="/edit-profile" method="POST">
-        <!-- Name Field -->
         <div class="form-group">
             <label for="name">name:</label>
             <input type="text" class="form-control" id="name" name="name" value="<%=user.name%>" required>
         </div>
 
-        <!-- Email Field -->
         <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" class="form-control" id="email" name="email" value="<%=user.email%>" required>
+            <input type="email" class="form-control" id="email" name="email" value="<%=user.email%>" required disabled>
         </div>
 
-        <!-- Phone Field -->
         <div class="form-group">
             <label for="phone">Phone</label>
             <input type="number" class="form-control" id="phone" name="phone" value="<%=user.phone%>" required>
         </div>
 
-        <!-- Save Changes Button -->
         <button type="submit" class="btn btn-maroon btn-block">Save Changes</button>
     </form>
 
-    <!-- Cancel Button -->
     <div class="text-center mt-3">
         <a href="/profile" class="btn btn-link">Cancel</a>
     </div>

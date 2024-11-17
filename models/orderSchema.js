@@ -51,7 +51,15 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request','Return Pending', 'Returned']
+    },
+    cancellationReason: {
+        type: String,
+        default: null
+    },
+    returnRequestReason: {
+        type: String,
+        default: null
     },
     createdOn: {
         type: Date,
@@ -61,6 +69,19 @@ const orderSchema = new Schema({
     couponApplied: {
         type: Boolean,
         default: false
+    },
+    paymentId: {
+        type: String 
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['Cash On Delivery', 'Razorpay','pending'],
+        default:'Cash On Delivery' 
+    },
+    paymentStatus: {
+        type:String,
+        enum: ["completed","Pending"],
+        default:'completed'
     }
 });
 
