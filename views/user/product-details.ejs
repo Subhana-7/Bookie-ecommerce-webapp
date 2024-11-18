@@ -231,12 +231,25 @@
 
 
       <div class="price-section">
-        <span class="price">₹<%= product.salePrice %></span>
-        <% if (product.productOffer) { %>
-          <span class="discounted-price">₹<%= product.regularPrice %></span>
-          <p class="coupon">Discount: SAVE20</p>
+        <span class="price">
+
+        <% if (product.productOffer > 0) { %>
+            <% let productDiscountedPrice = product.salePrice - (product.salePrice * (product.productOffer / 100)); %>
+            <span class="discounted-price">₹<%= product.regularPrice %></span>
+            ₹<%= productDiscountedPrice.toFixed(2) %> 
+            <p class="coupon">Product Discount: SAVE<%= product.productOffer %>%</p>
+        <% } else if (product.category && product.category.categoryOffer > 0) { %>
+            <% let categoryDiscountedPrice = product.salePrice - (product.salePrice * (product.category.categoryOffer / 100)); %>
+            <span class="discounted-price">₹<%= product.regularPrice %></span>
+            ₹<%= categoryDiscountedPrice.toFixed(2) %> 
+            <p class="coupon">Category Discount: SAVE<%= product.category.categoryOffer %>%</p>
+        <% } else { %>
+            ₹<%= product.salePrice %>
         <% } %>
-      </div>
+
+        </span>
+    </div>
+    
 
 
 
@@ -267,12 +280,12 @@
         <% relatedProducts.forEach(product => { %>
             <div class="col-md-3 col-sm-6 mb-4"> 
                 <div class="card h-100"> 
-                    <img src="<%= product.productImage[0] %>" alt="Product Image" style="width: 50px; height: auto; margin-right: 10px;">
+                    <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="Product Image" >
                     <div class="card-body">
                         <h5 class="card-title"><%= product.productName %></h5>
                         <p class="card-text">by <%= product.author %></p>
                         <p class="price">Price: ₹<%= product.salePrice %></p>
-                        <a href="/products/<%= product._id %>" class="btn add-to-cart">View Product</a>
+                        <a href="/product-details/<%= product._id %>" class="btn add-to-cart">View Product</a>
                     </div>
                 </div>
             </div>
@@ -287,75 +300,82 @@
 
 <script>
     async function addToCart() {
-        console.log("addtocart");
+    console.log("addtocart");
 
-        const productData = document.getElementById('product-data');
-        const availableStock = parseInt(productData.getAttribute('data-available-stock'), 10);
-        const productId = productData.getAttribute('data-product-id');
+    const productData = document.getElementById('product-data');
+    const availableStock = parseInt(productData.getAttribute('data-available-stock'), 10);
+    const productId = productData.getAttribute('data-product-id');
 
-        const quantityInput = document.querySelector('input[name="quantity"]');
-        const quantity = parseInt(quantityInput.value, 10);
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    const quantity = parseInt(quantityInput.value, 10);
 
-        console.log("Quantity:", quantity);
-        console.log("Available Stock:", availableStock);
+    console.log("Quantity:", quantity);
+    console.log("Available Stock:", availableStock);
 
-        if (quantity > availableStock) {
+    if (quantity > availableStock) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Insufficient Stock',
+            text: `Only ${availableStock} item(s) available in stock. Please reduce the quantity.`,
+        });
+        return;
+    }
+
+    if (quantity > 12) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Limit Exceeded',
+            text: 'You can only add a maximum of 12 of the same product to the cart.',
+        });
+        return;
+    }
+
+    const data = {
+        productId: productId,
+        quantity: quantity,
+    };
+
+    try {
+        const response = await fetch("/cart/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            console.log("Product added to cart successfully");
             Swal.fire({
-                icon: 'error',
-                title: 'Insufficient Stock',
-                text: `Only ${availableStock} item(s) available in stock. Please reduce the quantity.`,
+                icon: 'success',
+                title: 'Added to Cart!',
+                text: `Successfully added ${quantity} item(s) to your cart.`,
+            }).then(() => {
+                window.location.href = "/cart"; 
             });
-            return;
-        }
-
-        if (quantity > 12) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Limit Exceeded',
-                text: 'You can only add a maximum of 12 of the same product to the cart.',
-            });
-            return;
-        }
-
-        const data = {
-            productId: productId,
-            quantity: quantity
-        };
-
-        try {
-            const response = await fetch("/cart/add", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                console.log("Product added to cart successfully");
-                window.location.href = "/cart";
-            } else {
-                const errorData = await response.json();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorData.message || 'An error occurred while adding the item to your cart.',
-                });
-            }
-        } catch (error) {
-            console.error("Error in addToCart function:", error);
+        } else {
+            const errorData = await response.json();
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'An unexpected error occurred. Please try again later.',
+                text: errorData.message || 'An error occurred while adding the item to your cart.',
             });
         }
+    } catch (error) {
+        console.error("Error in addToCart function:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred. Please try again later.',
+        });
     }
+}
+
 
 
     async function addToWishlist() {
     const productData = document.getElementById('product-data');
     const productId = productData.getAttribute('data-product-id');
 
-    const data = { productId: productId }; // Add productId to the data object
+    const data = { productId: productId }; 
 
     try {
         const response = await fetch("/wishlist/add", {

@@ -1,5 +1,5 @@
 const Category = require("../../models/categorySchema");
-const product = require("../../models/productSchema");
+const Product = require("../../models/productSchema");
 
 
 const categoryInfo = async (req, res) => {
@@ -55,8 +55,9 @@ const addCategory = async(req,res) => {
 
 
 const addCategoryOffer = async (req, res) => {
-  console.log("Request body:", req.body); 
+  console.log("controller block of addCategoryOffer")
   try {
+    console.log("try block of addCategoryOffer")
     const percentage = parseInt(req.body.percentage);
     const categoryId = req.body.categoryId;
 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%- include("../../views/partials/user/header") %>
+<%- include("../../views/partials/user/header") %>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,6 +35,10 @@
             margin-bottom: 20px;
             color: #343a40;
         }
+        .price {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -42,33 +46,63 @@
 <div class="container wishlist-container">
     <div class="wishlist-header">Your Wishlist</div>
 
-    <!-- Display message if the wishlist is empty -->
     <% if (message) { %>
         <p class="text-center text-muted"><%= message %></p>
     <% } else { %>
-        <!-- Loop through Wishlist items and display each one -->
         <div class="row">
-            <% Wishlist.forEach(item => { %>
+            <% Wishlist.forEach(item => { 
+                let product = item.productId;
+                let finalPrice = product.salePrice;
+                if (product.category && product.category.categoryOffer > 0) {
+                    let discountedPrice = finalPrice - (finalPrice * (product.category.categoryOffer / 100));
+                    finalPrice = discountedPrice;
+                }
+
+                if (product.productOffer > 0) {
+                    finalPrice = finalPrice - (finalPrice * (product.productOffer / 100));
+                }
+
+                let finalDiscountedPrice = finalPrice.toFixed(2);
+            %>
                 <div class="col-md-12">
+                    <a href="/product-details/<%= product._id %>">
                     <div class="wishlist-item d-flex align-items-center">
-                        <img src="<%= item.productId.productImage %>" alt="<%= item.productId.productName %>" class="img-fluid mr-3">
+                        <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="img-fluid mr-3">
                         <div class="wishlist-details">
-                            <h5 class="mb-1"><%= item.productId.productName %></h5>
-                            <p class="text-muted mb-2">Author: <%= item.productId.author %></p>
-                            <p class="text-muted mb-2">Price: $<%= item.productId.regularPrice %></p>
+                            <h5 class="mb-1"><%= product.productName %></h5>
+                            <p class="text-muted mb-2">Author: <%= product.author %></p>
+                            <p class="mb-2">
+                                Stock Status: 
+                                <% if (product.quantity <= 0) { %>
+                                    <span style="color: red;">Out of Stock</span>
+                                <% } else { %>
+                                    <span style="color: green;"><%= product.quantity %> Stock left - In Stock</span>
+                                <% } %>
+                            </p>
+
+                            <% if (product.quantity > 0) { %>
+                                <p class="price">
+                                    <% if (product.category && product.category.categoryOffer > 0) { %>
+                                        <span style="text-decoration: line-through; color: grey;">₹<%= product.salePrice %></span><br>
+                                    <% } %>
+                                    ₹<%= finalDiscountedPrice %>
+                                </p>
+                                <% if (product.category && product.category.categoryOffer > 0) { %>
+                                    <p>Category Discount: <span style="color: red;"><%= product.category.categoryOffer %>%</span></p>
+                                <% } %>
+                                <% if (product.productOffer > 0) { %>
+                                    <p>Product Discount: <span style="color: red;"><%= product.productOffer %>%</span></p>
+                                <% } %>
+                            <% } %>
                         </div>
                         <div class="ml-auto">
-                            <!-- Add to Cart and Remove buttons (adjust routes if necessary) -->
-                            <form action="/cart/add" method="POST" class="d-inline">
-                                <input type="hidden" name="productId" value="<%= item.productId._id %>">
-                                <button type="submit" class="btn btn-success btn-sm">Add to Cart</button>
-                            </form>
                             <form action="/wishlist/remove" method="POST" class="d-inline">
-                                <input type="hidden" name="productId" value="<%= item.productId._id %>">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
                                 <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                             </form>
                         </div>
                     </div>
+                    </a>
                 </div>
             <% }) %>
         </div>
@@ -81,5 +115,3 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
-
-

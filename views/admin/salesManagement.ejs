@@ -71,20 +71,23 @@
         </div>
 
         <div class="row my-4">
-            <div class="col-md-6 mx-auto text-center">
-                <label for="reportType" class="form-label">Report type:</label>
-                <select id="reportType" class="form-select d-inline-block w-auto">
-                    <% reportTypes.forEach(type => { %>
-                        <option value="<%= type.value %>"><%= type.label %></option>
-                    <% }); %>
-                </select>
-                <div id="customDateRange">
+          <div class="col-md-6 mx-auto text-center">
+              <label for="reportType" class="form-label">Report type:</label>
+              <select id="reportType" class="form-select d-inline-block w-auto">
+                  <% reportTypes.forEach(type => { %>
+                      <option value="<%= type.value %>"><%= type.label %></option>
+                  <% }); %>
+              </select>
+              <div id="customDateRange">
                   <input type="date" id="startDate" class="form-control my-2" placeholder="Start Date">
                   <input type="date" id="endDate" class="form-control my-2" placeholder="End Date">
-                </div>
-                <button class="btn btn-success" onclick="generateReport()">Generate Report</button>
-            </div>
-        </div>
+              </div>
+              <button class="btn btn-success" onclick="generateReport()">Generate Report</button>
+              <button class="btn btn-primary mt-2" onclick="downloadReport('pdf')">Download as PDF</button>
+              <button class="btn btn-primary mt-2" onclick="downloadReport('excel')">Download as Excel</button>
+          </div>
+      </div>
+      
 
         <table class="table table-bordered text-center">
             <thead>

@@ -138,9 +138,9 @@
                                                    <td>
                                                        <input type="hidden" value="<%= product.productImage[i] %>" id="imageDatas">
                                                        <img class="rounded" style="width: 50px; height: 60px;"
-                                                           src="public/uploads/re-image/<%=product.productImage[i]%>"
+                                                           src="/uploads/product-images/<%=product.productImage[i]%>"
                                                            alt="">
-                                                       <i onclick="deleteSingleImage('<%=product.productImage[i]%>','<%=product._id%>')" style="position: absolute; margin-left: .5rem; cursor: pointer;" class="fa-thin fa-x"></i>
+                                                       <i onclick="deleteSingleImage('/uploads/product-images/<%=product.productImage[i]%>','<%=product._id%>')" style="position: absolute; margin-left: .5rem; cursor: pointer;" class="fa-thin fa-x"></i>
                                                    </td>
                                                </div>
                                               

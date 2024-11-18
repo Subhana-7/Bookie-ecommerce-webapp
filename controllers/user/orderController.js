@@ -8,7 +8,7 @@ const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema");
 const razorpay = require("razorpay");
 const crypto = require("crypto");
-const { log } = require("console");
+//const { log } = require("console");
 
 
 const loadCheckOut = async (req, res) => {

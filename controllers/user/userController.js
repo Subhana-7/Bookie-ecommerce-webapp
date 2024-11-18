@@ -281,7 +281,7 @@ const logout = async(req,res) => {
 
 const getResetPassword = async(req,res) => {
   try {
-    return res.render("reset-password");
+    return res.render("user-reset-password");
   } catch (error) {
     return res.redirect("/pageNotFound");
   }

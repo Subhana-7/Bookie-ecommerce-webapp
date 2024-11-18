@@ -1,19 +1,18 @@
 <head>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    /* Sidebar Styles */
+
     .sidebar {
       background-color: maroon;
       color: white;
       padding: 20px;
-      height: 100vh; /* Full height sidebar */
+      height: 100vh;
     }
 
     .product-card {
-      height: 100%; /* Ensure all cards have the same height */
+      height: 100%; 
     }
 
-    /* Search Bar Styles */
     .search-bar {
       margin-bottom: 20px;
     }
@@ -22,11 +21,10 @@
       width: 100%;
     }
 
-    /* Adjust for consistent card heights */
     .card-body {
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* Space out title, text, and price */
+      justify-content: space-between; 
     }
   </style>
 </head>
@@ -39,9 +37,9 @@
 
   <div class="content row">
     <aside class="sidebar col-md-3">
-      <h2>Filter & Sort</h2>
-      <div class="filter-section">
-        <h3>Sort By</h3>
+      <h2 class="text-white">Filter & Sort</h2>
+      <div class="filter-section"><br>
+        <h5 class="text-white">Sort By:</h5>
         <select id="sortOptions" class="form-control">
             <option value="default">Default</option>
             <option value="popularity">Popularity</option>
@@ -53,25 +51,27 @@
             <option value="aToZ">A - Z</option>
             <option value="zToA">Z - A</option>
         </select>
-    </div>
+    </div><br>
     
 
     <div class="filter-section">
-      <h3>Categories</h3>
+     
       <ul class="list-unstyled">
         <li>
           <input type="checkbox" id="in-stock" onchange="applyFilters()" <%= inStock ? 'checked' : '' %> />
           <label for="in-stock">Show only in-stock Books</label>
         </li>
+        <h4 class="text-white">Categories</h4><br>
         <% categories.forEach(category => { %>
           <li>
             <input 
-              type="checkbox" 
-              id="category-<%= category.name %>" 
-              onchange="applyFilters()" 
-              <% if (categoryFilter && categoryFilter.split(',').includes(category.name)) { %> checked <% } %>
-            />
-            <label for="category-<%= category.name %>"><%= category.name %></label>
+            type="checkbox" 
+            id="category-<%= category._id %>" 
+            value="<%= category._id %>" 
+            onchange="applyFilters()" 
+            <% if (categoryFilter && categoryFilter.split(',').includes(category._id)) { %> checked <% } %> 
+          />
+          <label for="category-<%= category._id %>"><%= category.name %></label>   
           </li>
         <% }) %>
       </ul>
@@ -83,7 +83,6 @@
 
     <main class="product-list col-md-9">
       <h2>Product List</h2>
-      <!-- Search Bar -->
 
     <div class="search-bar d-flex">
       <input
@@ -99,37 +98,63 @@
 
       <div class="row">
         <% products.forEach(product => { %>
-        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-          <a href="/product-details/<%= product._id %>">
-            <div class="product-card card">
-              <img src="uploads/product-images/<%= product.productImage[0] %>" class="card-img-top" alt="<%= product.productName %>" />
-              <div class="card-body">
-                <h3 class="card-title"><%= product.productName %></h3>
-                <p class="card-text">Author: <%= product.author %></p>
-                <p class="card-text">Publisher: <%= product.publisher %></p>
-
-                <p>
-                  Stock Status: 
-                  <% if (product.quantity <= 0) { %>
-                      <span style="color: red;">Out of Stock</span>
-                  <% } else { %>
-                      <span style="color: green;" ><%=product.quantity%> Stock left</span><br>
-                      <span style="color: green;">-In Stock</span>
-                  <% } %>
-              </p>
-                <p class="price">₹<%= product.salePrice %></p>
-                <p> 
-                  <% if (product.productOffer) { %>
-                    Discound:
-                      <span style="color: red;"><%= product.productOffer %>%</span>
-                  <% }
-                  %>
-              </p>
-
+          <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <a href="/product-details/<%= product._id %>">
+              <div class="product-card card">
+                <img src="uploads/product-images/<%= product.productImage[0] %>" class="card-img-top" alt="<%= product.productName %>" />
+                <div class="card-body">
+                  <h3 class="card-title"><%= product.productName %></h3>
+                  <p class="card-text">Category: <%= product.category.name %></p>
+                  <p class="card-text">Author: <%= product.author %></p>
+                  <p class="card-text">Publisher: <%= product.publisher %></p>
+          
+                  <p>
+                    Stock Status: 
+                    <% if (product.quantity <= 0) { %>
+                        <span style="color: red;">Out of Stock</span>
+                    <% } else { %>
+                        <span style="color: green;" ><%=product.quantity%> Stock left</span><br>
+                        <span style="color: green;">-In Stock</span>
+                    <% } %>
+                  </p>
+                  <p class="price">
+                    <% 
+                      let finalPrice = product.salePrice;
+                      
+                      if (product.category && product.category.categoryOffer > 0) {
+                        let discountedPrice = finalPrice - (finalPrice * (product.category.categoryOffer / 100));
+                        finalPrice = discountedPrice;
+                      }
+                  
+                      if (product.productOffer > 0) {
+                        finalPrice = finalPrice - (finalPrice * (product.productOffer / 100));
+                      }
+                  
+                      let finalDiscountedPrice = finalPrice.toFixed(2);
+                    %>
+                  
+                    <% if (product.category && product.category.categoryOffer > 0) { %>
+                      <span style="text-decoration: line-through; color: grey;">₹<%= product.salePrice %></span><br>
+                    <% } %>
+                  
+                    <span style="color: red;">₹<%= finalDiscountedPrice %></span>
+                  
+                    <% if (product.category && product.category.categoryOffer > 0) { %>
+                      <p>Category Discount: <span style="color: red;"><%= product.category.categoryOffer %>%</span></p>
+                    <% } %>
+                  
+                    <% if (product.productOffer > 0) { %>
+                      <p>Product Discount: <span style="color: red;"><%= product.productOffer %>%</span></p>
+                    <% } %>
+                  </p>
+                  
+          
+                </div>
               </div>
-            </div>
-          </a>
-        </div>
+            </a>
+          </div>
+          
+          
         <% }) %>
       </div>
     </main>
@@ -152,10 +177,8 @@ document.getElementById('sortOptions').addEventListener('change', function() {
     const sortValue = this.value;
 
     if (sortValue === 'default') {
-        // Reload the page without any sort query to display all products
         window.location.href = '/products';
     } else {
-        // Apply sorting by redirecting with the sort query parameter
         window.location.href = `/products?sort=${sortValue}`;
     }
 });
@@ -166,21 +189,19 @@ document.getElementById('sortOptions').addEventListener('change', function() {
 function applyFilters() {
   let filters = new URLSearchParams();
 
-  // Check if 'in-stock' filter is checked
   const inStockChecked = document.getElementById('in-stock').checked;
   filters.set('inStock', inStockChecked ? 'true' : 'false');
 
-  // Loop through all category checkboxes and add selected category ObjectIds to filters
-  const categoryCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="category-"]'); // Select all category checkboxes
+  const categoryCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="category-"]'); 
   categoryCheckboxes.forEach((checkbox) => {
     if (checkbox.checked) {
-      filters.append('category', checkbox.value); // Make sure category checkboxes use category _id as the value
+      filters.append('category', checkbox.value); 
     }
   });
 
-  // Redirect with the applied filters
   window.location.href = '/products?' + filters.toString();
 }
+
 
     
 
