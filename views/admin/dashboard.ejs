@@ -1,58 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
+  <%- include("../../views/partials/admin/header") %>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .container-fluid {
-      margin-left:50px;
+    .container {
+      max-width: 1200px;
+      padding-left: 100px;
+    }
+    .dashboard-stats {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    .stat-box {
+      background-color: #d04d4d;
+      padding: 20px;
+      border-radius: 10px;
+      color: white;
+      text-align: center;
+      flex: 1;
+      margin: 0 10px;
+    }
+    .filter-container {
+      margin: 20px 0;
+      text-align: center;
+    }
+    .chart-container {
+      width: 90%;
+      height: 400px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f8f8f8;
+      border-radius: 10px;
+    }
+    .best-selling {
+      margin: 40px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f2f2f2;
     }
   </style>
+  
 </head>
-
 <body>
-  <%- include("../../views/partials/admin/header") %>
+  <%- include("../../views/partials/admin/sidebar") %>
 
-  <div class="container-fluid">
-    <div class="row">
-      <%- include("../../views/partials/admin/sidebar") %>
-
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="h2">Dashboard</h1>
-        </div>
-
-        <div class="row">
-          <div class="col-12 col-md-6 col-lg-4 mb-4">
-            <div class="card bg-light shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">Total Orders</h5>
-                <p class="card-text">1023 Orders</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-lg-4 mb-4">
-            <div class="card bg-light shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">Active Products</h5>
-                <p class="card-text">245 Products</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-6 col-lg-4 mb-4">
-            <div class="card bg-light shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">New Users</h5>
-                <p class="card-text">145 Users</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+  <div class="container">
+    <h1 class="text-center my-4">Admin Dashboard</h1>
+  
+    <!-- Dashboard Stats -->
+    <div class="dashboard-stats">
+      <div class="stat-box">
+        <h3>Total Orders</h3>
+        <p><%= totalOrders %></p>
+      </div>
+      <div class="stat-box">
+        <h3>Total Revenue</h3>
+        <p>₹<%= totalRevenue.toFixed(2) %></p>
+      </div>
+    </div>
+  
+    <!-- Filter Dropdown -->
+    <div class="filter-container">
+      <label for="filter">Filter By:</label>
+      <select id="filter" class="form-select">
+        <option value="daily">Daily</option>
+        <option value="monthly" selected>Monthly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+  
+    <!-- Chart Section -->
+    <div class="chart-container">
+      <h2 class="text-center">Sales Data</h2>
+      <canvas id="salesChart"></canvas>
+    </div>
+  
+    <!-- Best Selling Products -->
+    <div class="best-selling">
+      <h2 class="text-center my-4">Best Selling Products (Top 10)</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product Name</th>
+            <th>Units Sold</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bestSellingProducts.forEach((product, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= product.name %></td>
+              <td><%= product.unitsSold %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Best Selling Categories -->
+    <div class="best-selling">
+      <h2 class="text-center my-4">Best Selling Categories (Top 10)</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Category Name</th>
+            <th>Units Sold</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bestSellingCategories.forEach((category, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= category.name %></td>
+              <td><%= category.unitsSold %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
     </div>
   </div>
+  
+  
+  <script>
+    const ctx = document.getElementById("salesChart").getContext("2d");
+    const filterDropdown = document.getElementById("filter");
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    let salesChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: [], 
+        datasets: [
+          {
+            label: "Total Sales ($)",
+            data: [],
+            backgroundColor: "rgba(75, 192, 192, 0.5)",
+            borderColor: "rgba(75, 192, 192, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, 
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+
+    async function updateChart(filter) {
+      const response = await fetch(`/admin/dashboard-data?filter=${filter}`);
+      const data = await response.json();
+
+      salesChart.data.labels = data.labels;
+      salesChart.data.datasets[0].data = data.sales;
+      salesChart.update();
+    }
+
+    updateChart(filterDropdown.value);
+
+    filterDropdown.addEventListener("change", (e) => {
+      updateChart(e.target.value);
+    });
+  </script>
 </body>
 </html>

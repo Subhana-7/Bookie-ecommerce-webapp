@@ -116,7 +116,7 @@ const loadEditAddress = async (req, res) => {
 
 
 const editAddress = async (req, res) => {
-  const addressId = req.params.id;  // Address ID to update
+  const addressId = req.params.id; 
   const { name, addressType, streetName, landmark, locality, city, state, pin, contactNo } = req.body;
   const user = req.session.user;
 
@@ -132,7 +132,6 @@ const editAddress = async (req, res) => {
       return res.redirect('/profile');
     }
 
-    // Update address details
     address.name = name;
     address.addressType = addressType;
     address.streetName = streetName;
@@ -143,9 +142,7 @@ const editAddress = async (req, res) => {
     address.pin = pin;
     address.contactNo = contactNo;
 
-    await address.save();  // Save updated address to DB
-
-    // Redirect to profile after updating
+    await address.save();  
     res.redirect('/profile');
   } catch (error) {
     console.error("Error updating address:", error);
@@ -173,22 +170,28 @@ const deleteAddress = async(req,res) => {
 }
 
 const cart = async (req, res) => {
-  //console.log("cart");
   try {
     const user = await User.findById(req.session.user);
     const cartItems = await Cart.findOne({ userId: user._id }).populate('items.productId');
-    //console.log(cartItems);
 
     if (!cartItems || !cartItems.items.length) {
-      return res.render("cart", { cart: [], message: "Your cart is empty." });
+      return res.render("cart", { cart: [], message: "Your cart is empty.", totalItems: 0 });
     }
 
-    return res.render("cart", { cart: cartItems.items, message: null });
+    // Calculate the total number of items
+    const totalItems = cartItems.items.reduce((total, item) => total + item.quantity, 0);
+
+    return res.render("cart", { 
+      cart: cartItems.items, 
+      message: null,
+      totalItems 
+    });
   } catch (error) {
     console.error("Error fetching cart items:", error);
     return res.redirect("pageNotFound");
   }
 };
+
 
 
 
@@ -224,12 +227,10 @@ const addItemToCart = async (req, res) => {
 
     const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
     if (existingItemIndex > -1) {
-      // Check if adding the quantity would exceed 12
       const newQuantity = cart.items[existingItemIndex].quantity + parsedQuantity;
       if (newQuantity > 12) {
         return res.status(400).json({ message: "Cannot add more than 12 of the same product." });
       }
-      // Check if the new quantity exceeds available stock
       if (newQuantity > product.stock) {
         return res.status(400).json({ message: `Cannot add more than ${product.stock} of the same product. Only ${product.stock} left in stock.` });
       }
@@ -240,7 +241,6 @@ const addItemToCart = async (req, res) => {
       if (parsedQuantity > 12) {
         return res.status(400).json({ message: "Cannot add more than 12 of the same product." });
       }
-      // Check stock availability for new item
       if (parsedQuantity > product.stock) {
         return res.status(400).json({ message: `Cannot add more than ${product.stock} of the same product. Only ${product.stock} left in stock.` });
       }
@@ -276,32 +276,36 @@ const updateCart = async (req, res) => {
 
     const itemIndex = cart.items.findIndex(item => item.productId._id.toString() === productId);
     if (itemIndex > -1) {
-      // Check if updating the quantity exceeds 12
       if (parsedQuantity > 12) {
         return res.status(400).json({ message: "Cannot update to more than 12 of the same product." });
       }
 
-      // Fetch the product again to check stock
       const product = await Product.findById(productId);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      if (parsedQuantity > product.quantity) {
+      if (parsedQuantity > product.stock) {
         return res.status(400).json({ 
-            message: `Cannot update to more than ${product.quantity} of the same product. Only ${product.quantity} left in stock.`,
-            availableStock: product.stock 
+          message: `Cannot update to more than ${product.stock} of the same product. Only ${product.stock} left in stock.`,
+          availableStock: product.stock 
         });
-    }
-    
+      }
 
       cart.items[itemIndex].quantity = parsedQuantity;
-      cart.items[itemIndex].totalPrice = parsedQuantity * product.salePrice; // Update total price
+      cart.items[itemIndex].totalPrice = parsedQuantity * product.salePrice;
 
       await cart.save();
 
+      // Calculate the cart total and total items
       const cartTotal = cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0);
-      return res.status(200).json({ message: "Cart updated successfully", cartTotal });
+      const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
+
+      return res.status(200).json({ 
+        message: "Cart updated successfully", 
+        cartTotal, 
+        totalItems 
+      });
     } else {
       return res.status(404).json({ message: "Item not found in cart" });
     }
@@ -313,9 +317,9 @@ const updateCart = async (req, res) => {
 
 
 
+
 const removeItemFromCart = async (req, res) => {
   try {
-    //console.log("removing product")
     const userId = req.session.user;
     const { productId } = req.body;
 
@@ -328,7 +332,16 @@ const removeItemFromCart = async (req, res) => {
     if (itemIndex > -1) {
       cart.items.splice(itemIndex, 1);
       await cart.save();
-      return res.status(200).json({ message: "Item removed from cart" });
+
+      // Calculate the cart total and total items
+      const cartTotal = cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0);
+      const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
+
+      return res.status(200).json({ 
+        message: "Item removed from cart", 
+        cartTotal, 
+        totalItems 
+      });
     } else {
       return res.status(404).json({ message: "Item not found in cart" });
     }

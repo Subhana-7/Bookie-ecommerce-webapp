@@ -91,7 +91,9 @@
                             <div class="card-body">
                                 <h5 class="card-title">Order ID: <%= order._id %></h5>
                                 <p class="card-text">Order Date: <%= order.createdOn.toDateString() %></p>
-                                <p class="card-text">Status: <span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'warning' %>"><%= order.status %></span></p>
+                                <p class="card-text">Order Status: <span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'warning' %>"><%= order.status %></span></p>
+                                <p class="card-text">Payment Method: <span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'warning' %>"><%= order.paymentMethod %></span></p>
+                                <p class="card-text">Payment Status: <span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'warning' %>"><%= order.paymentStatus %></span></p>
 
                                 <div class="order-items">
                                     <h6>Items:</h6>

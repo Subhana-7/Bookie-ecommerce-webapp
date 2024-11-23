@@ -200,73 +200,11 @@ const deleteProduct = async(req,res) => {
     req.flash('error', 'An error occurred while deleting the product'); 
     res.redirect("pageNotFound");
    }
-
-}
-
-/*const getEditProduct = async(req,res) => {
-  try {
-    //console.log("Inside the try block of geteditproduct")
-    const id = req.params.id;
-    //console.log(id);
-     const product = await Product.findOne({_id:id});
-     const category = await Category.find({});
-     //console.log(product,category)
-    res.render("edit-product",{
-      product:product,
-      cat:category
-    });
-  } catch (error) {
-    res.redirect("pageNotFound");
-  }
-}
-
-const editProduct = async (req, res) => {
-  console.log("inside editProduct controller")
-  try {
-    console.log("Inside the try block of editProduct");
-    const id = req.params.id;
-    console.log(id);
-    const { productName,author, descriptionData, regularPrice, salePrice, quantity, publisher, category, images } = req.body;
-
-    const product = await Product.findById(id).populate('category');
-    console.log(product);
-
-    product.productName = productName || product.productName;
-    product.author = author || product.author;
-    product.description = descriptionData || product.description;
-    product.regularPrice = regularPrice || product.regularPrice;
-    product.salePrice = salePrice || product.salePrice;
-    product.quantity = quantity || product.quantity;
-    product.publisher = publisher || product.publisher;
-    product.category = category || product.category;
-
-    await product.save();
-
-if (req.files && req.files.images) {
-  const uploadedImages = req.files.images;
-  const imagePaths = [];
-
-  for (let i = 0; i < uploadedImages.length; i++) {
-    const imagePath = `/uploads/product-images/${uploadedImages[i].filename}`;
-    imagePaths.push(imagePath);
-  }
-  product.productImage.push(...imagePaths); // Add new images to the existing ones
 }
 
 
-    await product.save();
 
-    res.redirect("/admin/productManagement");
-  } catch (error) {
-    console.error("Error updating product:", error);
-    res.status(500).send("Internal Server Error");
-  }
-};
-
-
-
-
-
+/*
 
 const deleteSingleImage = async(req,res) => {
   try {
@@ -382,5 +320,5 @@ module.exports = {
   deleteProduct,
   getEditProduct,
   editProduct,
-  deleteSingleImage
+  deleteSingleImage,
 }

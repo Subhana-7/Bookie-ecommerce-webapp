@@ -71,23 +71,25 @@
         </div>
 
         <div class="row my-4">
-          <div class="col-md-6 mx-auto text-center">
-              <label for="reportType" class="form-label">Report type:</label>
-              <select id="reportType" class="form-select d-inline-block w-auto">
-                  <% reportTypes.forEach(type => { %>
-                      <option value="<%= type.value %>"><%= type.label %></option>
-                  <% }); %>
-              </select>
-              <div id="customDateRange">
+            <div class="col-md-6 mx-auto text-center">
+                <label for="reportType" class="form-label">Report type:</label>
+                <select id="reportType" class="form-select d-inline-block w-auto">
+                    <% reportTypes.forEach(type => { %>
+                        <option value="<%= type.value %>"><%= type.label %></option>
+                    <% }); %>
+                </select>
+                <div id="customDateRange">
                   <input type="date" id="startDate" class="form-control my-2" placeholder="Start Date">
                   <input type="date" id="endDate" class="form-control my-2" placeholder="End Date">
-              </div>
-              <button class="btn btn-success" onclick="generateReport()">Generate Report</button>
-              <button class="btn btn-primary mt-2" onclick="downloadReport('pdf')">Download as PDF</button>
-              <button class="btn btn-primary mt-2" onclick="downloadReport('excel')">Download as Excel</button>
-          </div>
-      </div>
-      
+                </div>
+                <button class="btn btn-success" onclick="generateReport()">Generate Report</button>
+                <div class="text-center my-3">
+                  <button class="btn btn-danger" onclick="downloadReport('pdf')">Download PDF</button>
+                  <button class="btn btn-primary" onclick="downloadReport('excel')">Download Excel</button>
+                </div>
+                
+            </div>
+        </div>
 
         <table class="table table-bordered text-center">
             <thead>
@@ -157,7 +159,6 @@
         const result = await response.json();
 
         if (result.success) {
-            // Update the table with the new orders
             const tbody = document.querySelector("table tbody");
             tbody.innerHTML = "";
 
@@ -194,5 +195,26 @@
 }
 
     </script>
+
+<script>
+  function downloadReport(format) {
+    const reportType = document.getElementById('reportType').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    let query = `?format=${format}&reportType=${reportType}`;
+    if (reportType === 'custom') {
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates for a custom report.');
+            return;
+        }
+        query += `&startDate=${startDate}&endDate=${endDate}`;
+    }
+
+    // Redirect to the download endpoint
+    window.location.href = `/admin/download-report${query}`;
+  }
+</script>
+
 </body>
 </html>

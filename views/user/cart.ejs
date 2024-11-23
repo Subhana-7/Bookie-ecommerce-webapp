@@ -70,12 +70,18 @@
                 </table>
                 
                 <div class="d-flex justify-content-between">
+                    <h5>Total Items: <span id="totalItems"><%= cart.reduce((total, item) => total + item.quantity, 0) %></span></h5>
                     <h5>Total Amount: ₹<span id="totalAmount"><%= cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) %></span></h5>
-                    <button class="btn btn-success">
-                        <a href="/order" class="text-white">Proceed to Checkout</a>
-                    </button>
-                   
+                 
                 </div>
+
+                <div class="d-flex justify-content-center my-4">
+                    <button class="btn btn-success">
+                        <a href="/order" class="text-white text-decoration-none d-inline-block px-3 py-2">Proceed to Checkout</a>
+                    </button>
+                </div>
+                
+                
             <% } %>
         </div>
     </div>
@@ -109,6 +115,7 @@ $(document).ready(function() {
                 const newRowTotal = (price * newQty).toFixed(2);
                 row.find('td:nth-child(4)').text(`₹${newRowTotal}`);
                 $('#totalAmount').text(response.cartTotal.toFixed(2));
+                $('#totalItems').text(response.totalItems); // Update total items dynamically
 
                 Swal.fire({
                     icon: 'success',
@@ -163,6 +170,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 </script>
 

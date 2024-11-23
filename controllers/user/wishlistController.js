@@ -32,11 +32,9 @@ const addItemToWishlist = async (req, res) => {
 
     let wishlist = await Wishlist.findOne({ userId });
 
-    // Create a new wishlist if it doesn't exist for the user
     if (!wishlist) {
       wishlist = new Wishlist({ userId, products: [{ productId }] });
     } else {
-      // Check if the product already exists in the wishlist
       const productExists = wishlist.products.some(item => item.productId.equals(productId));
       if (!productExists) {
         wishlist.products.push({ productId });

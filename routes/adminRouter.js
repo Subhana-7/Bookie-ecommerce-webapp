@@ -7,6 +7,7 @@ const adminProductController = require("../controllers/admin/productController")
 const adminOrderController = require("../controllers/admin/orderController");
 const adminCouponController = require("../controllers/admin/couponController");
 const adminSalesController = require("../controllers/admin/salesController");
+const adminDashboardController = require("../controllers/admin/dashboardController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const multer = require("multer");
 const storage = require("../helpers/multer");
@@ -17,7 +18,8 @@ router.get("/pageNotFound",adminController.pageError);
 //Login Management
 router.get("/login",adminController.loadLogin);
 router.post("/login",adminController.login);
-router.get("/dashboard",adminAuth,adminController.loadDashboard);
+router.get("/dashboard",adminAuth,adminDashboardController.renderDashboard);
+router.get("/dashboard-data", adminAuth, adminDashboardController.renderDashboardData);
 router.get("/logout",adminController.logout);
 
 //Customer Management
@@ -49,9 +51,7 @@ router.get("/unblockProduct",adminAuth,adminProductController.unblockProduct);
 router.get("/deleteProduct",adminAuth,adminProductController.deleteProduct);
 router.get("/edit-product", adminAuth, adminProductController.getEditProduct);
 router.post("/edit-product/:id",adminAuth,uploads.array("images",4),adminProductController.editProduct);
-router.post("/delete-image",adminAuth,adminProductController.deleteSingleImage)
-//router.post("/editProduct/:id",adminAuth,uploads.array("images",4),adminProductController.editProduct);
-//router.post("/deleteImage",adminAuth,adminProductController.deleteSingleImage);
+router.post("/delete-image",adminAuth,adminProductController.deleteSingleImage);
 
 
 
@@ -73,6 +73,11 @@ router.get("/delete-coupon/:id",adminAuth,adminCouponController.deleteCoupon);
 //sales report
 router.get("/sales-report",adminAuth,adminSalesController.renderSalesReportPage);
 router.get("/generate-report",adminAuth,adminSalesController.generateReport);
+router.get("/download-report", adminAuth, adminSalesController.downloadReport);
+
+
+//dashboard
+router.get("/dash")
 
 
 module.exports = router;

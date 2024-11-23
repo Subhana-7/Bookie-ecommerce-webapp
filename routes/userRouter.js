@@ -24,6 +24,10 @@ router.get("/auth/google/callback",passport.authenticate("google",{failureRedire
 
 //reset password
 router.get("/reset-password",userController.getResetPassword);
+router.post("/send-reset-password-otp", userController.sendResetPasswordOTP);
+router.post("/verify-reset-password-otp", userController.verifyResetPasswordOTP);
+router.post("/reset-password", userController.resetPassword);
+
 
 router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
@@ -77,5 +81,11 @@ router.post("/wishlist/remove",userAuth,wishlistController.removeItemFromWishlis
 
 //wallet
 router.get("/wallet",userAuth,walletController.loadWallet);
+
+//invoice
+router.get('/download-invoice/:orderId',userAuth,orderController.invoiceDownload);
+
+//continue payment
+router.get('/continue-payment/:orderId',userAuth,orderController.loadCheckOut);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema");
 const razorpay = require("razorpay");
 const crypto = require("crypto");
+const PDFDocument = require('pdfkit');
 //const { log } = require("console");
 
 
@@ -149,12 +150,11 @@ const loadPlaceOrderPage = async (req, res) => {
 const placeOrder = async (req, res) => {
   console.log("place order");
   try {
-    console.log("placeOrder inside try");
     const user = await User.findById(req.session.user);
-    const {address, paymentMethod, finalAmount } = req.body;
+    const { address, paymentMethod, finalAmount } = req.body;
 
     if (!user) {
-      return res.status(401).json({ success: false, message: "User  not authenticated." });
+      return res.status(401).json({ success: false, message: "User not authenticated." });
     }
 
     const cart = await Cart.findOne({ userId: user._id }).populate("items.productId");
@@ -164,11 +164,8 @@ const placeOrder = async (req, res) => {
     }
 
     const selectedAddressId = req.session.selectedAddress;
-
-    //console.log("selected address in placeOrder", selectedAddressId);
-
-    if (!cart || !selectedAddressId) {
-      return res.status(400).send("Cart or address not found.");
+    if (!selectedAddressId) {
+      return res.status(400).json({ success: false, message: "No address selected." });
     }
 
     const selectedAddress = await Address.findOne({
@@ -178,15 +175,18 @@ const placeOrder = async (req, res) => {
     });
 
     if (!selectedAddress) {
-      return res.status(400).send("Selected address is not valid or no longer exists");
+      return res.status(400).json({ success: false, message: "Selected address is invalid." });
     }
 
-    //
     const totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-    // Use finalAmount from the frontend (already discounted)
     const finalOrderAmount = finalAmount || totalPrice;
-    //
-  
+
+    if (paymentMethod === "Cash On Delivery" && finalOrderAmount > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: "Cash on Delivery is not available for orders above ₹1000."
+      });
+    }
 
     const newOrder = new Order({
       userId: user._id,
@@ -194,23 +194,21 @@ const placeOrder = async (req, res) => {
         product: item.productId._id,
         quantity: item.quantity,
         price: item.price,
-        
       })),
       address: selectedAddress._id,
-      totalPrice:totalPrice,
-      finalAmount:finalOrderAmount,
-      paymentMethod: paymentMethod === "Cash On Delivery" ? "Cash On Delivery" : "Pending",
+      totalPrice: totalPrice,
+      finalAmount: finalOrderAmount,
+      paymentMethod: paymentMethod,
       status: paymentMethod === "Cash On Delivery" ? "Pending" : "Processing",
       createdOn: new Date()
     });
+
     await newOrder.save();
 
-    //
-    if(paymentMethod === 'Razorpay') {
+    if (paymentMethod === "Razorpay") {
       const options = {
-        amount: finalAmount * 100,
-        currency:"INR",
-        //receipt: order_rcptid_${newOrder._id},
+        amount: finalOrderAmount * 100,
+        currency: "INR",
       };
 
       const order = await razorpay.orders.create(options);
@@ -232,18 +230,19 @@ const placeOrder = async (req, res) => {
 
       cart.items = [];
       await cart.save();
+
       return res.status(201).json({
         success: true,
         orderId: newOrder._id,
-        message: "Order placed successfully!",
+        message: "Order placed successfully!"
       });
     }
-
   } catch (error) {
     console.error("Error in placeOrder controller:", error);
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 const createRazorpayOrder = async (req, res) => {
@@ -281,7 +280,7 @@ const createRazorpayOrder = async (req, res) => {
       totalPrice,
       finalAmount: totalPrice,
       status: 'Pending', 
-      paymentMethod: 'pending', 
+      paymentMethod: 'Razorpay', 
       paymentStatus: 'Pending', 
       createdOn: new Date()
     });
@@ -338,7 +337,6 @@ const verifyRazorpayPayment = async (req, res) => {
         );
       }
 
-      // Clear cart
       await Cart.updateOne(
         { userId: order.userId }, 
         { $set: { items: [] } }
@@ -350,7 +348,7 @@ const verifyRazorpayPayment = async (req, res) => {
       });
     } else {
       order.status = 'Cancelled';
-      order.paymentStatus = 'Pending';
+      order.paymentStatus = 'Payment Pending';
       await order.save();
       return res.status(400).json({ 
         success: false, 
@@ -383,6 +381,51 @@ const orderConfirmation = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
+const invoiceDownload = async(req,res) => {
+  try {
+    const orderId = req.params.orderId;
+    const order = await Order.findById(orderId).populate('orderedItems.product').populate('address');
+
+    if (!order) {
+      return res.status(404).send("Order not found.");
+    }
+
+    const doc = new PDFDocument();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="Invoice-${orderId}.pdf"`);
+
+    doc.fontSize(20).text('Invoice', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(14).text(`Order ID: ${orderId}`);
+    doc.text(`Payment Method: ${order.paymentMethod}`);
+    doc.text(`Total Price: ₹${order.totalPrice}`);
+    doc.moveDown();
+
+    doc.text('Shipping Address:');
+    doc.text(`${order.address.name}`);
+    doc.text(`${order.address.streetName}, ${order.address.landmark}, ${order.address.locality}`);
+    doc.text(`${order.address.city}, ${order.address.state}, ${order.address.pin}`);
+    doc.text(`Contact: ${order.address.contactNo}`);
+    doc.moveDown();
+
+    doc.text('Order Summary:');
+    order.orderedItems.forEach((item, index) => {
+      doc.text(
+        `${index + 1}. ${item.product.productName} - ₹${item.price} x ${item.quantity} = ₹${
+          item.price * item.quantity
+        }`
+      );
+    });
+
+    doc.text(`\nTotal: ₹${order.totalPrice}`);
+    doc.end();
+    doc.pipe(res); 
+  } catch (error) {
+    console.error("Error generating invoice:", error);
+    res.status(500).send("Error generating invoice.");
+  }
+}
 
 
 
@@ -491,13 +534,11 @@ const cancelOrder = async (req, res) => {
 
 
 
-// Controller for handling return request
 const returnRequest = async (req, res) => {
   try {
-    const orderId = req.params.orderId;  // Corrected to orderId
+    const orderId = req.params.orderId;  
     const { reason } = req.body;
 
-      // Update the order with return reason and set status to 'return_requested'
       await Order.findByIdAndUpdate(orderId, {
           status: 'Return Pending',
           returnRequestReason: reason
@@ -509,6 +550,8 @@ const returnRequest = async (req, res) => {
       res.status(500).json({ message: 'Failed to submit return request.' });
   }
 };
+
+
 
 
 
@@ -527,5 +570,6 @@ module.exports = {
   returnRequest,
   verifyRazorpayPayment,
   createRazorpayOrder,
-  getCoupons
+  getCoupons,
+  invoiceDownload
 }

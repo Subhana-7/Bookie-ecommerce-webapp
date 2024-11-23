@@ -4,6 +4,10 @@ const Product = require("../../models/productSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
+const crypto = require("crypto"); // For generating OTP
+const transporter = require('../../config/emailConfig'); // Import the email configuration
+
+
 
 const pageNotFound = async(req,res) => {
   try{
@@ -70,11 +74,9 @@ const redeemReferralCode = async (referredUserId, referralCode) => {
     throw new Error("Invalid referral code.");
   }
 
-  // Apply benefits for both users
-  referredUser.wallet += 10; // New user gets wallet credit
-  referringUser.wallet += 5; // Referring user gets wallet credit
+  referredUser.wallet += 10; 
+  referringUser.wallet += 5; 
 
-  // Mark the referred user as having redeemed the code
   referredUser.redeemed = true;
   await referredUser.save();
   await referringUser.save();
@@ -223,19 +225,26 @@ const resendOtp = async(req,res) => {
   }
 }
 
-const loadLogin = async(req,res) => {
+const loadLogin = async (req, res) => {
   try {
-
-    if(!req.session.user){
-      return res.render("login")
-    }else {
-      res.redirect("/")
+    if (req.session.user) {
+      const user = await User.findById(req.session.user);
+      if (user && user.isBlocked) {
+        req.session.destroy(() => {
+          res.render("login", { message: "Your account has been blocked." });
+        });
+      } else {
+        res.redirect("/");
+      }
+    } else {
+      res.render("login");
     }
-    
   } catch (error) {
     res.redirect("/pageNotFound");
   }
-}
+};
+
+
 
 const login = async(req,res) => {
   try {
@@ -287,6 +296,92 @@ const getResetPassword = async(req,res) => {
   }
 }
 
+
+const sendResetPasswordOTP = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+      // Check if the email exists in the database
+      const user = await User.findOne({ email });
+      if (!user) {
+          req.flash('error', 'No account found with this email address.');
+          return res.redirect('/reset-password');
+      }
+
+      // Generate OTP or token
+      const otp = Math.floor(100000 + Math.random() * 900000); // Example 6-digit OTP
+
+      // Store OTP in session or database (linked to the user)
+      req.session.otp = otp;
+      req.session.email = email;
+
+      // Send OTP email
+      const mailOptions = {
+          from: process.env.EMAIL_USER, // Sender's email address
+          to: email,
+          subject: 'Reset Password OTP',
+          html: `<p>Your OTP for resetting your password is: <strong>${otp}</strong></p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      req.flash('success', 'OTP sent to your email.');
+      res.redirect('/verify-otp'); // Redirect to OTP verification page
+  } catch (error) {
+      console.error(error);
+      req.flash('error', 'Error sending OTP. Please try again.');
+      res.redirect('/reset-password');
+  }
+};
+
+const verifyResetPasswordOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found!" });
+    }
+
+    if (user.resetPasswordOTP !== parseInt(otp) || user.resetPasswordExpires < Date.now()) {
+      return res.status(400).json({ success: false, message: "Invalid or expired OTP!" });
+    }
+
+    return res.status(200).json({ success: true, message: "OTP verified!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error!" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found!" });
+    }
+
+    // Update the password
+    user.password = newPassword; // Make sure to hash the password
+    user.resetPasswordOTP = undefined; // Clear OTP
+    user.resetPasswordExpires = undefined; // Clear OTP expiry
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Password reset successful!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error!" });
+  }
+};
+
+
+
+
+
+
 module.exports = {
   loadHomePage,
   pageNotFound,
@@ -297,5 +392,8 @@ module.exports = {
   loadLogin,
   login,
   logout,
-  getResetPassword
+  getResetPassword,
+  sendResetPasswordOTP,
+  verifyResetPasswordOTP,
+  resetPassword
 }

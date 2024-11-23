@@ -3,7 +3,7 @@ const app = express();
 const path = require("path");
 const env = require("dotenv").config();
 const session = require("express-session");
-const flash = require('express-flash');
+const flash = require("connect-flash");
 const passport = require("./config/passport");
 const db = require("./config/db");
 const userRouter = require("./routes/userRouter");
@@ -18,7 +18,6 @@ const razorpayInstance = new Razorpay({
 });
 
 app.locals.razorpayInstance = razorpayInstance;
-//process.env idk
 
 db();
 
