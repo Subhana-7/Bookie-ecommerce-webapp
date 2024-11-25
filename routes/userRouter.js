@@ -17,10 +17,30 @@ router.post("/verify-otp",userController.verifyOtp);
 router.post("/resend-otp",userController.resendOtp);
 router.get("/",userAuth,userController.loadHomePage);
 
-router.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
-router.get("/auth/google/callback",passport.authenticate("google",{failureRedirect:"/signup"}),(req,res) => {
-  res.redirect("/")
-});
+
+router.get('/auth/google',
+  passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      prompt: 'select_account' 
+  })
+);
+
+router.get('/auth/google/callback',
+  passport.authenticate('google', {
+      failureRedirect: '/login',
+      failureFlash: true
+  }),
+  (req, res) => {
+      res.redirect('/'); 
+  }
+);
+
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+      return next();
+  }
+  res.redirect('/login');
+};
 
 //reset password
 router.get("/reset-password",userController.getResetPassword);
@@ -32,6 +52,9 @@ router.post("/reset-password", userController.resetPassword);
 router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
 router.get("/logout",userAuth,userController.logout);
+
+
+
 
 router.get("/products",userAuth,userProductController.getProducts);
 router.get("/product-details/:id",userAuth,userProductController.productDetails);
@@ -86,6 +109,5 @@ router.get("/wallet",userAuth,walletController.loadWallet);
 router.get('/download-invoice/:orderId',userAuth,orderController.invoiceDownload);
 
 //continue payment
-router.get('/continue-payment/:orderId',userAuth,orderController.loadCheckOut);
 
 module.exports = router;

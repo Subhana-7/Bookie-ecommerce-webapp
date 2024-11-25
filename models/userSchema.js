@@ -24,6 +24,13 @@ const userSchema = new Schema({
         type : String,
         unique:true,
     },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    lastLogin:{
+        Date,
+    },
     password : {
         type:String,
         required :false
@@ -80,7 +87,13 @@ const userSchema = new Schema({
             type: Date,
             default: Date.now
         }
-    }]
+    }],
+    resetPasswordOTP:{
+        type:Number,
+    } ,
+    resetPasswordExpires:{
+        type:Date,
+    } 
    
 })
 

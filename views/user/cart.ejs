@@ -1,91 +1,282 @@
 
-<%- include("../../views/partials/user/header") %>
-<title>Shopping Cart</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-    .cart-container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .btn-maroon {
-        background-color: #800000;
-        color: white;
-    }
-    .btn-maroon:hover {
-        background-color: #a00000;
-    }
-    .main-content {
-        display: flex;
-        margin-top: 20px;
-    }
-</style>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <style>
+        :root {
+            --primary-color: #800000;
+            --primary-hover: #600000;
+            --secondary-color: #f8f9fa;
+            --text-color: #2d3436;
+            --border-radius: 12px;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .main-content {
+            display: flex;
+            margin-top: 30px;
+            padding: 0 20px;
+        }
+
+        .cart-container {
+            flex-grow: 1;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-left: 20px;
+        }
+
+        .cart-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .cart-header:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .cart-header h3 {
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .cart-table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .cart-table th {
+            background-color: var(--secondary-color);
+            padding: 15px;
+            font-weight: 600;
+            color: var(--text-color);
+            border: none;
+        }
+
+        .cart-table td {
+            padding: 20px 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .quantity-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(128, 0, 0, 0.1);
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background-color: #fff5f5;
+            color: #ff4040;
+        }
+
+        .cart-summary {
+            background-color: var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #ddd;
+            margin-top: 10px;
+            padding-top: 20px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .checkout-btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            font-weight: 500;
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .checkout-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .empty-cart i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .cart-container {
+                margin-left: 0;
+                margin-top: 20px;
+                padding: 15px;
+            }
+
+            .cart-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+    </style>
+</head>
 <body>
-<div class="container">
-    <div class="main-content">
+
+    <%- include("../../views/partials/user/header") %>
+
+<div class="container-fluid" >
+    <div class="main-content" style="margin-bottom: 90px;">
         <%- include("../../views/partials/user/sidebar") %>
 
-        <div class="cart-container flex-grow-1">
-            <h3 class="text-center mb-4">Your Shopping Cart</h3>
+        <div class="cart-container">
+            <div class="cart-header">
+                <h3>Your Shopping Cart</h3>
+            </div>
             
             <% if (message) { %>
-                <div class="alert alert-warning" role="alert">
-                    <%= message %>
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p><%= message %></p>
+                    <a href="/products" class="checkout-btn">
+                        Continue Shopping
+                    </a>
                 </div>
             <% } else { %>
-                <table class="table">
-                    <thead class="thead-light">
-                        <tr>
-                            <th scope="col">Product</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% cart.forEach(item => { %>
-                        <tr>
-                            <td>
-                                
-                                <%= item.productId.productName %>
-                            </td>
-                            <td>₹<%= item.price.toFixed(2) %></td>
-                            <td>
-                                <input type="number" class="form-control quantity-input" min="1" max="12" value="<%= item.quantity %>" data-id="<%= item.productId._id %>">
-                            </td>
-                            <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
-                            <td>
-                                <button class="btn btn-sm btn-danger remove-btn" data-id="<%= item.productId._id %>">Remove</button>
-                            </td>
-                        </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-                
-                <div class="d-flex justify-content-between">
-                    <h5>Total Items: <span id="totalItems"><%= cart.reduce((total, item) => total + item.quantity, 0) %></span></h5>
-                    <h5>Total Amount: ₹<span id="totalAmount"><%= cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) %></span></h5>
-                 
+                <div class="cart-table-wrapper">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% cart.forEach(item => { %>
+                            <tr>
+                                <td>
+                                    <span class="product-name"><%= item.productId.productName %></span>
+                                </td>
+                                <td>₹<%= item.price.toFixed(2) %></td>
+                                <td>
+                                    <input type="number" 
+                                           class="quantity-input" 
+                                           min="1" 
+                                           max="12" 
+                                           value="<%= item.quantity %>" 
+                                           data-id="<%= item.productId._id %>">
+                                </td>
+                                <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                                <td>
+                                    <button class="remove-btn" data-id="<%= item.productId._id %>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="d-flex justify-content-center my-4">
-                    <button class="btn btn-success">
-                        <a href="/order" class="text-white text-decoration-none d-inline-block px-3 py-2">Proceed to Checkout</a>
-                    </button>
+                <div class="cart-summary" >
+                    <div class="summary-row">
+                        <span>Total Items:</span>
+                        <span id="totalItems"><%= cart.reduce((total, item) => total + item.quantity, 0) %></span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Amount:</span>
+                        <span>₹<span id="totalAmount"><%= cart.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2) %></span></span>
+                    </div>
+                    <a href="/order" class="checkout-btn">
+                        <i class="fas fa-lock mr-2"></i>
+                        Proceed to Checkout
+                    </a>
                 </div>
-                
-                
             <% } %>
         </div>
     </div>
 </div>
+<%- include("../../views/partials/user/footer") %>
+
+</body>
+</html>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>

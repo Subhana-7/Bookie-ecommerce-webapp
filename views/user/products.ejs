@@ -2,45 +2,165 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
 
-    .sidebar {
-      background-color: maroon;
-      color: white;
+body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f9f9f9;
+    }
+
+    .container {
+      margin: 0px auto;
       padding: 20px;
-      height: 100vh;
     }
 
-    .product-card {
-      height: 100%; 
+    /* Sidebar Styling */
+    .sidebar {
+      background-color: rgb(140, 25, 25); /* Deep Maroon */
+      color: white;
+      padding: 40px;
+      height: auto;
+      border-radius: 8px;
+      width: 500px;
+      margin-right:50px;
     }
 
+    .sidebar h2, .sidebar h4, .sidebar h5 {
+      font-weight: bold;
+    }
+
+    .sidebar label {
+      margin-left: 5px;
+    }
+
+    .filter-section ul {
+      padding: 0;
+    }
+
+    .filter-section ul li {
+      margin-bottom: 10px;
+    }
+
+    /* Breadcrumbs Styling */
+    .breadcrumbs {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .breadcrumbs a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .breadcrumbs a:hover {
+      text-decoration: underline;
+    }
+
+    /* Search Bar Styling */
     .search-bar {
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
     }
 
     .search-input {
       width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      padding: 10px;
     }
 
-    .card-body {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between; 
+    .search-btn {
+      margin-left: 10px;
+      border-radius: 5px;
     }
-    
-    a {
-      color: black;
+
+    /* Product List Styling */
+    .product-list h2 {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .product-card {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+      margin-bottom: 20px;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-card img {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .product-card .card-body {
+      padding: 15px;
+    }
+
+    .product-card .card-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .product-card .price {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .product-card .price span {
+      font-size: 1rem;
+    }
+
+    /* Stock Status Styling */
+    .product-card p {
+      margin-bottom: 8px;
+    }
+
+    .product-card .card-text span {
+      font-weight: bold;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        height: auto;
+        margin-bottom: 20px;
+      }
     }
   </style>
 </head>
 
 <%- include("../../views/partials/user/header") %>
-<div class="container">
-  <nav class="breadcrumbs">
+<div class="container-fluid">
+  <nav class="breadcrumbs" style="margin-left:50px;">
     <a href="/">Home</a> &gt; <span>Products</span>
   </nav>
 
-  <div class="content row">
-    <aside class="sidebar col-md-3">
+  <div>
+    <h2 style="
+      text-decoration: none;
+      text-align: center;
+      background-color: #f0f0f0; /* Light gray for a professional background */
+      color: #333; /* Dark gray for better contrast and readability */
+      padding: 10px 0;
+    ">
+      Product List
+    </h2>
+    <br>
+  </div>
+  
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper d-flex" style="margin-left: 50px; margin-right: 50px;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
       <h2 class="text-white">Filter & Sort</h2>
       <div class="filter-section"><br>
         <h5 class="text-white">Sort By:</h5>
@@ -55,110 +175,90 @@
             <option value="aToZ">A - Z</option>
             <option value="zToA">Z - A</option>
         </select>
-    </div><br>
+      </div><br>
     
-
-    <div class="filter-section">
-     
-      <ul class="list-unstyled">
-        <li>
-          <input type="checkbox" id="in-stock" onchange="applyFilters()" <%= inStock ? 'checked' : '' %> />
-          <label for="in-stock">Show only in-stock Books</label>
-        </li>
-        <h4 class="text-white">Categories</h4><br>
-        <% categories.forEach(category => { %>
+      <div class="filter-section">
+        <ul class="list-unstyled">
           <li>
-            <input 
-            type="checkbox" 
-            id="category-<%= category._id %>" 
-            value="<%= category._id %>" 
-            onchange="applyFilters()" 
-            <% if (categoryFilter && categoryFilter.split(',').includes(category._id)) { %> checked <% } %> 
-          />
-          <label for="category-<%= category._id %>"><%= category.name %></label>   
+            <input type="checkbox" id="in-stock" onchange="applyFilters()" <%= inStock ? 'checked' : '' %> />
+            <label for="in-stock">Show only in-stock Books</label>
           </li>
-        <% }) %>
-      </ul>
-    </div>
-       
-
-    
+          <h4 class="text-white">Categories</h4><br>
+          <% categories.forEach(category => { %>
+            <li>
+              <input 
+                type="checkbox" 
+                id="category-<%= category._id %>" 
+                value="<%= category._id %>" 
+                onchange="applyFilters()" 
+                <% if (categoryFilter && categoryFilter.split(',').includes(category._id)) { %> checked <% } %> 
+              />
+              <label for="category-<%= category._id %>"><%= category.name %></label>   
+            </li>
+          <% }) %>
+        </ul>
+      </div>
     </aside>
 
-    <main class="product-list col-md-9">
-      <h2>Product List</h2>
+    <!-- Product List -->
+    <main class="product-list flex-grow-1" style="margin-left: 10px; ">
+      <div class="search-bar d-flex " >
+        <input
+          type="text"
+          placeholder="Search products..."
+          class="form-control search-input"
+          value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+        />
+        <button class="btn btn-primary ml-2 search-btn">Search</button>
+      </div>
 
-    <div class="search-bar d-flex">
-      <input
-        type="text"
-        placeholder="Search products..."
-        class="form-control search-input"
-        value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
-      />
-      <button class="btn btn-primary ml-2 search-btn">Search</button>
-    </div>
-
-      
-
-      <div class="row">
+      <div class="row" style="margin: 50px;">
         <% products.forEach(product => { %>
           <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <a href="/product-details/<%= product._id %>">
-              <div class="product-card card">
+              <div class="product-card card" style="margin-left: 20px; margin-bottom: 20px;">
                 <img src="uploads/product-images/<%= product.productImage[0] %>" class="card-img-top" alt="<%= product.productName %>" />
                 <div class="card-body">
                   <h3 class="card-title"><%= product.productName %></h3>
                   <p class="card-text">Category: <%= product.category.name %></p>
                   <p class="card-text">Author: <%= product.author %></p>
                   <p class="card-text">Publisher: <%= product.publisher %></p>
-          
                   <p>
                     Stock Status: 
                     <% if (product.quantity <= 0) { %>
-                        <span style="color: red;">Out of Stock</span>
+                      <span style="color: red;">Out of Stock</span>
                     <% } else { %>
-                        <span style="color: green;" ><%=product.quantity%> Stock left</span><br>
-                        <span style="color: green;">-In Stock</span>
+                      <span style="color: green;" ><%=product.quantity%> Stock left</span><br>
+                      <span style="color: green;">-In Stock</span>
                     <% } %>
                   </p>
                   <p class="price">
                     <% 
                       let finalPrice = product.salePrice;
-                      
                       if (product.category && product.category.categoryOffer > 0) {
                         let discountedPrice = finalPrice - (finalPrice * (product.category.categoryOffer / 100));
                         finalPrice = discountedPrice;
                       }
-                  
                       if (product.productOffer > 0) {
                         finalPrice = finalPrice - (finalPrice * (product.productOffer / 100));
                       }
-                  
                       let finalDiscountedPrice = finalPrice.toFixed(2);
                     %>
-                  
                     <% if (product.category && product.category.categoryOffer > 0) { %>
                       <span style="text-decoration: line-through; color: grey;">₹<%= product.salePrice %></span><br>
                     <% } %>
-                  
                     <span style="color: red;">₹<%= finalDiscountedPrice %></span>
-                  
                     <% if (product.category && product.category.categoryOffer > 0) { %>
                       <p>Category Discount: <span style="color: red;"><%= product.category.categoryOffer %>%</span></p>
                     <% } %>
-                  
                     <% if (product.productOffer > 0) { %>
                       <p>Product Discount: <span style="color: red;"><%= product.productOffer %>%</span></p>
                     <% } %>
                   </p>
-                  
-          
                 </div>
               </div>
             </a>
           </div>
-          
-          
         <% }) %>
       </div>
     </main>

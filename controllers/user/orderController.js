@@ -157,10 +157,21 @@ const placeOrder = async (req, res) => {
       return res.status(401).json({ success: false, message: "User not authenticated." });
     }
 
-    const cart = await Cart.findOne({ userId: user._id }).populate("items.productId");
+    const cart = await Cart.findOne({ userId: user._id })
+      .populate({
+        path: "items.productId",
+        match: { isBlocked: false, isDeleted: false }, // Filter out blocked or deleted products
+      });
 
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Your cart is empty." });
+    }
+
+    // Filter out null products (due to match filter)
+    const filteredItems = cart.items.filter(item => item.productId !== null);
+
+    if (!filteredItems.length) {
+      return res.status(400).json({ success: false, message: "Your cart contains invalid products." });
     }
 
     const selectedAddressId = req.session.selectedAddress;
@@ -178,7 +189,7 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Selected address is invalid." });
     }
 
-    const totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const totalPrice = filteredItems.reduce((sum, item) => sum + item.totalPrice, 0);
     const finalOrderAmount = finalAmount || totalPrice;
 
     if (paymentMethod === "Cash On Delivery" && finalOrderAmount > 1000) {
@@ -190,7 +201,7 @@ const placeOrder = async (req, res) => {
 
     const newOrder = new Order({
       userId: user._id,
-      orderedItems: cart.items.map(item => ({
+      orderedItems: filteredItems.map(item => ({
         product: item.productId._id,
         quantity: item.quantity,
         price: item.price,
@@ -221,7 +232,7 @@ const placeOrder = async (req, res) => {
         keyId: razorpay.key_id,
       });
     } else {
-      for (const item of cart.items) {
+      for (const item of filteredItems) {
         await Product.updateOne(
           { _id: item.productId._id },
           { $inc: { quantity: -item.quantity } }
@@ -245,6 +256,7 @@ const placeOrder = async (req, res) => {
 
 
 
+
 const createRazorpayOrder = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
@@ -252,9 +264,21 @@ const createRazorpayOrder = async (req, res) => {
       return res.status(401).json({ success: false, message: "User not authenticated." });
     }
 
-    const cart = await Cart.findOne({ userId: user._id }).populate("items.productId");
+    const cart = await Cart.findOne({ userId: user._id })
+      .populate({
+        path: "items.productId",
+        match: { isBlocked: false, isDeleted: false }, // Filter out blocked or deleted products
+      });
+
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: "Cart is empty." });
+      return res.status(400).json({ success: false, message: "Your cart is empty." });
+    }
+
+    // Filter out null products (due to match filter)
+    const filteredItems = cart.items.filter(item => item.productId !== null);
+
+    if (!filteredItems.length) {
+      return res.status(400).json({ success: false, message: "Your cart contains invalid products." });
     }
 
     const { addressId } = req.body;
@@ -267,11 +291,11 @@ const createRazorpayOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid address." });
     }
 
-    const totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const totalPrice = filteredItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
     const newOrder = new Order({
       userId: user._id,
-      orderedItems: cart.items.map(item => ({
+      orderedItems: filteredItems.map(item => ({
         product: item.productId._id,
         quantity: item.quantity,
         price: item.price
@@ -307,6 +331,7 @@ const createRazorpayOrder = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 const verifyRazorpayPayment = async (req, res) => {
   try {
@@ -465,7 +490,8 @@ const loadOrderDetails = async (req, res) => {
      .populate("address");
 
      //console.log("Order found:", order);
-     res.render("order-details", { order });
+     const user = req.session.user;
+     res.render("order-details", { order , user });
 }catch (error) {
   console.error("Error in loadOrderDetails controller:", error);
   res.redirect("/pageNotFound");
@@ -571,5 +597,5 @@ module.exports = {
   verifyRazorpayPayment,
   createRazorpayOrder,
   getCoupons,
-  invoiceDownload
+  invoiceDownload,
 }

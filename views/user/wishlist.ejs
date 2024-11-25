@@ -43,7 +43,7 @@
 </head>
 <body>
 
-<div class="container wishlist-container">
+<div class="container wishlist-container" >
     <div class="wishlist-header">Your Wishlist</div>
 
     <% if (message) { %>
@@ -52,20 +52,27 @@
         <div class="row">
             <% Wishlist.forEach(item => { 
                 let product = item.productId;
-                let finalPrice = product.salePrice;
+                let originalPrice = product.salePrice;
+                let finalPrice = originalPrice;
+                let discountAmount = 0;
+
                 if (product.category && product.category.categoryOffer > 0) {
-                    let discountedPrice = finalPrice - (finalPrice * (product.category.categoryOffer / 100));
-                    finalPrice = discountedPrice;
+                    let categoryDiscount = originalPrice * (product.category.categoryOffer / 100);
+                    discountAmount += categoryDiscount;
+                    finalPrice -= categoryDiscount;
                 }
 
                 if (product.productOffer > 0) {
-                    finalPrice = finalPrice - (finalPrice * (product.productOffer / 100));
+                    let productDiscount = originalPrice * (product.productOffer / 100);
+                    discountAmount += productDiscount;
+                    finalPrice -= productDiscount;
                 }
 
                 let finalDiscountedPrice = finalPrice.toFixed(2);
+                let totalDiscount = discountAmount.toFixed(2);
             %>
-                <div class="col-md-12">
-                    <a href="/product-details/<%= product._id %>">
+            <div class="col-md-12">
+                <a style="text-decoration: none;" href="/product-details/<%= product._id %>">
                     <div class="wishlist-item d-flex align-items-center">
                         <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="img-fluid mr-3">
                         <div class="wishlist-details">
@@ -82,17 +89,14 @@
 
                             <% if (product.quantity > 0) { %>
                                 <p class="price">
-                                    <% if (product.category && product.category.categoryOffer > 0) { %>
-                                        <span style="text-decoration: line-through; color: grey;">₹<%= product.salePrice %></span><br>
+                                    <% if (discountAmount > 0) { %>
+                                        <span style="text-decoration: line-through; color: grey;">₹<%= originalPrice %></span><br>
+                                        <span style="color: green; font-weight: bold;">₹<%= finalDiscountedPrice %></span>
+                                        <small style="color: red;">(You save ₹<%= totalDiscount %>)</small>
+                                    <% } else { %>
+                                        <span style="color: black; font-weight: bold;">₹<%= originalPrice %></span>
                                     <% } %>
-                                    ₹<%= finalDiscountedPrice %>
                                 </p>
-                                <% if (product.category && product.category.categoryOffer > 0) { %>
-                                    <p>Category Discount: <span style="color: red;"><%= product.category.categoryOffer %>%</span></p>
-                                <% } %>
-                                <% if (product.productOffer > 0) { %>
-                                    <p>Product Discount: <span style="color: red;"><%= product.productOffer %>%</span></p>
-                                <% } %>
                             <% } %>
                         </div>
                         <div class="ml-auto">
@@ -102,13 +106,13 @@
                             </form>
                         </div>
                     </div>
-                    </a>
-                </div>
-            <% }) %>
+                </a>
+            </div>
+            <% }); %> 
         </div>
     <% } %>
-
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>

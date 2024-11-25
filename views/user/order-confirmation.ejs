@@ -5,95 +5,248 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Confirmation</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   
   <style>
+    :root {
+      --primary-color: #4CAF50;
+      --secondary-color: #2196F3;
+      --background-color: #f8f9fa;
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --border-radius: 16px;
+    }
+
+    body {
+      background-color: var(--background-color);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
     .order-confirmation {
-      max-width: 800px;
-      margin: 50px auto;
+      max-width: 900px;
+      margin: 40px auto;
       background-color: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
     }
+
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background-color: #e8f5e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .success-icon i {
+      color: var(--primary-color);
+      font-size: 40px;
+    }
+
     .order-confirmation h2 {
-      color: #28a745;
-      font-weight: bold;
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 8px;
     }
-    .order-summary, .address-box {
-      background-color: #f9f9f9;
-      padding: 15px;
-      border-radius: 8px;
+
+    .order-id {
+      color: #666;
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+    }
+
+    .section-card {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: transform 0.2s;
+    }
+
+    .section-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .section-title {
+      color: #333;
+      font-weight: 600;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .table td, .table th {
+
+    .section-title i {
+      color: var(--secondary-color);
+    }
+
+    .table {
+      margin-bottom: 0;
+    }
+
+    .table thead th {
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #e0e0e0;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .table td {
+      padding: 16px;
       vertical-align: middle;
+    }
+
+    .price-column {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .total-row {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .address-info {
+      line-height: 1.6;
+    }
+
+    .address-info p {
+      margin-bottom: 8px;
+    }
+
+    .payment-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 50px;
+      background-color: #e3f2fd;
+      color: var(--secondary-color);
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .btn-custom {
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-custom i {
+      margin-right: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .order-confirmation {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      .btn-custom {
+        width: 100%;
+        margin-bottom: 12px;
+      }
     }
   </style>
 </head>
 <body>
   <%-include("../../views/partials/user/header")%>
 
-<div class="container order-confirmation text-center">
-  <h2>Your Order Has Been Placed</h2>
-<% if (order.paymentMethod === 'Cash On Delivery') { %>
-  <h4>Thank you for choosing Cash On Delivery!</h4>
-<% } else if (order.paymentMethod === 'Razorpay') { %>
-  <h4>Thank you for choosing Online Payment!</h4>
-<% } else { %>
-  <h4>Thank you for your purchase!</h4>
-<% } %>
+  <div class="container order-confirmation">
+    <div class="success-icon">
+      <i class="fas fa-check"></i>
+    </div>
+    
+    <div class="text-center">
+      <h2>Order Successfully Placed!</h2>
+      <div class="order-id">Order ID: #<%= order._id %></div>
+      
+      <div class="payment-badge">
+        <i class="fas fa-<%= order.paymentMethod === 'Cash On Delivery' ? 'money-bill' : 'credit-card' %>"></i>
+        <%= order.paymentMethod %>
+      </div>
+    </div>
 
+    <div class="section-card">
+      <h5 class="section-title">
+        <i class="fas fa-shopping-bag"></i>
+        Order Summary
+      </h5>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th class="text-end">Unit Price</th>
+              <th class="text-center">Quantity</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.orderedItems.forEach((item, index) => { %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= item.product.productName %></td>
+                <td class="text-end price-column">₹<%= item.price.toLocaleString() %></td>
+                <td class="text-center"><%= item.quantity %></td>
+                <td class="text-end price-column">₹<%= (item.price * item.quantity).toLocaleString() %></td>
+              </tr>
+            <% }) %>
+            <tr class="total-row">
+              <td colspan="4" class="text-end">Total Amount:</td>
+              <td class="text-end price-column">₹<%= order.totalPrice.toLocaleString() %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-  <div class="order-summary">
-    <h5>Order Summary</h5>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Item</th>
-          <th>Unit Price</th>
-          <th>Quantity</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% order.orderedItems.forEach((item, index) => { %>
-          <tr>
-            <td><%= index + 1 %></td>
-            <td><%= item.product.productName %></td>
-            <td>₹<%= item.price %></td>
-            <td><%= item.quantity %></td>
-            <td>₹<%= item.price * item.quantity %></td>
-          </tr>
-        <% }) %>
-        <tr>
-          <td colspan="4" class="text-end"><strong>Total:</strong></td>
-          <td>₹<%= order.totalPrice %></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="section-card">
+      <h5 class="section-title">
+        <i class="fas fa-shipping-fast"></i>
+        Delivery Details
+      </h5>
+      <div class="address-info">
+        <% if (order.address) { %>
+          <p class="fw-bold mb-2"><%= order.address.name %></p>
+          <p><%= order.address.streetName %>,</p>
+          <p><%= order.address.landmark ? `${order.address.landmark},` : '' %> <%= order.address.locality %></p>
+          <p><%= order.address.city %>, <%= order.address.state %> - <%= order.address.pin %></p>
+          <p class="mb-0">
+            <i class="fas fa-phone-alt me-2"></i>
+            <%= order.address.contactNo %>
+          </p>
+        <% } else { %>
+          <p>No address information available.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+      <a href="/products" class="btn btn-outline-primary btn-custom">
+        <i class="fas fa-shopping-cart"></i>
+        Continue Shopping
+      </a>
+      <a href="/orders-list" class="btn btn-secondary btn-custom">
+        <i class="fas fa-list"></i>
+        View Orders
+      </a>
+      <a href="/download-invoice/<%= order._id %>" class="btn btn-success btn-custom">
+        <i class="fas fa-download"></i>
+        Download Invoice
+      </a>
+    </div>
   </div>
-
-  <div class="address-box text-start">
-    <h5>Shipping Address</h5>
-    <% if (order.address) { %>
-      <p><strong><%= order.address.name %></strong></p>
-      <p><%= order.address.streetName %>, <%= order.address.landmark %>, <%= order.address.locality %></p>
-      <p><%= order.address.city %>, <%= order.address.state %>, <%= order.address.pin %></p>
-      <p>Contact No: <%= order.address.contactNo %></p>
-    <% } else { %>
-      <p>No address information available.</p>
-    <% } %>
-  </div>
-
-  
-  <div class="d-flex justify-content-between">
-    <a href="/products" class="btn btn-secondary">Shop More</a>
-    <a href="/orders-list" class="btn btn-primary">View Orders</a>
-    <a href="/download-invoice/<%= order._id %>" class="btn btn-success">Download Invoice</a>
-  </div>
-  
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <%- include("../../views/partials/user/footer") %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

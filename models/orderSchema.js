@@ -82,7 +82,7 @@ const orderSchema = new Schema({
         type:String,
         enum: ["completed","Pending"],
         default:'completed'
-    }
+    },
 });
 
 const Order = mongoose.model("Order",orderSchema);

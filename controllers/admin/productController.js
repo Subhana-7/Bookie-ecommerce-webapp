@@ -74,27 +74,43 @@ const addProduct = async(req, res) => {
 };
 
 
-const getProductManagementPage = async(req, res) => {
+const getProductManagementPage = async (req, res) => {
   try {
     const search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = 10;
+    const limit = 6;
 
-    
+    // Fetch products with conditions for search and not deleted/blocked
     const productData = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+      $and: [
+        { isDeleted: false}, // Exclude deleted products
+        {
+          $or: [
+            { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }, // Search condition
+          ],
+        },
       ],
-    }).limit(limit * 1).skip((page - 1) * limit).populate("category").exec();
+    })
+      .limit(limit)
+      .skip((page - 1) * limit)
+      .populate("category")
+      .exec();
 
-    //console.log("Fetched products:", productData); 
-
+    // Count documents with the same conditions
     const count = await Product.find({
-      $or: [
-        { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+      $and: [
+        { isDeleted: false },
+        {
+          $or: [
+            { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+          ],
+        },
       ],
     }).countDocuments();
+
+    // Fetch listed categories
     const category = await Category.find({ isListed: true });
+
     if (category) {
       res.render("productManagement", {
         data: productData,
@@ -111,6 +127,7 @@ const getProductManagementPage = async(req, res) => {
     res.redirect("pageNotFound");
   }
 };
+
 
 
 
@@ -191,8 +208,9 @@ const unblockProduct = async(req,res) => {
 const deleteProduct = async(req,res) => {
    try {
     const id = req.query.id;
-    const findProduct = await Product.findOne({_id:id});
-    await findProduct.deleteOne({_id:id});
+    await Product.findByIdAndUpdate(id, {
+      isDeleted:true
+    })
     res.redirect("/admin/productManagement");
     req.flash('success', 'Product deleted successfully'); 
    } catch (error) {
@@ -203,27 +221,6 @@ const deleteProduct = async(req,res) => {
 }
 
 
-
-/*
-
-const deleteSingleImage = async(req,res) => {
-  try {
-    const {imageNameToServer,productIdToServer} = req.body;
-    const product = await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageNameToServer}});
-    const imagePath = path.join("public","uploads","product-images",imageNameToServer);
-    if(fs.existsSync(imagePath)) {
-      await fs.unlinkSync(imagePath);
-      console.log(`image ${imageNameToServer} deleted successfully`);
-    }else {
-      console.log(`image ${imageNameToServer} not found`);
-    }
-
-    res.send({status:true});
-  } catch (error) {
-    res.redirect("pageNotFound");
-  }
-}
-*/
 
 const getEditProduct = async(req,res) => {
   console.log("inside getEditProduct block-controller")
@@ -291,22 +288,72 @@ const editProduct = async(req,res) => {
   }
 }
 
-const deleteSingleImage = async(req,res) => {
+const deleteSingleImage = async (req, res) => {
   try {
-    const {imageNameToServer,productIdToServer} = req.body;
-    const product = await Product.findByIdAndUpdate(productIdToServer,{$pull:{productImage:imageName}});
-    const imagePath = path.join("public","uploads","re-image",imageNameToServer);
-    if(fs.existsSync(imagePath)) {
-      await fs.unlinkSync(imagePath);
-      console.log(`Image ${imageNameToServer} delete successfully`);
-    }else {
-      console.log(`Image ${imageNameToServer} is not found`);
-    }
-    res.send({status:true});
+      console.log("Inside the try block of deleteSingleImage");
+
+      const { imageNameToServer, productIdToServer } = req.body;
+
+      console.log("Image to delete:", imageNameToServer);
+      console.log("Product ID:", productIdToServer);
+
+      if (!imageNameToServer || !productIdToServer) {
+          return res.status(400).json({ 
+              success: false, 
+              message: "Missing required parameters" 
+          });
+      }
+
+      const product = await Product.findByIdAndUpdate(
+          productIdToServer,
+          { $pull: { productImage: imageNameToServer } },
+          { new: true }
+      );
+
+      if (!product) {
+          return res.status(404).json({ 
+              success: false, 
+              message: "Product not found" 
+          });
+      }
+
+      // Define the full path to the image
+      const imagePath = path.join(
+          process.cwd(),
+          "public",
+          "uploads",
+          "re-image",
+          imageNameToServer
+      );
+
+      console.log("Full image path:", imagePath);
+
+      if (fs.existsSync(imagePath)) {
+          await fs.promises.unlink(imagePath);
+          console.log(`Image ${imageNameToServer} deleted successfully`);
+          
+          res.json({ 
+              success: true, 
+              message: "Image deleted successfully" 
+          });
+      } else {
+          console.log(`Image ${imageNameToServer} not found at ${imagePath}`);
+          res.json({ 
+              success: true, 
+              message: "Image reference removed from database successfully" 
+          });
+      }
+
   } catch (error) {
-    return res.redirect("/pageNotFound");
+      console.error("Error in deleteSingleImage:", error);
+      res.status(500).json({ 
+          success: false, 
+          message: "Internal server error",
+          error: error.message 
+      });
   }
-}
+};
+
 
 
 module.exports = {

@@ -72,6 +72,10 @@ const productSchema = new Schema({
         type: Boolean,
         default: false 
     }, 
+    isDeleted : {
+        type:Boolean,
+        default:false,
+    }
 });
 
 const Product = mongoose.model("Product",productSchema);

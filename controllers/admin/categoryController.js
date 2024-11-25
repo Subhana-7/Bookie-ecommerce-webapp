@@ -1,7 +1,6 @@
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 
-
 const categoryInfo = async (req, res) => {
   try {
     const search = req.query.search || "";
@@ -9,18 +8,23 @@ const categoryInfo = async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
 
-    const categoryData = await Category.find({
-      name: { $regex: new RegExp(".*" + search + ".*", "i") },
-    })
-    .sort({ createdAt: 1 })
-    .skip(skip)
-    .limit(limit);
+    // Filter for non-deleted categories and search query
+    const filter = {
+      isDeleted: false, // Exclude deleted categories
+      name: { $regex: new RegExp(".*" + search + ".*", "i") }, // Search condition
+    };
 
-    const totalCategories = await Category.countDocuments({
-      name: { $regex: new RegExp(".*" + search + ".*", "i") },
-    });
+    // Fetch category data
+    const categoryData = await Category.find(filter)
+      .sort({ createdAt: 1 }) // Sort by creation date
+      .skip(skip) // Skip for pagination
+      .limit(limit); // Limit for pagination
+
+    // Count total non-deleted categories matching the search
+    const totalCategories = await Category.countDocuments(filter);
     const totalPages = Math.ceil(totalCategories / limit);
 
+    // Render the category page
     res.render("category-page", {
       cat: categoryData,
       currentPage: page,
@@ -28,10 +32,11 @@ const categoryInfo = async (req, res) => {
       totalCategories: totalCategories,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error in categoryInfo:", error);
     res.redirect("/pageError");
   }
 };
+
 
 
 
@@ -202,8 +207,9 @@ const editCategory = async(req,res) => {
 const deleteCategory = async(req,res) => {
   try {
     const id = req.query.id;
-    const findCategory = await Category.findOne({_id:id});
-    await findCategory.deleteOne({_id:id});
+    await Category.findByIdAndUpdate(id,{
+      isDeleted:true
+    });
     res.redirect("/admin/category");
   } catch (error) {
     res.redirect("pageNotFound");

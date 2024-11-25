@@ -51,7 +51,7 @@ router.get("/unblockProduct",adminAuth,adminProductController.unblockProduct);
 router.get("/deleteProduct",adminAuth,adminProductController.deleteProduct);
 router.get("/edit-product", adminAuth, adminProductController.getEditProduct);
 router.post("/edit-product/:id",adminAuth,uploads.array("images",4),adminProductController.editProduct);
-router.post("/delete-image",adminAuth,adminProductController.deleteSingleImage);
+router.post("/delete-product-image",adminAuth,adminProductController.deleteSingleImage);
 
 
 

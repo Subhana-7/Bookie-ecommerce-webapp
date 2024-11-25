@@ -7,19 +7,36 @@ const path = require("path");
 const mongoose = require("mongoose");
 
 
-const loadWishlist = async(req,res) => {
+const loadWishlist = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
-    const wishlistItem = await Wishlist.findOne({userId:user._id}).populate('products.productId');
 
-    if(!wishlistItem || wishlistItem.products.length === 0) {
-      return res.render("wishlist",{Wishlist : [], message : "Your Wishlist is empty."});
+    const wishlistItem = await Wishlist.findOne({ userId: user._id })
+      .populate({
+        path: 'products.productId',
+        match: { isBlocked: false, isDeleted: false }, 
+        populate: {
+          path: 'category',
+        },
+      });
+
+    if (!wishlistItem || !wishlistItem.products.length) {
+      return res.render("wishlist", { Wishlist: [], message: "Your Wishlist is empty." });
     }
-    res.render("wishlist",{Wishlist:wishlistItem.products,message:null});
+
+    const filteredProducts = wishlistItem.products.filter(item => item.productId !== null);
+
+    if (!filteredProducts.length) {
+      return res.render("wishlist", { Wishlist: [], message: "Your Wishlist is empty." });
+    }
+
+    res.render("wishlist", { Wishlist: filteredProducts, message: null });
   } catch (error) {
+    console.error("Error loading wishlist:", error);
     res.redirect("/pageNotFound");
   }
-}
+};
+
 
 const addItemToWishlist = async (req, res) => {
   try {

@@ -16,16 +16,23 @@ const getProducts = async (req, res) => {
     const inStock = req.query.inStock === 'true';
     const categoryFilter = req.query.category || ''; 
 
-    const filter = {};
+    // Initialize filter object
+    const filter = {
+      isDeleted: false, // Exclude deleted products
+      isBlocked: false, // Exclude blocked products
+    };
 
+    // Add search condition
     if (searchQuery) {
       filter.productName = new RegExp(searchQuery, 'i');
     }
 
+    // Add inStock condition
     if (inStock) {
       filter.quantity = { $gt: 0 };  
     }
 
+    // Add category filter condition
     if (categoryFilter) {
       const selectedCategories = categoryFilter.split(',');
       filter.category = { $in: selectedCategories }; 
@@ -33,6 +40,7 @@ const getProducts = async (req, res) => {
 
     console.log("Filter:", filter); 
 
+    // Define sorting options
     const sortOptions = {
       popularity: { popularity: -1 },
       priceAsc: { salePrice: 1 },
@@ -45,8 +53,10 @@ const getProducts = async (req, res) => {
     };
     const sort = sortOptions[sortOption] || {};
 
+    // Fetch products with filters and sorting
     const products = await Product.find(filter).sort(sort).populate('category');
 
+    // Render the products page
     res.render('products', {
       products,
       categories,
@@ -60,6 +70,7 @@ const getProducts = async (req, res) => {
     res.status(500).send("An error occurred while retrieving products.");
   }
 };
+
 
 
 

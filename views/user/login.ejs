@@ -179,20 +179,9 @@
             }
         }
 
-        function passValidationChecking() {
-            const passVal = passId.value.trim();
-            if (passVal.length < 8) {
-                loginError2.style.display = "block";
-                loginError2.innerHTML = "Password must be at least 8 characters";
-            } else {
-                loginError2.style.display = "none";
-                loginError2.innerHTML = "";
-            }
-        }
 
         loginForm.addEventListener("submit", function (e) {
             emailValidationChecking();
-            passValidationChecking();
 
             if (loginError1.innerHTML !== "" || loginError2.innerHTML !== "") {
                 e.preventDefault();

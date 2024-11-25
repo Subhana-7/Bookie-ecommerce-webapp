@@ -28,13 +28,16 @@ app.use(express.json());
 app.use(session({
   secret:process.env.SESSION_SECRET,
   resave:false,
-  saveUninitialized:true,
+  saveUninitialized:false,
   cookie:{
     secure:false,
     httpOnly:true,
     maxAge:72*60*60*1000
   }
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(flash());
 app.use((req, res, next) => {

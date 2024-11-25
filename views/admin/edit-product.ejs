@@ -20,11 +20,33 @@
            display: none;
        }
 
-    .cropped-img{
-    width: 200px;
-    height: auto;
-    object-fit: cover;
-   }
+   /* Add these styles to your existing CSS */
+   .cropped-img {
+        max-width: 200px;
+        height: auto;
+        object-fit: cover;
+        margin-bottom: 1rem;
+    }
+
+    .image-cropper {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .cropper-container {
+        max-width: 100%;
+    }
+
+    #imgView1, #imgView2, #imgView3, #imgView4 {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .btn-primary {
+        margin-top: 0.5rem;
+    }
 
    </style>
    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -140,7 +162,9 @@
                                                        <img class="rounded" style="width: 50px; height: 60px;"
                                                            src="/uploads/product-images/<%=product.productImage[i]%>"
                                                            alt="">
-                                                       <i onclick="deleteSingleImage('/uploads/product-images/<%=product.productImage[i]%>','<%=product._id%>')" style="position: absolute; margin-left: .5rem; cursor: pointer;" class="fa-thin fa-x"></i>
+                                                           <i onclick="deleteSingleImage('<%=product.productImage[i]%>','<%=product._id%>')" 
+                                                            style="position: absolute; margin-left: .5rem; cursor: pointer;" 
+                                                            class="fa-thin fa-x"></i>
                                                    </td>
                                                </div>
                                               
@@ -148,60 +172,61 @@
                                        </div>
                               
                                   <% } %>
-                               <div class="card-body">
-                                   <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                       <img src="" alt="" id="imgView1">
-                                       <input class="form-control" type="file" name="images" id="input1"
-                                           accept="image/png, image/jpeg, image/jpg"
-                                           onchange="viewImage1(event), viewImage(event, 1)">
-                                           <div id="images-error" class="error-message"></div>
-                                   </div>
-                                   <div class="image-cropper d-flex align-items-center"
-                                   style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                                   <img src="" id="croppedImg1" alt="" class="cropped-img">
-                                   <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
-                               </div>
-                                                           <div class="row">
-                                                               <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                                                   <img src="" alt="" id="imgView2">
-                                                                   <input class="form-control" type="file" name="images" id="input2"
-                                                                       accept="image/png, image/jpeg, image/jpg"
-                                                                       onchange="viewImage2(event),viewImage(event, 2)">
-                                                               </div>
-                                                               <div class="image-cropper d-flex align-items-center"
-                                                                   style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                                                                   <img src="" id="croppedImg2" alt="" class="cropped-img">
-                                                                   <button type="button" id="saveButton2" class="btn-sm btn-primary">Save</button>
-                                                               </div>
-                                                           </div>
-                                                          
-                                                           <div class="row">
-                                                               <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                                                   <img src="" alt="" id="imgView3">
-                                                                   <input class="form-control" type="file" name="images" id="input3"
-                                                                       accept="image/png, image/jpeg, image/jpg"
-                                                                       onchange="viewImage3(event),viewImage(event, 3)">
-                                                               </div>
-                                                               <div class="image-cropper d-flex align-items-center"
-                                                                   style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                                                                   <img src="" id="croppedImg3" alt="" class="cropped-img">
-                                                                   <button type="button" id="saveButton3" class="btn-sm btn-primary">Save</button>
-                                                               </div>
-                                                           </div>
-                                                          
-                                                           <div class="row">
-                                                               <div class="card-body align-items-center" style="margin-bottom: 20px;">
-                                                                   <img src="" alt="" id="imgView4">
-                                                                   <input class="form-control" type="file" name="images" id="input4"
-                                                                       accept="image/png, image/jpeg, image/jpg"
-                                                                       onchange="viewImage4(event),viewImage(event, 4)">
-                                                               </div>
-                                                               <div class="image-cropper d-flex align-items-center"
-                                                                   style="display:none; width: 300px; height: 200px; margin-bottom: 20px;">
-                                                                   <img src="" id="croppedImg4" alt="" class="cropped-img">
-                                                                   <button type="button" id="saveButton4" class="btn-sm btn-primary">Save</button>
-                                                               </div>
-                                                           </div>
+                                  <div class="card-body">
+                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                        <img src="" alt="" id="imgView1" style="max-width: 100%; display: none;">
+                                        <input class="form-control" type="file" name="images" id="input1"
+                                            accept="image/png, image/jpeg, image/jpg"
+                                            onchange="viewImage1(event)">
+                                        <div id="images-error" class="error-message"></div>
+                                    </div>
+                                    <div class="image-cropper d-flex align-items-center flex-column"
+                                        style="display:none; margin-bottom: 20px;">
+                                        <img src="" id="croppedImg1" alt="" class="cropped-img mb-2" style="display: none;">
+                                        <button type="button" id="saveButton1" class="btn btn-primary">Save Cropped Image</button>
+                                    </div>
+                                    
+                                    <!-- Repeat similar structure for other image inputs (2-4) -->
+
+                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                        <img src="" alt="" id="imgView2" style="max-width: 100%; display: none;">
+                                        <input class="form-control" type="file" name="images" id="input2"
+                                            accept="image/png, image/jpeg, image/jpg"
+                                            onchange="viewImage2(event)">
+                                        <div id="images-error" class="error-message"></div>
+                                    </div>
+                                    <div class="image-cropper d-flex align-items-center flex-column"
+                                        style="display:none; margin-bottom: 20px;">
+                                        <img src="" id="croppedImg2" alt="" class="cropped-img mb-2" style="display: none;">
+                                        <button type="button" id="saveButton2" class="btn btn-primary">Save Cropped Image</button>
+                                    </div>
+
+                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                        <img src="" alt="" id="imgView3" style="max-width: 100%; display: none;">
+                                        <input class="form-control" type="file" name="images" id="input3"
+                                            accept="image/png, image/jpeg, image/jpg"
+                                            onchange="viewImage3(event)">
+                                        <div id="images-error" class="error-message"></div>
+                                    </div>
+                                    <div class="image-cropper d-flex align-items-center flex-column"
+                                        style="display:none; margin-bottom: 20px;">
+                                        <img src="" id="croppedImg3" alt="" class="cropped-img mb-2" style="display: none;">
+                                        <button type="button" id="saveButton3" class="btn btn-primary">Save Cropped Image</button>
+                                    </div>
+
+                                    <div class="card-body align-items-center" style="margin-bottom: 20px;">
+                                        <img src="" alt="" id="imgView4" style="max-width: 100%; display: none;">
+                                        <input class="form-control" type="file" name="images" id="input4"
+                                            accept="image/png, image/jpeg, image/jpg"
+                                            onchange="viewImage4(event)">
+                                        <div id="images-error" class="error-message"></div>
+                                    </div>
+                                    <div class="image-cropper d-flex align-items-center flex-column"
+                                        style="display:none; margin-bottom: 20px;">
+                                        <img src="" id="croppedImg4" alt="" class="cropped-img mb-2" style="display: none;">
+                                        <button type="button" id="saveButton4" class="btn btn-primary">Save Cropped Image</button>
+                                    </div>
+                                </div>
                                </div>
                            </div>
                            <div>
@@ -227,64 +252,124 @@
       }
     }
 
-    function viewImage1(event) {
-      document.getElementById("imgView1").src = URL.createObjectURL(event.target.files[0]);
-    }
 
-    function viewImage2(event) {
-      document.getElementById("imgView2").src = URL.createObjectURL(event.target.files[0]);
-    }
-
-    function viewImage3(event) {
-      document.getElementById("imgView3").src = URL.createObjectURL(event.target.files[0]);
-    }
-
-    function viewImage4(event) {
-      document.getElementById("imgView4").src = URL.createObjectURL(event.target.files[0]);
-    }
-
-    function viewImage(event,index) {
-      let input = event.target;
-      let reader = new FileReader();
-      reader.onload = function() {
-        let dataURL = reader.result;
-        let image = document.getElementById("imgView"+index);
-        image.src = dataURL;
-        let cropper = new Cropper(image,{
-          aspectRatio:1,
-          viewModel:1,
-          guides:true,
-          background:false,
-          autoCropArea:1,
-          zoomable:true
-        });
-      
-      let cropperContainer = document.querySelector("#croppedImg"+index).parentNode;
-      cropperContainer.style.display = "block";
-
-      let saveButton = document.querySelector("#saveButton"+index);
-      saveButton.addEventListener("click",async function () {
-        let croppedCanvas = cropper.getCroppedCanvas();
-        let croppedImage = document.getElementById("croppedImg"+index);
-        croppedImage.src = croppedCanvas.toDataURL("image/jpeg",1.0);
-
-        let timestamp = new Date().getTime();
-        let fileName = `cropped-img-${timestamp}-${index}.png`;
-
-        await croppedCanvas.toBlob(blob => {
-          let input = document.getElementById("input"+index);
-          let imgFile = new File([blob].fileName,blob)
-          const fileList = new DataTransfer();
-          fileList.items.add(imgFile);
-          input.files = fileList.files
+    async function deleteSingleImage(imagePath, productId) {
+    try {
+        const imageFileName = imagePath.split('/').pop();
+        
+        const response = await fetch('/admin/delete-product-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                imageNameToServer: imageFileName,
+                productIdToServer: productId
+            })
         });
 
-        cropperContainer.style.display = "none";
-        cropper.destroy();
-      });
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            // Find and remove the clicked image's parent container
+            const targetImage = event.target.closest('.col-md-12');
+            if (targetImage) {
+                targetImage.remove();
+                alert('Image deleted successfully');
+            }
+        } else {
+            throw new Error(data.message || 'Failed to delete image');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(error.message || 'Error occurred while deleting image');
+    }
+}
+
+
+// Improved image preview functions
+// Improved image preview functions
+function viewImage(event, index) {
+    const input = event.target;
+    const imgView = document.getElementById(`imgView${index}`);
+    const croppedImg = document.getElementById(`croppedImg${index}`);
+    const cropperContainer = croppedImg.parentNode;
+    const saveButton = document.getElementById(`saveButton${index}`);
+
+    // Clear any existing cropper
+    if (imgView.cropper) {
+        imgView.cropper.destroy();
+    }
+
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            imgView.style.display = 'block';
+            imgView.src = e.target.result;
+            cropperContainer.style.display = 'flex';
+            
+            // Initialize cropper
+            const cropper = new Cropper(imgView, {
+                aspectRatio: 1,
+                viewMode: 1,
+                guides: true,
+                background: false,
+                autoCropArea: 1,
+                zoomable: true
+            });
+            
+            imgView.cropper = cropper;
+            
+            // Handle save button click
+            saveButton.onclick = function() {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 600,
+                    height: 600
+                });
+                
+                // Show the cropped image
+                croppedImg.src = canvas.toDataURL('image/jpeg');
+                croppedImg.style.display = 'block';
+                
+                // Convert canvas to blob and update file input
+                canvas.toBlob(function(blob) {
+                    const fileName = `cropped-image-${index}-${Date.now()}.jpg`;
+                    const file = new File([blob], fileName, { type: 'image/jpeg' });
+                    
+                    // Update file input with cropped image
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    input.files = dataTransfer.files;
+                    
+                    // Hide original image and cropper
+                    imgView.style.display = 'none';
+                    cropper.destroy();
+                    imgView.cropper = null;
+                }, 'image/jpeg');
+            };
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Individual image preview handlers
+function viewImage1(event) {
+    viewImage(event, 1);
+}
+
+function viewImage2(event) {
+    viewImage(event, 2);
+}
+
+function viewImage3(event) {
+    viewImage(event, 3);
+}
+
+function viewImage4(event) {
+    viewImage(event, 4);
+}
 
 
   const selectedImages = [];
