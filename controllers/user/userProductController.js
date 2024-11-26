@@ -10,37 +10,35 @@ const { console } = require("inspector");
 
 const getProducts = async (req, res) => {
   try {
-    const categories = await Category.find(); 
+    const categories = await Category.find({ isListed: true, isDeleted: false });
+
     const searchQuery = req.query.search || '';
     const sortOption = req.query.sort || 'default';
     const inStock = req.query.inStock === 'true';
     const categoryFilter = req.query.category || ''; 
 
-    // Initialize filter object
     const filter = {
-      isDeleted: false, // Exclude deleted products
-      isBlocked: false, // Exclude blocked products
+      isDeleted: false,
+      isBlocked: false,
     };
 
-    // Add search condition
     if (searchQuery) {
-      filter.productName = new RegExp(searchQuery, 'i');
+      filter.productName = new RegExp(searchQuery, 'i'); 
     }
 
-    // Add inStock condition
     if (inStock) {
-      filter.quantity = { $gt: 0 };  
+      filter.quantity = { $gt: 0 }; 
     }
 
-    // Add category filter condition
     if (categoryFilter) {
       const selectedCategories = categoryFilter.split(',');
       filter.category = { $in: selectedCategories }; 
+    } else {
+      filter.category = { $in: categories.map(category => category._id) };
     }
 
     console.log("Filter:", filter); 
 
-    // Define sorting options
     const sortOptions = {
       popularity: { popularity: -1 },
       priceAsc: { salePrice: 1 },
@@ -53,10 +51,8 @@ const getProducts = async (req, res) => {
     };
     const sort = sortOptions[sortOption] || {};
 
-    // Fetch products with filters and sorting
     const products = await Product.find(filter).sort(sort).populate('category');
 
-    // Render the products page
     res.render('products', {
       products,
       categories,
@@ -70,6 +66,7 @@ const getProducts = async (req, res) => {
     res.status(500).send("An error occurred while retrieving products.");
   }
 };
+
 
 
 

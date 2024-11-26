@@ -10,46 +10,39 @@
     <div class="container mt-5">
         <h2 class="text-center mb-4">Create Coupon</h2>
         <form id="couponForm" action="/admin/create-coupon" method="POST" novalidate>
-            <!-- Coupon Name -->
             <div class="mb-3">
                 <label for="name" class="form-label">Coupon Name</label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="Enter coupon name" required>
                 <div class="invalid-feedback">Coupon name is required.</div>
             </div>
 
-            <!-- Expiry Date -->
             <div class="mb-3">
                 <label for="expireOn" class="form-label">Expiry Date</label>
                 <input type="date" class="form-control" id="expireOn" name="expireOn" required>
                 <div class="invalid-feedback">Please select a valid expiry date.</div>
             </div>
 
-            <!-- Offer Percentage -->
             <div class="mb-3">
                 <label for="offerPrice" class="form-label">Offer Percentage</label>
                 <input type="number" class="form-control" id="offerPrice" name="offerPrice" placeholder="Enter discount percentage (e.g., 10 for 10%)" required min="0" max="100">
                 <div class="invalid-feedback">Offer percentage must be between 0 and 100.</div>
             </div>
 
-            <!-- Minimum Price for Discount -->
             <div class="mb-3">
                 <label for="minimumPrice" class="form-label">Minimum Price for Discount</label>
                 <input type="number" class="form-control" id="minimumPrice" name="minimumPrice" placeholder="Enter minimum purchase amount" required min="0">
                 <div class="invalid-feedback">Minimum price must be greater than zero.</div>
             </div>
 
-            <!-- Listing Status -->
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="isList" name="isList">
                 <label class="form-check-label" for="isList">List this coupon</label>
             </div>
 
-            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">Create Coupon</button>
         </form>
     </div>
 
-    <!-- Bootstrap JavaScript Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('couponForm').addEventListener('submit', function (event) {
@@ -61,7 +54,6 @@
 
             let isValid = true;
 
-            // Validate Coupon Name
             if (name.value.trim() === '') {
                 name.classList.add('is-invalid');
                 isValid = false;
@@ -69,7 +61,6 @@
                 name.classList.remove('is-invalid');
             }
 
-            // Validate Expiry Date
             const today = new Date().toISOString().split('T')[0];
             if (expireOn.value === '' || expireOn.value < today) {
                 expireOn.classList.add('is-invalid');
@@ -78,7 +69,6 @@
                 expireOn.classList.remove('is-invalid');
             }
 
-            // Validate Offer Percentage
             const offerValue = parseInt(offerPrice.value, 10);
             if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
                 offerPrice.classList.add('is-invalid');
@@ -87,7 +77,6 @@
                 offerPrice.classList.remove('is-invalid');
             }
 
-            // Validate Minimum Price
             const minPriceValue = parseFloat(minimumPrice.value);
             if (isNaN(minPriceValue) || minPriceValue <= 0) {
                 minimumPrice.classList.add('is-invalid');
@@ -102,7 +91,6 @@
             }
         });
 
-        // Add input event listeners to remove error messages dynamically
         const fields = document.querySelectorAll('#couponForm input');
         fields.forEach(field => {
             field.addEventListener('input', function () {
@@ -111,7 +99,6 @@
                 }
             });
 
-            // Prevent negative values in numeric fields
             if (field.type === 'number') {
                 field.addEventListener('keydown', function (e) {
                     if (e.key === '-' || e.key === 'e' || e.key === '+') {

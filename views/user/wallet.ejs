@@ -71,7 +71,6 @@
  
     <div class="wallet-header">My Wallet</div>
     
-    <!-- Display current wallet balance -->
     <div class="wallet-balance-box">
         <div>
             <div>Wallet Balance</div>
@@ -80,7 +79,6 @@
        <!-- <button class="btn btn-add-money">Add Money</button> -->
     </div>
     
-    <!-- Display wallet transaction history -->
     <div class="wallet-history-header">Wallet History</div>
     
     <table class="table">
@@ -94,7 +92,6 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Loop through transactions and display each one -->
             <% wallet.transactions.forEach(transaction => { %>
                 <tr>
                     <td><%= transaction.date.toLocaleDateString() %></td>

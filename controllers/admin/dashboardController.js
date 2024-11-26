@@ -11,7 +11,6 @@ const Order = require("../../models/orderSchema");
 const renderDashboard = async (req, res) => {
     if (req.session.admin) {
       try {
-        // Fetch overall statistics
         const totalOrders = await Order.countDocuments();
         const totalRevenueData = await Order.aggregate([
           {
@@ -23,7 +22,6 @@ const renderDashboard = async (req, res) => {
         ]);
         const totalRevenue = totalRevenueData[0]?.totalRevenue || 0;
   
-        // Sales data for chart (grouped by month)
         const monthlySalesData = await Order.aggregate([
           {
             $group: {
@@ -39,36 +37,35 @@ const renderDashboard = async (req, res) => {
           salesData[item._id - 1] = item.totalSales;
         });
   
-        // Best Selling Products
         const bestSellingProducts = await Order.aggregate([
-          { $unwind: "$orderedItems" }, // Unwind `orderedItems` instead of `products`
+          { $unwind: "$orderedItems" }, 
           {
             $group: {
-              _id: "$orderedItems.product", // Group by `product` field in `orderedItems`
-              unitsSold: { $sum: "$orderedItems.quantity" }, // Sum quantities sold
+              _id: "$orderedItems.product", 
+              unitsSold: { $sum: "$orderedItems.quantity" }, 
             },
           },
           {
             $lookup: {
-              from: "products", // Lookup the `products` collection
+              from: "products", 
               localField: "_id",
               foreignField: "_id",
               as: "productDetails",
             },
           },
-          { $unwind: "$productDetails" }, // Unwind product details
+          { $unwind: "$productDetails" }, 
           {
             $project: {
-              name: "$productDetails.productName", // Ensure the field name matches your schema
+              name: "$productDetails.productName", 
               unitsSold: 1,
             },
           },
-          { $sort: { unitsSold: -1 } }, // Sort by units sold (descending)
-          { $limit: 10 }, // Get top 10
+          { $sort: { unitsSold: -1 } }, 
+          { $limit: 10 }, 
         ]);
         
         const bestSellingCategories = await Order.aggregate([
-          { $unwind: "$orderedItems" }, // Unwind `orderedItems`
+          { $unwind: "$orderedItems" }, 
           {
             $lookup: {
               from: "products",
@@ -94,8 +91,8 @@ const renderDashboard = async (req, res) => {
               unitsSold: { $sum: "$orderedItems.quantity" },
             },
           },
-          { $sort: { unitsSold: -1 } }, // Sort by units sold (descending)
-          { $limit: 10 }, // Get top 10
+          { $sort: { unitsSold: -1 } }, 
+          { $limit: 10 },
         ]);
         
         res.render("dashboard", {
@@ -117,7 +114,7 @@ const renderDashboard = async (req, res) => {
 
 
 const renderDashboardData = async (req, res) => {
-  const filter = req.query.filter || "monthly"; // Default to monthly
+  const filter = req.query.filter || "monthly";
   try {
     let salesData = [];
     let labels = [];
@@ -138,7 +135,6 @@ const renderDashboardData = async (req, res) => {
       salesData = dailySalesData.map((item) => item.totalSales);
 
     } else if (filter === "monthly") {
-      // Group data by month
       const monthlySalesData = await Order.aggregate([
         {
           $group: {
@@ -159,7 +155,6 @@ const renderDashboardData = async (req, res) => {
       });
 
     } else if (filter === "yearly") {
-      // Group data by year
       const yearlySalesData = await Order.aggregate([
         {
           $group: {

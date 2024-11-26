@@ -666,17 +666,14 @@
 
 let imageZoom = document.getElementById('imageZoom');
     
-    // Enhanced zoom functionality
     imageZoom.addEventListener('mousemove', (event) => {
         const rect = imageZoom.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         
-        // Calculate percentage positions
         const xPercent = (x / rect.width) * 100;
         const yPercent = (y / rect.height) * 100;
         
-        // Apply zoom effect
         imageZoom.style.setProperty('--display', 'block');
         imageZoom.style.setProperty('--zoom-x', `${xPercent}%`);
         imageZoom.style.setProperty('--zoom-y', `${yPercent}%`);
@@ -686,13 +683,11 @@ let imageZoom = document.getElementById('imageZoom');
         imageZoom.style.setProperty('--display', 'none');
     });
 
-    // Enhanced image change function
     function changeImage(imageSrc) {
         const mainImage = imageZoom.querySelector('img');
         mainImage.src = imageSrc;
         imageZoom.style.setProperty('--url', `url('${imageSrc}')`);
         
-        // Update active thumbnail visual
         const thumbnails = document.querySelectorAll('.thumbnail-images img');
         thumbnails.forEach(thumb => {
             if (thumb.src === imageSrc) {
@@ -703,7 +698,6 @@ let imageZoom = document.getElementById('imageZoom');
         });
     }
 
-    // Initialize the first thumbnail as active
     window.addEventListener('load', () => {
         const firstImage = imageZoom.querySelector('img').src;
         imageZoom.style.setProperty('--url', `url('${firstImage}')`);

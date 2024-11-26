@@ -83,7 +83,6 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Helper function for validation
         function validateField(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
             const field = document.getElementById(fieldId);
             const error = document.getElementById(errorId);
@@ -100,39 +99,33 @@
             }
         }
 
-        // Attach event listeners for real-time validation
         function attachValidationListeners(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
             const field = document.getElementById(fieldId);
 
-            // Validate on blur
             field.addEventListener('blur', () => {
                 validateField(fieldId, errorId, regex, errorMessage);
             });
 
-            // Validate on input
             field.addEventListener('input', () => {
                 validateField(fieldId, errorId, regex, errorMessage);
             });
         }
 
-        // Add validation listeners
         attachValidationListeners('name', 'nameError', /^[A-Za-z\s]+$/, 'Name should only contain letters and spaces.');
         attachValidationListeners('pincode', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
         attachValidationListeners('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
         attachValidationListeners('addressType', 'addressTypeError', null, 'Please select an address type.');
 
-        // Validate all fields on form submission
         document.getElementById('addressForm').addEventListener('submit', function (event) {
             let isValid = true;
 
-            // Validate all fields
             isValid &= validateField('name', 'nameError', /^[A-Za-z\s]+$/, 'Name should only contain letters and spaces.');
             isValid &= validateField('pincode', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
             isValid &= validateField('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
             isValid &= validateField('addressType', 'addressTypeError', null, 'Please select an address type.');
 
             if (!isValid) {
-                event.preventDefault(); // Prevent form submission if validation fails
+                event.preventDefault(); 
             }
         });
     </script>

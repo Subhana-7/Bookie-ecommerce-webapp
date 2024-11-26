@@ -4,8 +4,8 @@ const Product = require("../../models/productSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
-const crypto = require("crypto"); // For generating OTP
-const transporter = require('../../config/emailConfig'); // Import the email configuration
+const crypto = require("crypto"); 
+const transporter = require('../../config/emailConfig'); 
 
 
 

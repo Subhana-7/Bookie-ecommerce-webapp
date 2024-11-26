@@ -9,6 +9,7 @@ const renderSalesReportPage = async (req, res) => {
   console.log("inside the controller block of renderSalesReportPage");
   try {
     console.log("inside the try block of renderSalesReportPage");
+
     const reportTypes = [
       { value: 'daily', label: 'Daily' },
       { value: 'weekly', label: 'Weekly' },
@@ -16,6 +17,7 @@ const renderSalesReportPage = async (req, res) => {
       { value: 'yearly', label: 'Yearly' },
       { value: 'custom', label: 'Custom Date Range' },
     ];
+
     const totalOrders = await Order.countDocuments();
     const totalOrderAmountData = await Order.aggregate([
       {
@@ -29,13 +31,22 @@ const renderSalesReportPage = async (req, res) => {
     const totalOrderAmount = totalOrderAmountData[0]?.totalOrderAmount || 0;
     const totalDiscount = totalOrderAmountData[0]?.totalDiscount || 0;
 
+    const page = parseInt(req.query.page) || 1;  
+    const limit = 10;  
+    const skip = (page - 1) * limit;
+
     const orders = await Order.find()
       .populate("userId", "name")
       .populate({
         path: "orderedItems.product",
         select: "productName",
       })
+      .sort({ createdOn: -1 }) 
+      .skip(skip)
+      .limit(limit)
       .lean();
+
+    const totalPages = Math.ceil(totalOrders / limit);
 
     res.render("salesManagement", {
       title: "Sales Report",
@@ -44,6 +55,8 @@ const renderSalesReportPage = async (req, res) => {
       totalDiscount,
       orders,
       reportTypes,
+      currentPage: page,
+      totalPages: totalPages,
     });
   } catch (error) {
     console.error("Error:", error);

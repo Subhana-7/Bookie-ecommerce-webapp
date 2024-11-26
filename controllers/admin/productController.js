@@ -80,13 +80,12 @@ const getProductManagementPage = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
 
-    // Fetch products with conditions for search and not deleted/blocked
     const productData = await Product.find({
       $and: [
-        { isDeleted: false}, // Exclude deleted products
+        { isDeleted: false}, 
         {
           $or: [
-            { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }, // Search condition
+            { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }, 
           ],
         },
       ],
@@ -96,7 +95,6 @@ const getProductManagementPage = async (req, res) => {
       .populate("category")
       .exec();
 
-    // Count documents with the same conditions
     const count = await Product.find({
       $and: [
         { isDeleted: false },
@@ -108,7 +106,6 @@ const getProductManagementPage = async (req, res) => {
       ],
     }).countDocuments();
 
-    // Fetch listed categories
     const category = await Category.find({ isListed: true });
 
     if (category) {
@@ -317,7 +314,6 @@ const deleteSingleImage = async (req, res) => {
           });
       }
 
-      // Define the full path to the image
       const imagePath = path.join(
           process.cwd(),
           "public",

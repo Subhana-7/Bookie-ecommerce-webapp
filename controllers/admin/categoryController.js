@@ -7,24 +7,19 @@ const categoryInfo = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
-
-    // Filter for non-deleted categories and search query
     const filter = {
-      isDeleted: false, // Exclude deleted categories
-      name: { $regex: new RegExp(".*" + search + ".*", "i") }, // Search condition
+      isDeleted: false,
+      name: { $regex: new RegExp(".*" + search + ".*", "i") }, 
     };
 
-    // Fetch category data
     const categoryData = await Category.find(filter)
-      .sort({ createdAt: 1 }) // Sort by creation date
-      .skip(skip) // Skip for pagination
-      .limit(limit); // Limit for pagination
+      .sort({ createdAt: 1 }) 
+      .skip(skip) 
+      .limit(limit); 
 
-    // Count total non-deleted categories matching the search
     const totalCategories = await Category.countDocuments(filter);
     const totalPages = Math.ceil(totalCategories / limit);
 
-    // Render the category page
     res.render("category-page", {
       cat: categoryData,
       currentPage: page,

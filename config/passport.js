@@ -12,7 +12,6 @@ async (accessToken, refreshToken, profile, done) => {
         let user = await User.findOne({ googleId: profile.id });
         
         if (user) {
-            // Update user's last login
             user.lastLogin = new Date();
             await user.save();
             return done(null, user);
@@ -22,7 +21,7 @@ async (accessToken, refreshToken, profile, done) => {
                 name: profile.displayName,
                 email: profile.emails[0].value,
                 googleId: profile.id,
-                isEmailVerified: true, // Since Google email is verified
+                isEmailVerified: true,
                 lastLogin: new Date()
             });
             await newUser.save();

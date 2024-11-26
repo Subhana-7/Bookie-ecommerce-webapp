@@ -5,15 +5,32 @@ const Order = require("../../models/orderSchema");
 
 const getOrderManagementPage = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;  
+    const limit = 10;  
+
+    const skip = (page - 1) * limit;
+
     const orders = await Order.find()
-      .populate("userId", "name");
-      //console.log(orders);
-    res.render("order-management", { orders });
+      .populate("userId", "name")
+      .sort({ createdOn: -1 }) 
+      .skip(skip)
+      .limit(limit);
+
+    const totalOrders = await Order.countDocuments();
+
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    res.render("order-management", { 
+      orders, 
+      currentPage: page, 
+      totalPages: totalPages
+    });
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 

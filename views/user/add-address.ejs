@@ -42,7 +42,7 @@
         .error-message {
             color: red;
             font-size: 0.9em;
-            display: none; /* Default hidden */
+            display: none; 
         }
     </style>
 </head>
@@ -121,7 +121,6 @@
 <script>
     const form = document.getElementById('addressForm');
 
-    // Helper function to validate input and show/hide error message
     function validateField(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
         const field = document.getElementById(fieldId);
         const error = document.getElementById(errorId);
@@ -138,22 +137,18 @@
         }
     }
 
-    // Attach blur and input event listeners to fields
     function attachValidationListeners(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
         const field = document.getElementById(fieldId);
 
-        // Validate on blur (losing focus)
         field.addEventListener('blur', () => {
             validateField(fieldId, errorId, regex, errorMessage);
         });
 
-        // Validate on input (real-time typing)
         field.addEventListener('input', () => {
             validateField(fieldId, errorId, regex, errorMessage);
         });
     }
 
-    // Attach listeners to each field
     attachValidationListeners('name', 'nameError', /^[A-Za-z\s]{3,}$/, 'Name must contain only letters and spaces, with at least 3 characters.');
     attachValidationListeners('addressType', 'addressTypeError', /.+/, 'Please select an address type.');
     attachValidationListeners('streetName', 'streetNameError');
@@ -164,11 +159,9 @@
     attachValidationListeners('pin', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
     attachValidationListeners('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
 
-    // Validate all fields on form submission
     form.addEventListener('submit', function (e) {
         let isValid = true;
 
-        // Validate each field
         isValid &= validateField('name', 'nameError', /^[A-Za-z\s]{3,}$/, 'Name must contain only letters and spaces, with at least 3 characters.');
         isValid &= validateField('addressType', 'addressTypeError', /.+/, 'Please select an address type.');
         isValid &= validateField('streetName', 'streetNameError');
@@ -180,7 +173,7 @@
         isValid &= validateField('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
 
         if (!isValid) {
-            e.preventDefault(); // Prevent form submission if any field is invalid
+            e.preventDefault(); 
         }
     });
 </script>

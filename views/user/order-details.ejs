@@ -162,15 +162,14 @@
         font-size: 0.95rem;
         font-weight: 600;
         padding: 10px 20px;
-        border-radius: 30px; /* Rounded buttons */
+        border-radius: 30px; 
         border: none;
         transition: all 0.3s ease;
         cursor: pointer;
     }
 
-    /* "Shop More" button styling */
     .shop-more-btn {
-        background-color: #28a745; /* Green */
+        background-color: #28a745; 
         color: white;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -180,10 +179,9 @@
         transform: translateY(-2px);
     }
 
-    /* "Return Request" button styling */
     .return-request-btn {
-        background-color: #ffc107; /* Yellow */
-        color: #343a40; /* Dark text */
+        background-color: #ffc107; 
+        color: #343a40; 
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
@@ -192,9 +190,8 @@
         transform: translateY(-2px);
     }
 
-    /* "Cancel Order" button styling */
     .cancel-order-btn {
-        background-color: #dc3545; /* Red */
+        background-color: #dc3545;
         color: white;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -278,8 +275,10 @@
                                 </div>
                             <% } %>
                             <div class="summary-row summary-total">
-                                <span>Total</span>
-                                <span>₹<%= order.finalAmount %></span>
+                                <td colspan="4" class="text-end" style="font-weight: bold;">
+                                    <%= order.couponApplied === true? "Final Amount (discount applied):" : "FInal Amount:" %>
+                                  </td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+                                  <td class="text-end price-column">₹<%= order.finalAmount.toLocaleString() %></td>
                             </div>
                         </div>
                     </div>
@@ -292,11 +291,11 @@
                                 <a href="/products" style="color: inherit; text-decoration: none;">Shop More</a>
                             </button>
                         <% } else if (order.status && order.status.toLowerCase() === 'delivered') { %>
-                            <button id="return-request-btn" class="btn return-request-btn">Return Request</button>
+                            <button id="return-request-btn" class="btn return-request-btn"> <a href="/return-order-page/<%=order._id%>">Return Request</a></button>
                         <% } else if(order.status && order.status.toLowerCase() !== 'Returned') { %>
-                            <button id="cancel-order-btn" class="btn cancel-order-btn">Cancel Order</button>
+                            <button id="cancel-order-btn" class="btn cancel-order-btn"><a href="/cancel-order-page/<%=order._id%>">Cancel Order</a></button>
                         <% } else { %>
-                            <button id="cancel-order-btn" class="btn cancel-order-btn">Cancel Order</button>
+                            <button id="cancel-order-btn" class="btn cancel-order-btn"><a href="/cancel-order-page/<%=order._id%>">Cancel Order</a></button>
                         <% } %>
                     </div>
 
@@ -343,72 +342,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $('#cancel-order-btn').click(function () {
-    Swal.fire({
-        title: 'Cancel Order',
-        input: 'text',
-        inputPlaceholder: 'Enter cancellation reason',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Confirm Cancellation',
-        preConfirm: (reason) => {
-            if (!reason) {
-                Swal.showValidationMessage('Please enter a reason for cancellation.');
-            }
-            return reason;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '/cancel-order/<%= order._id %>',
-                method: 'POST',
-                data: { reason: result.value },
-                success: function () {
-                    Swal.fire('Cancelled!', 'Your order has been cancelled.', 'success');
-                    location.reload();
-                },
-                error: function () {
-                    Swal.fire('Error!', 'There was an issue cancelling your order.', 'error');
-                }
-            });
-        }
-    });
-});
-
-$('#return-request-btn').click(function () {
-    Swal.fire({
-        title: 'Return Request',
-        input: 'text',
-        inputPlaceholder: 'Enter reason for return',
-        showCancelButton: true,
-        confirmButtonText: 'Submit Return Request',
-        preConfirm: (reason) => {
-            if (!reason) {
-                Swal.showValidationMessage('Please enter a reason for return.');
-            }
-            return reason;
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '/return-request/<%= order._id %>',
-                method: 'POST',
-                data: { reason: result.value },
-                success: function () {
-                    Swal.fire('Requested!', 'Your return request has been submitted.', 'success');
-                    location.reload();
-                },
-                error: function () {
-                    Swal.fire('Error!', 'There was an issue with your return request.', 'error');
-                }
-            });
-        }
-    });
-});
 
 
-const addressId = $("input[name='address']:checked").val(); // assuming the address is selected via radio buttons
+
+
+
+const addressId = $("input[name='address']:checked").val(); 
 if (!addressId) {
     Swal.fire('Error', 'Please select an address.', 'error');
     return;
@@ -420,7 +359,6 @@ $.ajax({
     data: { addressId: addressId },
     success: function (response) {
         console.log(response,data);
-        // Handle Razorpay initiation
     },
     error: function (error) {
         Swal.fire('Error', error.responseJSON.message, 'error');
@@ -431,10 +369,75 @@ $.ajax({
 
 //payment
 
+   document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector(".btn-primary").addEventListener("click", function (e) {
+        e.preventDefault();  
 
+        const orderId = "<%= order._id %>"; 
+        
+        fetch(`/continue-payment/${orderId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to initiate payment");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const options = {
+                key: data.key_id,  
+                amount: data.amount,  
+                currency: data.currency,
+                name: 'Your Shop Name',
+                description: 'Order Payment',
+                order_id: data.order_id,  
+                handler: function (response) {
+                   
+                    fetch('/payment-success', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            order_id: orderId,
+                            payment_id: response.razorpay_payment_id,
+                            signature: response.razorpay_signature
+                        })
+                    })
+                    .then(successResponse => successResponse.json())
+                    .then(successData => {
+                        if (successData.success) {
+                            location.reload();  
+                        } else {
+                            Swal.fire('Error', 'Payment failed. Please try again.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+                        console.error(error);
+                    });
+                },
+                theme: {
+                    color: '#3399cc'
+                }
+            };
 
+            const rzp1 = new Razorpay(options);
+            rzp1.open();  
+        })
+        .catch(error => {
+            Swal.fire('Error', error.message, 'error');
+            console.error(error);
+        });
+    });
+});
 
-    </script>
+</script>
+
 
 
 

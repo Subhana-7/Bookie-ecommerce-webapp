@@ -306,7 +306,7 @@ $(document).ready(function() {
                 const newRowTotal = (price * newQty).toFixed(2);
                 row.find('td:nth-child(4)').text(`₹${newRowTotal}`);
                 $('#totalAmount').text(response.cartTotal.toFixed(2));
-                $('#totalItems').text(response.totalItems); // Update total items dynamically
+                $('#totalItems').text(response.totalItems); 
 
                 Swal.fire({
                     icon: 'success',

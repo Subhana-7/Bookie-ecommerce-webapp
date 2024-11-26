@@ -177,33 +177,35 @@ const deleteAddress = async(req,res) => {
 
 const cart = async (req, res) => {
   try {
-    // Find the logged-in user
     const user = await User.findById(req.session.user);
 
-    // Fetch the cart and populate items while filtering out blocked or deleted products
     const cartItems = await Cart.findOne({ userId: user._id })
       .populate({
         path: 'items.productId',
-        match: { isBlocked: false, isDeleted: false }, // Only include non-blocked and non-deleted products
+        match: { isBlocked: false, isDeleted: false }, 
+        populate: {
+          path: 'category',
+          match: { isListed: true, isDeleted: false },
+        },
       });
 
     if (!cartItems || !cartItems.items.length) {
       return res.render("cart", { cart: [], message: "Your cart is empty.", totalItems: 0 });
     }
 
-    // Filter out items where the populated product is null (due to the match filter)
-    const filteredItems = cartItems.items.filter(item => item.productId !== null);
+    const filteredItems = cartItems.items.filter(
+      item => item.productId !== null && item.productId.category !== null
+    );
 
     if (!filteredItems.length) {
       return res.render("cart", { cart: [], message: "Your cart is empty.", totalItems: 0 });
     }
 
-    // Calculate the total number of items
     const totalItems = filteredItems.reduce((total, item) => total + item.quantity, 0);
 
     return res.render("cart", { 
       cart: filteredItems, 
-      message: null,
+      message: null, 
       totalItems 
     });
   } catch (error) {
@@ -211,6 +213,7 @@ const cart = async (req, res) => {
     return res.redirect("pageNotFound");
   }
 };
+
 
 
 
@@ -317,7 +320,6 @@ const updateCart = async (req, res) => {
 
       await cart.save();
 
-      // Calculate the cart total and total items
       const cartTotal = cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0);
       const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
 
@@ -353,7 +355,6 @@ const removeItemFromCart = async (req, res) => {
       cart.items.splice(itemIndex, 1);
       await cart.save();
 
-      // Calculate the cart total and total items
       const cartTotal = cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0);
       const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
 

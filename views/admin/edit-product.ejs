@@ -20,7 +20,6 @@
            display: none;
        }
 
-   /* Add these styles to your existing CSS */
    .cropped-img {
         max-width: 200px;
         height: auto;
@@ -186,7 +185,6 @@
                                         <button type="button" id="saveButton1" class="btn btn-primary">Save Cropped Image</button>
                                     </div>
                                     
-                                    <!-- Repeat similar structure for other image inputs (2-4) -->
 
                                     <div class="card-body align-items-center" style="margin-bottom: 20px;">
                                         <img src="" alt="" id="imgView2" style="max-width: 100%; display: none;">
@@ -271,7 +269,6 @@
         const data = await response.json();
 
         if (response.ok && data.success) {
-            // Find and remove the clicked image's parent container
             const targetImage = event.target.closest('.col-md-12');
             if (targetImage) {
                 targetImage.remove();
@@ -287,8 +284,6 @@
 }
 
 
-// Improved image preview functions
-// Improved image preview functions
 function viewImage(event, index) {
     const input = event.target;
     const imgView = document.getElementById(`imgView${index}`);
@@ -296,7 +291,6 @@ function viewImage(event, index) {
     const cropperContainer = croppedImg.parentNode;
     const saveButton = document.getElementById(`saveButton${index}`);
 
-    // Clear any existing cropper
     if (imgView.cropper) {
         imgView.cropper.destroy();
     }
@@ -309,7 +303,6 @@ function viewImage(event, index) {
             imgView.src = e.target.result;
             cropperContainer.style.display = 'flex';
             
-            // Initialize cropper
             const cropper = new Cropper(imgView, {
                 aspectRatio: 1,
                 viewMode: 1,
@@ -321,28 +314,23 @@ function viewImage(event, index) {
             
             imgView.cropper = cropper;
             
-            // Handle save button click
             saveButton.onclick = function() {
                 const canvas = cropper.getCroppedCanvas({
                     width: 600,
                     height: 600
                 });
                 
-                // Show the cropped image
                 croppedImg.src = canvas.toDataURL('image/jpeg');
                 croppedImg.style.display = 'block';
                 
-                // Convert canvas to blob and update file input
                 canvas.toBlob(function(blob) {
                     const fileName = `cropped-image-${index}-${Date.now()}.jpg`;
                     const file = new File([blob], fileName, { type: 'image/jpeg' });
                     
-                    // Update file input with cropped image
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     input.files = dataTransfer.files;
                     
-                    // Hide original image and cropper
                     imgView.style.display = 'none';
                     cropper.destroy();
                     imgView.cropper = null;
@@ -354,7 +342,6 @@ function viewImage(event, index) {
     }
 }
 
-// Individual image preview handlers
 function viewImage1(event) {
     viewImage(event, 1);
 }

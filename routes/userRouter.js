@@ -7,6 +7,7 @@ const profileController = require("../controllers/user/profileController");
 const orderController = require("../controllers/user/orderController");
 const wishlistController = require("../controllers/user/wishlistController");
 const walletController = require("../controllers/user/walletController");
+const retryPaymentController = require("../controllers/user/retryPaymentController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
 
@@ -94,8 +95,10 @@ router.get("/coupon",adminAuth,orderController.getCoupons);
 
 router.get("/orders-list",userAuth,orderController.loadListOrders);
 router.get("/order-details/:orderId",userAuth,orderController.loadOrderDetails);
+router.get("/cancel-order-page/:id",userAuth,orderController.getCancelOrder);
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder);
-router.post("/return-request/:orderId",userAuth,orderController.returnRequest);
+router.get("/return-order-page/:id",userAuth,orderController.getReturnOrder);
+router.post("/return-order/:orderId",userAuth,orderController.returnRequest);
 
 //wishlist
 router.get("/wishlist",userAuth,wishlistController.loadWishlist);
@@ -109,5 +112,7 @@ router.get("/wallet",userAuth,walletController.loadWallet);
 router.get('/download-invoice/:orderId',userAuth,orderController.invoiceDownload);
 
 //continue payment
+router.post('/continue-payment/:orderId',userAuth,retryPaymentController.continuePayment);
+router.post('/payment-success',userAuth,retryPaymentController.handlePaymentSuccess);
 
 module.exports = router;

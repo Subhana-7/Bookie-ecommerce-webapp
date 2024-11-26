@@ -1,291 +1,113 @@
-<style>
-    /* General Reset */
-body, h1, h2, h3, h4, h5, h6, p, ul, li, a {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Order Management</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
 
-body {
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f8f9fa;
-}
+    .content-wrapper {
+      min-height: 100vh; 
+    }
 
-/* Hero Section */
-.hero {
-    position: relative;
-}
+    .content-wrapper .container {
+      flex: 1; 
+      padding: 20px;
+      overflow-y: auto;
+      margin-left: 400px; /* Add margin-left to push the content to the right, avoiding the sidebar */
+    }
 
-.hero__slider .hero__items {
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    padding: 100px 0;
-}
+    .content-wrapper > * {
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
 
-.hero__text {
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-}
+  <%- include("../../views/partials/admin/header") %>
 
-.hero__text h6 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+<div class="content-wrapper">
+  
+  <%- include("../../views/partials/admin/sidebar") %>
 
-.hero__text h2 {
-    font-size: 36px;
-    margin-bottom: 15px;
-}
+  <div class="container mt-5">
+    <h2>Order Management</h2>
 
-.hero__text p {
-    font-size: 16px;
-    margin-bottom: 20px;
-}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Order ID</th>
+          <th scope="col">Order Date</th>
+          <th scope="col">Customer</th>
+          <th scope="col">Total Amount</th>
+          <th scope="col">Status</th>
+          <th scope="col">View More</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(order => { %>
+        <tr>
+          <td><%= order.orderId %></td>
 
-.primary-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    color: #fff;
-    background: #007bff;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-    text-transform: uppercase;
-}
+          <td><%= order.createdOn.toDateString() %></td>
 
-.primary-btn:hover {
-    background: #0056b3;
-}
+          <td><%= order.userId.name %></td> 
 
-/* Product Section */
-.product {
-    padding: 60px 0;
-}
+          <td>₹<%= order.finalAmount.toFixed(2) %></td>
 
-.filter__controls {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-}
+          <td>
+            <!-- If status is 'Delivered' or 'Cancelled', disable the dropdown -->
+            <form action="/admin/order-management/<%= order._id %>" method="POST">
+              <select class="form-control" name="status" onchange="this.form.submit()"
+                      <%= (order.status === 'Delivered' || order.status === 'Cancelled' || order.status === 'Returned') ? 'disabled' : '' %>>
+                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+              </select>
+            </form>
+          </td>
 
-.filter__controls li {
-    padding: 10px 20px;
-    cursor: pointer;
-    background: #007bff;
-    color: #fff;
-    margin-right: 10px;
-    border-radius: 20px;
-    transition: background 0.3s ease;
-}
+          <td>
+            <a href="/admin/admin-order-details/<%= order.orderId %>" class="btn btn-info btn-sm">View More</a>
+          </td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
 
-.filter__controls li.active,
-.filter__controls li:hover {
-    background: #0056b3;
-}
+    <!-- Pagination controls -->
+    <nav>
+      <ul class="pagination">
+        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+          <a class="page-link" href="/admin/order-management?page=<%= currentPage - 1 %>">Previous</a>
+        </li>
 
-.Product__filter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
+        <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" href="/admin/order-management?page=<%= i %>"><%= i %></a>
+        </li>
+        <% } %>
 
-.product-cart-wrap {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
+        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+          <a class="page-link" href="/admin/order-management?page=<%= currentPage + 1 %>">Next</a>
+        </li>
+      </ul>
+    </nav>
 
-.product-cart-wrap:hover {
-    transform: scale(1.05);
-}
+  </div>
+</div>
 
-.product-img-action-wrap {
-    position: relative;
-    overflow: hidden;
-}
-
-.product-img img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.product-action-1 {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.action-btn {
-    display: inline-block;
-    background: #007bff;
-    color: #fff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    text-align: center;
-    font-size: 18px;
-    transition: background 0.3s ease;
-}
-
-.action-btn:hover {
-    background: #0056b3;
-}
-
-.product-content-wrap {
-    padding: 15px;
-    text-align: center;
-}
-
-.product-content-wrap h6 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.product-content-wrap h5 {
-    font-size: 18px;
-    color: #007bff;
-    margin-bottom: 15px;
-}
-
-.product-content-wrap a {
-    display: inline-block;
-    padding: 8px 15px;
-    color: #fff;
-    background: #007bff;
-    border-radius: 20px;
-    text-decoration: none;
-    font-size: 14px;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-.product-content-wrap a:hover {
-    background: #0056b3;
-}
-
-/* Footer */
-footer {
-    background: #333;
-    color: #fff;
-    padding: 20px 0;
-    text-align: center;
-}
-
-footer a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-</style>
-
-<%-include("../../views/partials/user/header")%>
-
-<section class="hero">
-    <div class="hero__slider owl-carousel">
-        <div class="hero__items set-bg" data-setbg="img/hero/hero-1.png">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-5 col-lg-7 col-md-8">
-                        <div class="hero__text">
-                            <h6>Explore New Worlds</h6>
-                            <h2>Your Next Favorite Book Awaits</h2>
-                            <p>Discover our curated collection of bestsellers, timeless classics, and hidden gems. Dive into stories that inspire and entertain.</p>
-                            <a href="/products" class="primary-btn">Shop now <span class="arrow_right"></span></a>
-                            <div class="hero__social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-pinterest"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="hero__items set-bg" data-setbg="img/hero/hero-2.png">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-5 col-lg-7 col-md-8">
-                        <div class="hero__text">
-                            <h6>Unleash Your Imagination</h6>
-                            <h2>Best Books of 2023</h2>
-                            <p>From thrilling adventures to heartwarming tales, our selection has something for every reader. Join our community of book lovers!</p>
-                            <a href="/products" class="primary-btn">Shop now <span class="arrow_right"></span></a>
-                            <div class="hero__social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-pinterest"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-
-<section class="product spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <ul class="filter__controls">
-                    <li class="active" data-filter=".new-arrivals">New Arrivals</li>
-                </ul>
-            </div>
-        </div>
-        <div class="row Product__filter">
-            <%for(let i = 0; i < products.length;i++){%>
-                <div class="col-lg-3 col-md-4 col-12 col-sm-6" >
-                    <div class="product-cart-wrap mb-30" >
-                        <div class="product-img-action-wrap" >
-                            <div class="product-img product-img-zoom" >
-                                <a href="/productDetails?id=<%=products[i]._id%>">
-                                <img class="default-img" src="/uploads/re-image/<%=products[i].productImage[0]%>" alt="<%=products[i].productName%>">
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="product-action-1" >
-                            <a aria-label="Add to Wishlist" class="action-btn hover-up" href="/addToWishlist"></a>
-                        </div>
-
-                        <div class="product-content-wrap" >
-                            <h6><%=products[i].productName%></h6>
-                            <h5><%=products[i].salePrice%></h5>
-                            <a href="/addToCart?id=<%=products[i]._id%>">Add to Cart</a>
-                        </div>
-
-                    </div>
-                </div>
-            <%}%>
-        </div>
-    </div>
-</section>
-
-
-
-
-   <%-include("../../views/partials/user/footer")%>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

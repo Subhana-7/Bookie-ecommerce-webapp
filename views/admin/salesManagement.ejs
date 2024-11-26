@@ -37,8 +37,6 @@
     .btn-success {
       margin-left: 10px;
     }
-
-
     #customDateRange {
       display: none;
       margin-top: 10px;
@@ -87,7 +85,6 @@
                   <button class="btn btn-danger" onclick="downloadReport('pdf')">Download PDF</button>
                   <button class="btn btn-primary" onclick="downloadReport('excel')">Download Excel</button>
                 </div>
-                
             </div>
         </div>
 
@@ -125,10 +122,27 @@
                 <% }); %>
             </tbody>
         </table>
+
+        <nav>
+            <ul class="pagination justify-content-center">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage - 1 %>">Previous</a>
+                </li>
+
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                    <a class="page-link" href="/admin/sales-report?page=<%= i %>"><%= i %></a>
+                </li>
+                <% } %>
+
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage + 1 %>">Next</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 
     <script>
-      // Toggle custom date range visibility
       document.getElementById('reportType').addEventListener('change', function () {
           const customDateRange = document.getElementById('customDateRange');
           if (this.value === 'custom') {
@@ -138,13 +152,11 @@
           }
       });
 
-      // Placeholder for generating the report
       async function generateReport() {
     const reportType = document.getElementById('reportType').value;
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
 
-    // Prepare query parameters
     let query = `?reportType=${reportType}`;
     if (reportType === 'custom') {
         if (!startDate || !endDate) {
@@ -171,7 +183,7 @@
                             ${order.orderedItems
                                 .map(
                                     item =>
-                                        `<p>${item.product?.productName || "Unknown"} (x${item.quantity})</p>`
+                                        `<p>${item.product?.productName || "Unknown"} (x${item.quantity})</p>` 
                                 )
                                 .join("")}
                         </td>
@@ -211,7 +223,6 @@
         query += `&startDate=${startDate}&endDate=${endDate}`;
     }
 
-    // Redirect to the download endpoint
     window.location.href = `/admin/download-report${query}`;
   }
 </script>

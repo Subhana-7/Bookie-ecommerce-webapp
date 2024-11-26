@@ -17,6 +17,7 @@ const loadWishlist = async (req, res) => {
         match: { isBlocked: false, isDeleted: false }, 
         populate: {
           path: 'category',
+          match: { isListed: true, isDeleted: false }, 
         },
       });
 
@@ -24,7 +25,9 @@ const loadWishlist = async (req, res) => {
       return res.render("wishlist", { Wishlist: [], message: "Your Wishlist is empty." });
     }
 
-    const filteredProducts = wishlistItem.products.filter(item => item.productId !== null);
+    const filteredProducts = wishlistItem.products.filter(
+      item => item.productId !== null && item.productId.category !== null
+    );
 
     if (!filteredProducts.length) {
       return res.render("wishlist", { Wishlist: [], message: "Your Wishlist is empty." });
@@ -36,6 +39,7 @@ const loadWishlist = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 const addItemToWishlist = async (req, res) => {
