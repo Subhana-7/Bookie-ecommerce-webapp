@@ -2,6 +2,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
 const Order = require("../../models/orderSchema");
+const Wallet = require("../../models/walletSchema");
 
 const getOrderManagementPage = async (req, res) => {
   try {
@@ -31,15 +32,10 @@ const getOrderManagementPage = async (req, res) => {
   }
 };
 
-
-
-
-
 const orderManagement = async (req, res) => {
-  //console.log("Entering orderManagement controller");
   try {
-    //console.log("Inside try block of orderManagement");
     const status = req.body.status;
+    const returnAction = req.body.returnAction; // New returnAction field
     const orderId = req.params.orderId;
 
     const order = await Order.findById(orderId).populate("orderedItems.product");
@@ -48,21 +44,62 @@ const orderManagement = async (req, res) => {
       return res.status(404).send("Order not found");
     }
 
-    if (status === "Cancelled" && order.status !== "Cancelled") {
-      for (let item of order.orderedItems) {
-        const product = await Product.findById(item.product._id);
-        if (product) {
-          product.quantity += item.quantity;
-          await product.save();
+    // Handle Return Action (Allow or Deny)
+    if (order.status === "Return Request" && returnAction) {
+      if (returnAction === "allow") {
+        order.status = "Returned"; // If allowed, change status to 'Returned'
+
+        // Wallet refund logic for Razorpay payments
+        if (order.paymentMethod === "Razorpay") {
+          const userId = order.userId;
+
+          let wallet = await Wallet.findOne({ userId });
+          if (!wallet) {
+            wallet = await Wallet.create({ userId, transactions: [] });
+          }
+
+          const lastBalance = wallet.transactions.length
+            ? wallet.transactions[wallet.transactions.length - 1].balance
+            : 0;
+          const newBalance = lastBalance + order.finalAmount;
+
+          wallet.transactions.push({
+            date: new Date(),
+            type: "Credit",
+            amount: order.finalAmount,
+            balance: newBalance,
+            description: `Refund for returned order #${orderId}`,
+          });
+
+          await wallet.save();
+          console.log("Wallet updated successfully:", wallet);
+        }
+      } else if (returnAction === "deny") {
+        order.status = "Delivered"; // If denied, change status to 'Delivered'
+      }
+    } else if (status) {
+      // General status update
+      if (status === "Cancelled" && order.status !== "Cancelled") {
+        for (let item of order.orderedItems) {
+          const product = await Product.findById(item.product._id);
+          if (product) {
+            product.quantity += item.quantity;
+            await product.save();
+          }
         }
       }
+
+      // Update status and paymentStatus if 'Delivered'
+      order.status = status;
+      if (status === "Delivered") {
+        order.paymentStatus = "completed";
+      }
     }
-    order.status = status;
+
     await order.save();
-    //console.log("Order status updated successfully");
     res.redirect("/admin/order-management");
   } catch (error) {
-    console.error("Error updating order status:", error); 
+    console.error("Error updating order status:", error);
     res.redirect("/pageNotFound");
   }
 };
@@ -77,7 +114,6 @@ const getOrderDetails = async (req, res) => {
       .populate("address")
       .populate("orderedItems.product");
 
-      //console.log(order);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -87,15 +123,8 @@ const getOrderDetails = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
 module.exports = {
   getOrderManagementPage,
   orderManagement,
   getOrderDetails,
-}
+};

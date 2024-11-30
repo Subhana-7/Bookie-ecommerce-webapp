@@ -67,43 +67,44 @@
 <body>
     <%- include("../../views/partials/user/sidebar") %>
 
-<div class="container wallet-container" style="margin-left: 20px;">
+    <div class="container wallet-container" style="margin-left: 20px;">
  
-    <div class="wallet-header">My Wallet</div>
-    
-    <div class="wallet-balance-box">
-        <div>
-            <div>Wallet Balance</div>
-            <div class="wallet-balance">Rs. <%= wallet.transactions.reduce((acc, transaction) => transaction.type === 'Credit' ? acc + transaction.amount : acc - transaction.amount, 0) %></div>
+        <div class="wallet-header">My Wallet</div>
+        
+        <div class="wallet-balance-box">
+            <div>
+                <div>Wallet Balance</div>
+                <div class="wallet-balance">Rs. <%= wallet.transactions.reduce((acc, transaction) => transaction.type === 'Credit' ? acc + transaction.amount : acc - transaction.amount, 0) %></div>
+            </div>
+           <!-- <button class="btn btn-add-money">Add Money</button> -->
         </div>
-       <!-- <button class="btn btn-add-money">Add Money</button> -->
+        
+        <div class="wallet-history-header">Wallet History</div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Balance</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% wallet.transactions.slice().reverse().forEach(transaction => { %> <!-- Reverse the order -->
+                    <tr>
+                        <td><%= transaction.date.toLocaleDateString() %></td>
+                        <td><%= transaction.type %></td>
+                        <td><%= transaction.amount %></td>
+                        <td><%= transaction.balance %></td>
+                        <td><%= transaction.description %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
     </div>
     
-    <div class="wallet-history-header">Wallet History</div>
-    
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Balance</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% wallet.transactions.forEach(transaction => { %>
-                <tr>
-                    <td><%= transaction.date.toLocaleDateString() %></td>
-                    <td><%= transaction.type %></td>
-                    <td><%= transaction.amount %></td>
-                    <td><%= transaction.balance %></td>
-                    <td><%= transaction.description %></td>
-                </tr>
-            <% }) %>
-        </tbody>
-    </table>
-</div>
 
 
 

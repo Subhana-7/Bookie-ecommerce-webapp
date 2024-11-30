@@ -215,6 +215,22 @@ const cart = async (req, res) => {
 };
 
 
+const getCartItemCount = async (req, res) => {
+  try {
+    const userId = req.session.user;
+
+    const cart = await Cart.findOne({ userId });
+
+    const totalItems = cart 
+      ? cart.items.reduce((total, item) => total + item.quantity, 0) 
+      : 0;
+
+    return res.status(200).json({ totalItems });
+  } catch (error) {
+    console.error("Error fetching cart item count:", error);
+    return res.status(500).json({ message: "An error occurred while fetching the cart item count" });
+  }
+};
 
 
 
@@ -390,5 +406,6 @@ module.exports = {
   cart,
   addItemToCart,
   removeItemFromCart,
-  updateCart
+  updateCart,
+  getCartItemCount
 }

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continue Payment</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .payment-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="payment-card">
+            <h3 class="text-center">Complete Your Payment</h3>
+            <p class="text-center text-muted">Order ID: <%= order._id %></p>
+            <p>Total Amount: <strong>₹<%= order.finalAmount %></strong></p>
+            <p>Payment Status: <strong><%= order.paymentStatus %></strong></p>
+
+            <% if (order.paymentStatus.toLowerCase() === 'pending') { %>
+                <div class="text-center mt-4">
+                    <button id="continue-payment-btn" class="btn btn-primary">Continue Payment</button>
+                </div>
+            <% } else { %>
+                <div class="alert alert-success text-center">
+                    Payment already completed for this order.
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("continue-payment-btn").addEventListener("click", function () {
+            const orderId = "<%= order._id %>";
+
+            // Fetch payment details from the server
+            fetch(`/continue-payment/${orderId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((response) => {
+                    if (!response.ok) throw new Error("Failed to initiate payment");
+                    return response.json();
+                })
+                .then((data) => {
+                    const options = {
+                        key: data.key_id, // Razorpay API key
+                        amount: data.amount, // Amount in paise
+                        currency: data.currency,
+                        name: "Your Shop Name",
+                        description: "Order Payment",
+                        order_id: data.order_id, // Razorpay Order ID
+                        handler: function (response) {
+                        // Send payment confirmation to the server
+                        fetch(`/payment-success/${orderId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                order_id: data.order_id, // Razorpay Order ID
+                                payment_id: response.razorpay_payment_id, // Razorpay Payment ID
+                                signature: response.razorpay_signature,  // Razorpay Signature
+                            }),
+                        })
+                            .then((successResponse) => successResponse.json())
+                            .then((successData) => {
+                                if (successData.success) {
+                                    Swal.fire("Success", "Payment completed successfully!", "success").then(() => {
+                                        window.location.href = "/orders-list"; // Redirect after success
+                                    });
+                                } else {
+                                    Swal.fire("Error", "Payment verification failed.", "error");
+                                }
+                            })
+                            .catch((error) => {
+                                Swal.fire("Error", "Something went wrong. Please try again.", "error");
+                                console.error(error);
+                            });
+                    },
+
+                        theme: {
+                            color: "#3399cc",
+                        },
+                    };
+
+                    const rzp1 = new Razorpay(options);
+                    rzp1.open();
+                })
+                .catch((error) => {
+                    Swal.fire("Error", error.message, "error");
+                    console.error(error);
+                });
+        });
+    </script>
+</body>
+</html>

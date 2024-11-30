@@ -22,40 +22,49 @@ const getAddProduct = async(req,res) => {
 }
 
 
-const addProduct = async(req, res) => {
+const addProduct = async (req, res) => {
   try {
     const products = req.body;
+
     const productExists = await Product.findOne({ productName: products.productName });
-    if(!products.category) {
-      return res.status(400).json({message:"Select"})
+    if (!products.category) {
+      return res.status(400).json({ message: "Please select a category." });
     }
+
     if (!productExists) {
       const images = [];
       if (req.files && req.files.length > 0) {
-        for (let i = 0; i < req.files.length; i++) {
-          const originalImagePath = req.files[i].path;
-          console.log(req.files[i].filename);
+        for (const file of req.files) {
+          const originalImagePath = file.path;
+          const resizedImagePath = path.join(
+            "public",
+            "uploads",
+            "product-images",
+            `resized-${file.filename}` // Add a "resized-" prefix to avoid conflicts
+          );
 
-          const resizedImagePath = path.join("public", "uploads", "product-images", req.files[i].filename);
-          console.log(resizedImagePath);
-          await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
-          images.push(req.files[i].filename);
+          await sharp(originalImagePath)
+            .resize({ width: 440, height: 440 })
+            .toFile(resizedImagePath);
+
+          images.push(`resized-${file.filename}`);
         }
       }
 
       const categoryId = await Category.findOne({ name: products.category });
       if (!categoryId) {
-        return res.status(400).json("Invalid category name");
+        return res.status(400).json({ message: "Invalid category name." });
       }
 
+      const regularPrice = parseFloat(products.regularPrice);
       const newProduct = new Product({
         productName: products.productName,
         description: products.description,
         category: categoryId._id,
-        publisher:products.publisher,
-        author:products.author,
-        regularPrice: products.regularPrice,
-        salePrice: products.salePrice,
+        publisher: products.publisher,
+        author: products.author,
+        regularPrice: regularPrice,
+        salePrice: regularPrice,
         createdOn: new Date(),
         quantity: products.quantity,
         productImage: images,
@@ -65,13 +74,15 @@ const addProduct = async(req, res) => {
       await newProduct.save();
       return res.redirect("/admin/productManagement");
     } else {
-      return res.status(400).json("Product already exists, please try with another name");
+      return res.status(400).json({ message: "Product already exists, please try with another name." });
     }
   } catch (error) {
     console.error("Error saving product", error);
     return res.redirect("/admin/pageNotFound");
   }
 };
+
+
 
 
 const getProductManagementPage = async (req, res) => {
@@ -127,8 +138,7 @@ const getProductManagementPage = async (req, res) => {
 
 
 
-
-const addProductOffer = async(req, res) => {
+const addProductOffer = async (req, res) => {
   try {
     const { productId, percentage } = req.body;
 
@@ -143,14 +153,18 @@ const addProductOffer = async(req, res) => {
     }
 
     if (findCategory.categoryOffer > percentage) {
-      return res.json({ status: false, message: "This product's category already has a category offer" });
+      return res.json({ status: false, message: "This product's category already has a higher category offer." });
     }
 
-    findProduct.salePrice = Math.floor(findProduct.regularPrice * (percentage / 100));
+    // Calculate sale price based on offer percentage
+    const discountAmount = (findProduct.regularPrice * percentage) / 100;
+    findProduct.salePrice = findProduct.regularPrice - discountAmount;
     findProduct.productOffer = parseInt(percentage);
-    
+
     await findProduct.save();
-    findCategory.categoryOffer = 0; 
+
+    // Reset category offer (if any)
+    findCategory.categoryOffer = 0;
     await findCategory.save();
 
     return res.json({ status: true });
@@ -158,23 +172,31 @@ const addProductOffer = async(req, res) => {
     console.error("Error in addProductOffer:", error);
     return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
-}
+};
 
 
 
-const removeProductOffer = async(req,res) => {
+
+const removeProductOffer = async (req, res) => {
   try {
-    const {productId} = req.body;
-    const findProduct = await Product.findOne({_id:productId});
-    const percentage = findProduct.productOffer;
-    findProduct.salePrice = findProduct.salePrice+Math.floor(findProduct.regularPrice*(percentage/100));
+    const { productId } = req.body;
+
+    const findProduct = await Product.findOne({ _id: productId });
+    if (!findProduct) {
+      return res.status(404).json({ message: "Product not found." });
+    }
+
+    findProduct.salePrice = findProduct.regularPrice; // Reset to regular price
     findProduct.productOffer = 0;
+
     await findProduct.save();
-    res.json({status:true})
+    res.json({ status: true });
   } catch (error) {
-    res.redirect("pageNotFound");
+    console.error("Error in removeProductOffer:", error);
+    res.status(500).json({ status: false, message: "Internal Server Error" });
   }
-}
+};
+
 
 
 const blockProduct = async(req,res) => {
@@ -236,54 +258,63 @@ const getEditProduct = async(req,res) => {
   }
 }
 
-const editProduct = async(req,res) => {
-  console.log("inside editProduct of controller");
+const editProduct = async (req, res) => {
   try {
-    console.log("inside the try block of editProduct")
     const id = req.params.id;
-    const product = await Product.findOne({_id:id});
+    const product = await Product.findById(id).populate('category');
     const data = req.body;
-    const existingProduct = await Product.findOne({
-      productName:data.productName,
-      _id:{$ne:id}
-    })
 
-    if(existingProduct) {
-      return res.status(400).json({error:"Product with this name already exists.Please try with another name"})
+    const existingProduct = await Product.findOne({
+      productName: data.productName,
+      _id: { $ne: id },
+    });
+
+    if (existingProduct) {
+      return res.status(400).json({ error: "Product with this name already exists. Please try another name." });
     }
 
     const images = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const originalImagePath = file.path;
+        const resizedImagePath = path.join(
+          "public",
+          "uploads",
+          "product-images",
+          `resized-${file.filename}` // Add a "resized-" prefix
+        );
 
-    if(req.files && req.files.length > 0) {
-      for(let i = 0; i < req.files.length; i++) {
-        images.push(req.files[i].filename);
+        await sharp(originalImagePath)
+          .resize({ width: 440, height: 440 })
+          .toFile(resizedImagePath);
+
+        images.push(`resized-${file.filename}`);
       }
     }
 
     const updateFields = {
-      productName : data.productName,
-      author:data.author,
-      description:data.description,
-      publisher:data.publisher,
-      category:data.category,
-      regularPrice:data.regularPrice,
-      salePrice:data.salePrice,
-      quantity:data.quantity,
-    }
+      productName: data.productName || product.productName,
+      description: data.description || product.description,
+      author: data.author || product.author,
+      publisher: data.publisher || product.publisher,
+      category: data.cat || product.category,
+      regularPrice: data.regularPrice || product.regularPrice,
+      salePrice: data.regularPrice || product.regularPrice,
+      quantity: data.quantity || product.quantity,
+      ...(images.length > 0 && { productImage: images }),
+    };
 
-    if(req.files.length > 0) {
-      updateFields.$push = {productImage:{$each:images}};
-    }
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });
+    console.log("Updated successfully:", updatedProduct);
 
-    console.log(images);
-
-    await Product.findByIdAndUpdate(id,updateFields,{new:true});
-    res.redirect("/admin/productManagement")
+    res.redirect("/admin/productManagement");
   } catch (error) {
     console.error(error);
     res.redirect("/pageNotFound");
   }
-}
+};
+
+
 
 const deleteSingleImage = async (req, res) => {
   try {
@@ -318,7 +349,7 @@ const deleteSingleImage = async (req, res) => {
           process.cwd(),
           "public",
           "uploads",
-          "re-image",
+          "product-images",
           imageNameToServer
       );
 

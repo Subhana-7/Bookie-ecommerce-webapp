@@ -101,6 +101,8 @@ const renderDashboard = async (req, res) => {
           salesData,
           bestSellingProducts,
           bestSellingCategories,
+          filterTotalOrders: totalOrders, // Default value for initial render
+          filterTotalRevenue: totalRevenue, // Default value for initial render
         });
       } catch (error) {
         console.error("Error rendering dashboard:", error);
@@ -113,68 +115,99 @@ const renderDashboard = async (req, res) => {
   
 
 
-const renderDashboardData = async (req, res) => {
-  const filter = req.query.filter || "monthly";
-  try {
-    let salesData = [];
-    let labels = [];
-
-    if (filter === "daily") {
-      // Group data by day
-      const dailySalesData = await Order.aggregate([
-        {
-          $group: {
-            _id: { $dayOfMonth: "$createdOn" },
-            totalSales: { $sum: "$totalPrice" },
+  const renderDashboardData = async (req, res) => {
+    const filter = req.query.filter || "monthly";
+    try {
+      let salesData = [];
+      let labels = [];
+      let filterTotalOrders = 0;
+      let filterTotalRevenue = 0;
+  
+      if (filter === "daily") {
+        const dailySalesData = await Order.aggregate([
+          {
+            $group: {
+              _id: { $dayOfMonth: "$createdOn" },
+              totalSales: { $sum: "$totalPrice" },
+              totalOrders: { $sum: 1 },
+            },
           },
-        },
-        { $sort: { _id: 1 } },
-      ]);
+          { $sort: { _id: 1 } },
+        ]);
+  
+        // Labels as day numbers (1, 2, ..., N)
+        labels = dailySalesData.map((item) => `Day ${item._id}`);
+        // Sales data per day
+        salesData = dailySalesData.map((item) => item.totalSales);
+  
+        // Calculate the total orders and total revenue based on daily sales data
+        filterTotalOrders = dailySalesData.reduce((acc, item) => acc + item.totalOrders, 0);
+        filterTotalRevenue = dailySalesData.reduce((acc, item) => acc + item.totalSales, 0);
 
-      labels = dailySalesData.map((item) => `Day ${item._id}`);
-      salesData = dailySalesData.map((item) => item.totalSales);
-
-    } else if (filter === "monthly") {
-      const monthlySalesData = await Order.aggregate([
-        {
-          $group: {
-            _id: { $month: "$createdOn" },
-            totalSales: { $sum: "$totalPrice" },
+        console.log("daily basis:",filterTotalOrders);
+        console.log("daily basis:",filterTotalRevenue)
+  
+      } else if (filter === "monthly") {
+        const monthlySalesData = await Order.aggregate([
+          {
+            $group: {
+              _id: { $month: "$createdOn" },
+              totalSales: { $sum: "$totalPrice" },
+              totalOrders: { $sum: 1 },
+            },
           },
-        },
-        { $sort: { _id: 1 } },
-      ]);
-
-      labels = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
-      ];
-      salesData = Array(12).fill(0);
-      monthlySalesData.forEach((item) => {
-        salesData[item._id - 1] = item.totalSales;
-      });
-
-    } else if (filter === "yearly") {
-      const yearlySalesData = await Order.aggregate([
-        {
-          $group: {
-            _id: { $year: "$createdOn" },
-            totalSales: { $sum: "$totalPrice" },
+          { $sort: { _id: 1 } },
+        ]);
+  
+        // Labels as month names
+        labels = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December",
+        ];
+        // Initialize salesData with zero values for each month
+        salesData = Array(12).fill(0);
+  
+        // Calculate the total orders and total revenue based on monthly sales data
+        filterTotalOrders = monthlySalesData.reduce((acc, item) => acc + item.totalOrders, 0);
+        filterTotalRevenue = monthlySalesData.reduce((acc, item) => acc + item.totalSales, 0);
+  
+        // Fill the sales data for each month
+        monthlySalesData.forEach((item) => {
+          salesData[item._id - 1] = item.totalSales;
+        });
+  
+      } else if (filter === "yearly") {
+        const yearlySalesData = await Order.aggregate([
+          {
+            $group: {
+              _id: { $year: "$createdOn" },
+              totalSales: { $sum: "$totalPrice" },
+              totalOrders: { $sum: 1 },
+            },
           },
-        },
-        { $sort: { _id: 1 } },
-      ]);
-
-      labels = yearlySalesData.map((item) => `Year ${item._id}`);
-      salesData = yearlySalesData.map((item) => item.totalSales);
+          { $sort: { _id: 1 } },
+        ]);
+  
+        // Labels as year labels
+        labels = yearlySalesData.map((item) => `Year ${item._id}`);
+        salesData = yearlySalesData.map((item) => item.totalSales);
+  
+        // Calculate the total orders and total revenue based on yearly sales data
+        filterTotalOrders = yearlySalesData.reduce((acc, item) => acc + item.totalOrders, 0);
+        filterTotalRevenue = yearlySalesData.reduce((acc, item) => acc + item.totalSales, 0);
+      }
+  
+      // Log only once after all calculations are done for the selected filter
+      console.log("Total Orders:", filterTotalOrders);
+      console.log("Total Revenue:", filterTotalRevenue);
+  
+      res.json({ labels, sales: salesData, filterTotalOrders, filterTotalRevenue });
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      res.status(500).json({ error: "Unable to fetch data" });
     }
-
-    res.json({ labels, sales: salesData });
-  } catch (error) {
-    console.error("Error fetching dashboard data:", error);
-    res.status(500).json({ error: "Unable to fetch data" });
-  }
-};
+  };
+  
 
 
 

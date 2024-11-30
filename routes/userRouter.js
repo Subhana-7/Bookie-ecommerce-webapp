@@ -75,6 +75,7 @@ router.get("/cart",userAuth,profileController.cart);
 router.post("/cart/add",userAuth,profileController.addItemToCart);
 router.post("/cart/remove",userAuth,profileController.removeItemFromCart);
 router.post("/cart/update",userAuth,profileController.updateCart);
+router.get("/cart/item-count",userAuth,profileController.getCartItemCount);
 
 //order routes
 
@@ -85,6 +86,7 @@ router.post("/payment", userAuth, orderController.placeOrder);
 router.post("/create-razorpay-order", userAuth, orderController.createRazorpayOrder);
 router.post("/verify-razorpay-payment",userAuth,orderController.verifyRazorpayPayment);
 router.get("/order-confirmation/:orderId", userAuth, orderController.orderConfirmation);
+router.get("/payment-failed",userAuth,orderController.paymentFailed);
 
 //coupon
 
@@ -112,7 +114,10 @@ router.get("/wallet",userAuth,walletController.loadWallet);
 router.get('/download-invoice/:orderId',userAuth,orderController.invoiceDownload);
 
 //continue payment
-router.post('/continue-payment/:orderId',userAuth,retryPaymentController.continuePayment);
-router.post('/payment-success',userAuth,retryPaymentController.handlePaymentSuccess);
+
+router.get("/continue-payment/:orderId",userAuth,retryPaymentController.getContinuePaymentPage);
+router.post("/continue-payment/:orderId",userAuth,retryPaymentController.initiatePayment);
+router.post("/payment-success/:orderId",userAuth,retryPaymentController.handlePaymentSuccess);
+
 
 module.exports = router;

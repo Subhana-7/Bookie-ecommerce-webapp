@@ -62,7 +62,7 @@
           <option value="">Select a Coupon</option>
           <% coupons.forEach(coupon => { %>
             <option value="<%= coupon._id %>">
-              <%= coupon.name %> (₹<%= coupon.offerPrice %> off)
+              <%= coupon.name %> (<%= coupon.offerPrice %> %off)
             </option>
           <% }) %>
         <% } else { %>
@@ -73,6 +73,7 @@
 
     <p class="total"><strong>Total:</strong> ₹<%= cart.items.reduce((sum, item)=> sum + item.totalPrice, 0).toFixed(2) %>
     </p>
+
     <p class="total"><strong>Final Price:</strong> <span id="finalPrice">₹<%= cart.items.reduce((sum, item)=> sum +
           item.totalPrice, 0).toFixed(2) %></span></p>
 
@@ -154,7 +155,7 @@
           amount: data.amount,
           currency: data.currency,
           order_id: data.razorpayOrderId,
-          name: 'Zahra',
+          name: 'Bookie',
           description: 'Order Payment',
           handler: function(paymentResponse) {
             verifyPayment(paymentResponse, data.orderId, data.razorpayOrderId);
@@ -208,11 +209,14 @@ async function verifyPayment(paymentResponse, orderId, razorpayOrderId) {
     const data = await response.json();
 
     if (data.success) {
-      alert('Payment successful! Order placed.');
-      window.location.href = '/order-confirmation/' + orderId;
+    window.location.href = '/order-confirmation/' + orderId;
     } else {
-      alert('Payment verification failed.');
+    alert(data.message || 'Payment verification failed.');
+    if (data.redirect) {
+        window.location.href = data.redirect;
     }
+  }
+
   } catch (error) {
     console.error('Error:', error);
     alert('An error occurred while verifying payment.');

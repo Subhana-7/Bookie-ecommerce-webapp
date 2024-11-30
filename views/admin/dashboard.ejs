@@ -83,11 +83,25 @@
         <option value="yearly">Yearly</option>
       </select>
     </div>
+
+    <div class="dashboard-stats">
+     <div class="stat-box">
+  <h3>Total Orders</h3>
+  <p><%= filterTotalOrders%></p>
+</div>
+<div class="stat-box">
+  <h3>Total Revenue</h3>
+  <p>₹<%=filterTotalRevenue.toFixed(2)%></p>
+</div>
+
+    </div>
   
     <div class="chart-container">
       <h2 class="text-center">Sales Data</h2>
       <canvas id="salesChart"></canvas>
     </div>
+
+    
   
     <div class="best-selling">
       <h2 class="text-center my-4">Best Selling Products (Top 10)</h2>
@@ -165,19 +179,31 @@
     });
 
     async function updateChart(filter) {
-      const response = await fetch(`/admin/dashboard-data?filter=${filter}`);
-      const data = await response.json();
+  try {
+    const response = await fetch(`/admin/dashboard-data?filter=${filter}`);
+    const data = await response.json();
 
-      salesChart.data.labels = data.labels;
-      salesChart.data.datasets[0].data = data.sales;
-      salesChart.update();
-    }
+    // Update chart data
+    salesChart.data.labels = data.labels;
+    salesChart.data.datasets[0].data = data.sales;
+    salesChart.update();
 
-    updateChart(filterDropdown.value);
+    // Update dashboard stats
+    document.querySelector(".dashboard-stats .stat-box:nth-child(1) p").innerText = data.filterTotalOrders;
+    document.querySelector(".dashboard-stats .stat-box:nth-child(2) p").innerText = `₹${data.filterTotalRevenue.toFixed(2)}`;
+  } catch (error) {
+    console.error("Error updating chart and stats:", error);
+  }
+}
 
-    filterDropdown.addEventListener("change", (e) => {
-      updateChart(e.target.value);
-    });
+// Initialize with default filter
+updateChart(filterDropdown.value);
+
+// Add event listener for filter change
+filterDropdown.addEventListener("change", (e) => {
+  updateChart(e.target.value);
+});
+
   </script>
 </body>
 </html>

@@ -4,21 +4,54 @@
   <title>Admin Order Details</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
-
-    body { background-color: #f5f5f5; color: #333; display: flex; }
-    .header, .sidebar, .card-header, .btn-maroon { background-color: #800000; color: white; }
-    .btn-maroon:hover { background-color: #660000; }
-    .sidebar { width: 200px; position: fixed; top: 0; bottom: 0; left: 0; padding-top: 20px; }
-    .sidebar a { color: white; text-decoration: none; display: block; padding: 10px; }
-    .sidebar a:hover { background-color: #660000; }
-    .main-content { margin-left: 200px; padding: 20px; width: calc(100% - 200px); }
-    .order-details { margin-bottom: 1.5rem; }
-    .section-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; color: #800000; }
-    .cancel-reason { display: none; }
+  body { 
+    background-color: #f5f5f5;
+    color: #333;
+    display: flex; }
+  .header, .sidebar, .card-header, .btn-maroon {
+    background-color:  #660000;
+    color: white; 
+    }
+  .btn-maroon:hover {
+    background-color: #660000;
+    }
+  .sidebar {
+    width: 200px;
+    position: fixed;
+    top: 0;
+    bottom: 0; 
+    left: 0;
+    padding-top: 20px;
+    }
+  .sidebar a { 
+    color: white;
+    text-decoration: none;
+    display: block; 
+    padding: 10px;
+    }
+  .sidebar a:hover {
+    background-color: #660000; 
+    }
+  .main-content {
+    margin-left: 200px;
+    padding: 20px;
+    width: calc(100% - 200px); 
+    }
+  .order-details {
+    margin-bottom: 1.5rem;
+    }
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #800000; 
+    }
+  .cancel-reason {
+    display: none; 
+    }
   </style>
 </head>
 <body>
-
 
 <div class="main-content">
   <div class="container">
@@ -37,7 +70,7 @@
 
         <div class="order-details">
           <h5 class="section-title">Order Details</h5>
-          <p><strong>Order ID:</strong> <%= order.orderId %></p>
+          <p><strong>Order ID:</strong> <%= order._id %></p>
           <p><strong>Total Price:</strong> ₹<%= order.totalPrice.toFixed(2) %></p>
 
           <tr class="final-row">
@@ -59,20 +92,41 @@
               <select class="form-control" id="status" name="status" onchange="toggleCancelReason(this)"
                 <%= ['Delivered', 'Cancelled', 'Return Pending', 'Returned'].includes(order.status) ? 'disabled' : '' %>>
                 <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Processing</option>
                 <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                 <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
-                <option value="Return Pending" <%= order.status === 'Return Pending' ? 'selected' : '' %>>Return Pending</option>
-                <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %> disabled>Cancelled</option>
+                <option value="Return Request" <%= order.status === 'Return Request' ? 'selected' : '' %> disabled>Return Request</option>
+                <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %> disabled>Returned</option>
               </select>
             </div>
         
-            <% if (!['Delivered', 'Cancelled', 'Return Pending', 'Returned'].includes(order.status)) { %>
+            <% if (!['Delivered', 'Cancelled', 'Returned','Return Request'].includes(order.status)) { %>
               <button type="submit" class="btn btn-maroon btn-block">Update Status</button>
             <% } %>
           </form>
         </div>
+
+        <% if (order.status === 'Return Request') { %>
+          <div class="order-details mb-4 rounded" style="background-color: rgb(206, 117, 0); padding: 30px;  " >
+            <h5 class="section-title" style="color: rgb(135, 0, 0); text-decoration: underline;">Return Request</h5>
+            <p class="alert" style="color: black; font-weight: bold; font-size: 20px;">
+              User requested to return this order! Please review the request and decide whether to allow or cancel the return.
+            </p>
+            
+            <div class="d-flex justify-content-between">
+              <form action="/admin/order-management/<%= order._id %>" method="POST" class="w-48">
+                <input type="hidden" name="returnAction" value="allow">
+                <button type="submit" class="btn btn-success btn-block">Allow Return</button>
+              </form>
+              
+              <form action="/admin/order-management/<%= order._id %>" method="POST" class="w-48">
+                <input type="hidden" name="returnAction" value="deny">
+                <button type="submit" class="btn btn-danger btn-block">Cancel Return</button>
+              </form>
+            </div>
+          </div>
+        <% } %>
         
 
         <div class="order-details">

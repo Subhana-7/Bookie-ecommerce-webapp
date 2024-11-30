@@ -1,124 +1,126 @@
-const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema");
-const Address = require("../../models/addressSchema");
-const Cart = require("../../models/cartSchema");
-const Wallet = require("../../models/walletSchema");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
+const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
-
-
-const Razorpay = require('razorpay');
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-const env = require("dotenv").config();
-
-const crypto = require('crypto');
-
-
-
-const continuePayment = async(req,res) => {
-  console.log("inside the controller block of continuepayment");
-  try {
-    console.log("inside the try block of continue payment");
-
+const getContinuePaymentPage = async (req, res) => {
     const orderId = req.params.orderId;
-    const order = await Order.findById(orderId); 
 
-      console.log("your orderId and order:",orderId,order)
-
-/*
-    if (!order) {
-        return res.status(404).send({ message: 'Order not found' });
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+        return res.status(400).render("error", { message: "Invalid Order ID." });
     }
 
-    if (order.paymentStatus === 'completed') {
-        return res.status(400).send({ message: 'Payment already completed' });
+    try {
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).render("error", { message: "Order not found." });
+        }
+        res.render("continue-payment", { order });
+    } catch (error) {
+        console.error(error);
+        res.redirect("/pageNotFound");
+    }
+};
+
+
+const initiatePayment = async (req, res) => {
+    console.log("inside the controller block of initiate payment");
+    const orderId = req.params.orderId;
+
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+        return res.status(400).json({ success: false, message: "Invalid Order ID." });
     }
 
-    if (order.paymentMethod !== 'razorpay' || order.paymentStatus !== 'Pending') {
-        return res.status(400).send({ message: 'Invalid order status for payment retry' });
+    try {
+        console.log("inside the try block of initiate payment");
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found." });
+        }
+
+        const amount = order.finalAmount * 100; // Convert to paise
+        const currency = "INR";
+
+        // Create Razorpay order
+        const razorpayOrder = await razorpayInstance.orders.create({
+            amount,
+            currency,
+            receipt: `order_rcptid_${order._id}`
+        });
+
+        if (!razorpayOrder) {
+            return res.status(500).json({ success: false, message: "Failed to create Razorpay order." });
+        }
+
+        res.json({
+            success: true,
+            key_id: razorpayInstance.key_id,
+            amount,
+            currency,
+            order_id: razorpayOrder.id // Send Razorpay order ID
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal Server Error." });
     }
-        */
+};
 
-    console.log("checking inside continue payment");
-
-    const paymentOptions = {
-        amount: order.finalAmount * 100, 
-        currency: 'INR',
-        receipt: order._id.toString(),
-        payment_capture: 1  
-    };
-
-    console.log("payment opyion:",paymentOptions);
-
-    const razorpayOrder = await razorpayInstance.orders.create(paymentOptions);
-
-    if (!razorpayOrder) {
-        return res.status(500).send({ message: 'Failed to create Razorpay order' });
-    }
-
-    order.paymentGatewayOrderId = razorpayOrder.id;
-    await order.save();
-
-    return res.json({ 
-        key_id: process.env.RAZORPAY_KEY_ID, 
-        order_id: razorpayOrder.id, 
-        amount: razorpayOrder.amount, 
-        currency: razorpayOrder.currency 
-    });
-
-} catch (error) {
-    console.error(error);
-    return res.status(500).send({ message: 'Something went wrong, please try again.' });
-}
-}
-
-const handlePaymentSuccess = async(req,res) => {
-  console.log("inside the controller block of handlePaymentSuccess");
-  try {
-    console.log("inside the try block of handle payment success");
-    const { order_id, payment_id, signature } = req.body;
-
-    console.log("order_id :" ,order_id);
-    console.log("payment_id: ",payment_id);
-    console.log("signature:",signature);
-
-    const order = await Order.findById(order_id);
+// Handle Payment Success
+const handlePaymentSuccess = async (req, res) => {
+    console.log("inside the controller block of handle payment success");
     
-    if (!order) {
-        return res.status(404).send({ message: 'Order not found' });
+    try {
+        const Id = req.params.orderId;
+        //console.log("doc id:",orderDocId)
+
+        const { order_id, payment_id, signature } = req.body;
+        // console.log("order id:",order_id);
+        // console.log("payment id:",payment_id);
+        // console.log("signature:",signature);
+
+        console.log("inside the try block of handle payment success");
+        const generatedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(`${order_id}|${payment_id}`)
+        .digest("hex");
+
+        console.log("generated sig:",generatedSignature);
+        if (generatedSignature !== signature) {
+            return res.status(400).json({ success: false, message: "Invalid payment signature." });
+        }
+
+        const order = await Order.findOneAndUpdate(
+            {_id:Id} ,
+            {
+                status:'Processing',
+                paymentStatus: "completed",
+                paymentId: payment_id,
+                paymentSignature: signature
+            },
+            { new: true }
+        );
+
+        
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found." });
+        }
+
+        res.json({ success: true, message: "Payment verified and order updated." });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal Server Error." });
     }
-
-        console.log("order:",order);
-
-    const body = order_id + '|' + payment_id;
-    const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-        .update(body)
-        .digest('hex');
-
-        console.log("expectedSignature: ",expectedSignature);
-
-    if (expectedSignature !== signature) {
-        order.paymentStatus = 'completed';
-        order.paymentId = payment_id;
-        order.orderStatus = 'Processing';  
-        await order.save();
-
-        return res.json({ success: true });
-    } else {
-        return res.status(400).send({ message: 'Payment verification failed' });
-    }
-} catch (error) {
-    console.error(error);
-    return res.status(500).send({ message: 'Payment verification failed' });
-}
-}
-
+};
 
 module.exports = {
-  continuePayment,
-  handlePaymentSuccess
-}
+    getContinuePaymentPage,
+    initiatePayment,
+    handlePaymentSuccess
+};
+

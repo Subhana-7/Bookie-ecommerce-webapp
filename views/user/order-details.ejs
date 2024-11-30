@@ -285,25 +285,31 @@
                 </div>
 
                 <div class="mt-4 d-flex justify-content-between align-items-center">
-                    <div>      
-                        <% if (order.status && (order.status.toLowerCase() === 'cancelled' || order.status.toLowerCase() === 'return pending' || order.status.toLowerCase() === 'pending' && order.status.toLowerCase() === 'Returned' )) { %>
-                            <button id="product-btn" class="btn shop-more-btn">
-                                <a href="/products" style="color: inherit; text-decoration: none;">Shop More</a>
-                            </button>
+                    <div>
+                        <% if (order.status === 'Pending') { %>
+                          <!-- Show 'Shop More' button -->
+                          <button id="shop-more-btn" class="btn shop-more-btn">
+                            <a href="/products" style="color: inherit; text-decoration: none;">Shop More</a>
+                          </button>
                         <% } else if (order.status && order.status.toLowerCase() === 'delivered') { %>
-                            <button id="return-request-btn" class="btn return-request-btn"> <a href="/return-order-page/<%=order._id%>">Return Request</a></button>
-                        <% } else if(order.status && order.status.toLowerCase() !== 'Returned') { %>
-                            <button id="cancel-order-btn" class="btn cancel-order-btn"><a href="/cancel-order-page/<%=order._id%>">Cancel Order</a></button>
+                          <!-- Show 'Return Request' button -->
+                          <button id="return-request-btn" class="btn return-request-btn">
+                            <a href="/return-order-page/<%= order._id %>" style="color: inherit; text-decoration: none;">Return Request</a>
+                          </button>
                         <% } else { %>
-                            <button id="cancel-order-btn" class="btn cancel-order-btn"><a href="/cancel-order-page/<%=order._id%>">Cancel Order</a></button>
+                          <!-- Show 'Cancel Order' button -->
+                          <button id="cancel-order-btn" class="btn cancel-order-btn">
+                            <a href="/cancel-order-page/<%= order._id %>" style="color: inherit; text-decoration: none;">Cancel Order</a>
+                          </button>
                         <% } %>
-                    </div>
+                      </div>
+                      
 
                     
                     <div>
-                        <% if (order.paymentStatus.toLowerCase() === 'pending') { %>
+                        <% if (order.paymentStatus.toLowerCase() === 'pending' && order.paymentMethod.toLowerCase() === 'razorpay') { %>
                             <a href="/continue-payment/<%= order._id %>" class="btn btn-primary btn-custom">Continue Payment</a>
-                        <% } else { %>
+                        <% } else if(order.paymentStatus.toLowerCase() !== 'pending' || order.paymentMethod.toLowerCase() === 'cash on delivery'){ %>
                             <a href="/download-invoice/<%= order._id %>" class="btn btn-primary btn-custom">Download Invoice</a>
                         <% } %>
                         <a href="/orders-list" class="btn btn-custom btn-outline-secondary ms-2">Back to Orders</a>
@@ -342,102 +348,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-
-
-
-
-
 const addressId = $("input[name='address']:checked").val(); 
 if (!addressId) {
     Swal.fire('Error', 'Please select an address.', 'error');
     return;
 }
 
-$.ajax({
-    url: `/continue-payment/${orderId}`,
-    method: "POST",
-    data: { addressId: addressId },
-    success: function (response) {
-        console.log(response,data);
-    },
-    error: function (error) {
-        Swal.fire('Error', error.responseJSON.message, 'error');
-    }
-});
-
-
-
-//payment
-
-   document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector(".btn-primary").addEventListener("click", function (e) {
-        e.preventDefault();  
-
-        const orderId = "<%= order._id %>"; 
-        
-        fetch(`/continue-payment/${orderId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Failed to initiate payment");
-            }
-            return response.json();
-        })
-        .then(data => {
-            const options = {
-                key: data.key_id,  
-                amount: data.amount,  
-                currency: data.currency,
-                name: 'Your Shop Name',
-                description: 'Order Payment',
-                order_id: data.order_id,  
-                handler: function (response) {
-                   
-                    fetch('/payment-success', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            order_id: orderId,
-                            payment_id: response.razorpay_payment_id,
-                            signature: response.razorpay_signature
-                        })
-                    })
-                    .then(successResponse => successResponse.json())
-                    .then(successData => {
-                        if (successData.success) {
-                            location.reload();  
-                        } else {
-                            Swal.fire('Error', 'Payment failed. Please try again.', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-                        console.error(error);
-                    });
-                },
-                theme: {
-                    color: '#3399cc'
-                }
-            };
-
-            const rzp1 = new Razorpay(options);
-            rzp1.open();  
-        })
-        .catch(error => {
-            Swal.fire('Error', error.message, 'error');
-            console.error(error);
-        });
-    });
-});
-
 </script>
 
+<script>
+    console.log("order",orderId);
+</script>
 
 
 

@@ -267,6 +267,8 @@ const placeOrder = async (req, res) => {
 const createRazorpayOrder = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
+
+    const {finalAmount } = req.body;
     if (!user) {
       return res.status(401).json({ success: false, message: "User not authenticated." });
     }
@@ -297,7 +299,9 @@ const createRazorpayOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid address." });
     }
 
+
     const totalPrice = filteredItems.reduce((sum, item) => sum + item.totalPrice, 0);
+    const finalOrderAmount = finalAmount || totalPrice;
 
     const newOrder = new Order({
       userId: user._id,
@@ -308,7 +312,7 @@ const createRazorpayOrder = async (req, res) => {
       })),
       address: selectedAddress._id,
       totalPrice,
-      finalAmount: totalPrice,
+      finalAmount: finalOrderAmount,
       status: 'Pending', 
       paymentMethod: 'Razorpay', 
       paymentStatus: 'Pending', 
@@ -319,7 +323,7 @@ const createRazorpayOrder = async (req, res) => {
 
     const razorpay = req.app.locals.razorpayInstance;
     const razorpayOrder = await razorpay.orders.create({
-      amount: totalPrice * 100,
+      amount: finalOrderAmount * 100,
       currency: "INR",
       receipt: `order_rcptid_${newOrder._id}`
     });
@@ -381,10 +385,11 @@ const verifyRazorpayPayment = async (req, res) => {
       order.status = 'Cancelled';
       order.paymentStatus = 'Payment Pending';
       await order.save();
-      return res.status(400).json({ 
-        success: false, 
-        message: "Payment verification failed." 
-      });
+      return res.status(400).json({
+        success: false,
+        message: "Payment verification failed.",
+        redirect: "/payment-failed"
+      });      
     }
   } catch (error) {
     console.error("Error verifying payment:", error);
@@ -413,51 +418,210 @@ const orderConfirmation = async (req, res) => {
   }
 };
 
-const invoiceDownload = async(req,res) => {
+
+const paymentFailed = async(req,res) => {
+  try {
+    res.render("payment-failed");
+  } catch (error) {
+    console.error("error getting payment failed page",error);
+    res.redirect("pageNotFound");
+  }
+}
+
+
+
+
+
+
+const moment = require('moment');
+
+const invoiceDownload = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const order = await Order.findById(orderId).populate('orderedItems.product').populate('address');
+    const order = await Order.findById(orderId)
+      .populate('orderedItems.product')
+      .populate('address');
 
     if (!order) {
       return res.status(404).send("Order not found.");
     }
 
-    const doc = new PDFDocument();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="Invoice-${orderId}.pdf"`);
-
-    doc.fontSize(20).text('Invoice', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text(`Order ID: ${orderId}`);
-    doc.text(`Payment Method: ${order.paymentMethod}`);
-    doc.text(`Total Price: ₹${order.totalPrice}`);
-    doc.text(`Final Price: ₹${order.finalAmount}`);
-    doc.moveDown();
-
-    doc.text('Shipping Address:');
-    doc.text(`${order.address.name}`);
-    doc.text(`${order.address.streetName}, ${order.address.landmark}, ${order.address.locality}`);
-    doc.text(`${order.address.city}, ${order.address.state}, ${order.address.pin}`);
-    doc.text(`Contact: ${order.address.contactNo}`);
-    doc.moveDown();
-
-    doc.text('Order Summary:');
-    order.orderedItems.forEach((item, index) => {
-      doc.text(
-        `${index + 1}. ${item.product.productName} - ₹${item.price} x ${item.quantity} = ₹${
-          item.price * item.quantity
-        }`
-      );
+    const doc = new PDFDocument({ 
+      margin: 50,
+      size: 'A4'
     });
 
-    doc.text(`\nFinal Price: ₹${order.finalAmount}`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="Invoice-${orderId}.pdf"`
+    );
+
+    // Color Palette
+    const colors = {
+      primary: '#2C3E50',    // Deep Blue-Gray
+      secondary: '#34495E',  // Slightly Lighter Blue-Gray
+      accent: '#E74C3C',     // Vibrant Red
+      light: '#ECF0F1',      // Light Gray
+      text: '#2C3E50'        // Dark Text Color
+    };
+
+    // Background watermark
+    doc.save();
+    doc
+      .fillOpacity(0.1)
+      .fontSize(100)
+      .fillColor(colors.primary)
+      .rotate(45, { origin: [300, 400] })
+      .text('BOOKIE', 100, 300, { 
+        width: 500, 
+        align: 'center' 
+      })
+      .restore();
+
+    // Header with Logo Space
+    doc
+      .fillColor(colors.primary)
+      .fontSize(26)
+      .text('BOOKIE', { align: 'left', continued: true })
+      .fontSize(12)
+      .fillColor(colors.secondary)
+      .text('   Premium E-Commerce', { continued: false });
+    
+    // Invoice Title and Order Details
+    doc
+      .moveDown(1)
+      .fillColor(colors.accent)
+      .fontSize(20)
+      .text('INVOICE', { align: 'right' });
+
+    doc
+      .moveDown(0.5)
+      .fillColor(colors.text)
+      .fontSize(10)
+      .text(`Invoice Date: ${moment().format('MMMM Do, YYYY')}`, { align: 'right' })
+      .text(`Order ID: ${orderId}`, { align: 'right' });
+
+    // Horizontal Line
+    doc
+      .strokeColor(colors.light)
+      .lineWidth(2)
+      .moveTo(50, doc.y + 10)
+      .lineTo(550, doc.y + 10)
+      .stroke();
+
+    doc.moveDown(1);
+
+    // Two-Column Layout for Billing and Shipping
+    const columnGap = 50;
+    const leftColumnX = 50;
+    const rightColumnX = 350;
+
+    // Billing Details
+    doc
+      .fillColor(colors.primary)
+      .fontSize(14)
+      .text('Billing Details', leftColumnX, doc.y, { underline: true });
+
+    doc
+      .fillColor(colors.text)
+      .fontSize(10)
+      .text('Bookie E-Commerce Pvt. Ltd.')
+      .text('123 Fashion Street')
+      .text('Trendy District, Style City')
+      .text('Fashion State - 123456');
+
+    // Shipping Address
+    doc
+      .fillColor(colors.primary)
+      .fontSize(14)
+      .text('Shipping Address', rightColumnX, doc.y - 60, { underline: true });
+
+    doc
+      .fillColor(colors.text)
+      .fontSize(10)
+      .text(`${order.address.name}`, rightColumnX)
+      .text(`${order.address.streetName}, ${order.address.landmark}`)
+      .text(`${order.address.locality}`)
+      .text(`${order.address.city}, ${order.address.state} - ${order.address.pin}`)
+      .text(`Contact: ${order.address.contactNo}`);
+
+    doc.moveDown(1);
+
+    // Order Summary Table
+    doc
+      .fillColor(colors.primary)
+      .fontSize(14)
+      .text('Order Summary', { underline: true });
+
+    // Table Headers
+    const tableTop = doc.y + 10;
+    const headers = ['#', 'Product', 'Quantity', 'Unit Price', 'Total'];
+    const columnWidths = [30, 250, 70, 90, 100];
+    
+    headers.forEach((header, i) => {
+      doc
+        .fillColor(colors.light)
+        .rect(50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0), tableTop, columnWidths[i], 25)
+        .fill(colors.secondary);
+
+      doc
+        .fillColor('white')
+        .fontSize(10)
+        .text(header, 50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + 5, tableTop + 5);
+    });
+
+    // Order Items
+    let yPosition = tableTop + 35;
+    order.orderedItems.forEach((item, index) => {
+      const totalPrice = item.price * item.quantity;
+
+      doc
+        .fillColor(colors.text)
+        .fontSize(9)
+        .text(`${index + 1}`, 55, yPosition)
+        .text(item.product.productName, 80, yPosition, { width: 240 })
+        .text(`${item.quantity}`, 330, yPosition, { align: 'center' })
+        .text(`₹${item.price.toFixed(2)}`, 400, yPosition, { align: 'right' })
+        .text(`₹${totalPrice.toFixed(2)}`, 510, yPosition, { align: 'right' });
+
+      yPosition += 20;
+    });
+
+    // Total Summary
+    doc
+      .fillColor(colors.secondary)
+      .rect(50, yPosition + 10, 500, 50)
+      .fill()
+      .fillColor('white')
+      .fontSize(12)
+      .text('Subtotal:', 300, yPosition + 20, { continued: true })
+      .text(`₹${order.totalPrice.toFixed(2)}`, { align: 'right' })
+      .text('Total:', 300, yPosition + 35, { continued: true })
+      .text(`₹${order.finalAmount.toFixed(2)}`, { align: 'right' });
+
+    // Footer
+    doc
+      .fillColor(colors.secondary)
+      .fontSize(8)
+      .text('Thank you for your purchase!', 50, doc.page.height - 100, { 
+        align: 'center', 
+        width: 500 
+      })
+      .text('www.bookie.com | support@bookie.com', 50, doc.page.height - 80, { 
+        align: 'center', 
+        width: 500 
+      });
+
     doc.end();
-    doc.pipe(res); 
+    doc.pipe(res);
+
   } catch (error) {
     console.error("Error generating invoice:", error);
     res.status(500).send("Error generating invoice.");
   }
-}
+};
+
 
 
 
@@ -547,36 +711,44 @@ const cancelOrder = async (req, res) => {
     order.cancellationReason = reason;
     await order.save();
 
-    const refundAmount = order.finalAmount;
+    // Refund to wallet only if payment method is "Razorpay"
+    if (order.paymentMethod === "Razorpay") {
+      const refundAmount = order.finalAmount;
 
-    let wallet = await Wallet.findOne({ userId });
-    if (!wallet) {
-      wallet = await Wallet.create({ userId, transactions: [] });
+      let wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        wallet = await Wallet.create({ userId, transactions: [] });
+      }
+
+      const lastBalance = wallet.transactions.length 
+        ? wallet.transactions[wallet.transactions.length - 1].balance 
+        : 0;
+      const newBalance = lastBalance + refundAmount;
+
+      wallet.transactions.push({
+        date: new Date(),
+        type: "Credit",
+        amount: refundAmount,
+        balance: newBalance,
+        description: `Refund for canceled order #${orderId}`
+      });
+
+      await wallet.save();
+
+      console.log("Refund processed and wallet updated successfully:", wallet);
+    } else {
+      console.log("No wallet refund required as payment method is not Razorpay.");
     }
 
-    const lastBalance = wallet.transactions.length 
-      ? wallet.transactions[wallet.transactions.length - 1].balance 
-      : 0;
-    const newBalance = lastBalance + refundAmount;
-
-    wallet.transactions.push({
-      date: new Date(),
-      type: "Credit",
-      amount: refundAmount,
-      balance: newBalance,
-      description: `Refund for canceled order #${orderId}`
-    });
-
-    await wallet.save();
-
     console.log("Order updated successfully:", order);
-    res.status(200).json({ message: 'Order has been canceled successfully and refund amount is creadited to your wallet.' });
-    
+    res.status(200).json({ message: 'Order has been canceled successfully.' });
+
   } catch (error) {
     console.error('Error canceling order:', error);
     res.status(500).json({ message: 'Failed to cancel order.' });
   }
 };
+
 
 
 const getReturnOrder = async(req,res) => {
@@ -602,60 +774,36 @@ const getReturnOrder = async(req,res) => {
 const returnRequest = async (req, res) => {
   console.log("Inside returnRequest controller");
   try {
-    const { orderId } = req.params;  
+    const { orderId } = req.params;
     const { reason } = req.body;
-    const userId = req.session.user;
 
     console.log("Order ID:", orderId);
     console.log("Return Reason:", reason);
 
     const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found.' });
+      return res.status(404).json({ message: "Order not found." });
     }
 
     if (order.status !== "Delivered") {
       return res.status(400).json({ message: "Only delivered orders can be returned." });
     }
 
-    order.status = 'Return Request';
+    order.status = "Return Request";
     order.returnRequestReason = reason;
     await order.save();
 
-    const refundAmount = order.finalAmount;
-
-    let wallet = await Wallet.findOne({ userId });
-    if (!wallet) {
-      wallet = await Wallet.create({ userId, transactions: [] });
-    }
-
-    const lastBalance = wallet.transactions.length 
-      ? wallet.transactions[wallet.transactions.length - 1].balance 
-      : 0;
-    const newBalance = lastBalance + refundAmount;
-
-    wallet.transactions.push({
-      date: new Date(),
-      type: "Credit",
-      amount: refundAmount,
-      balance: newBalance,
-      description: `Refund for returned order #${orderId}`
-    });
-
-    await wallet.save();
-
     console.log("Return request recorded successfully:", order);
-    console.log("Wallet updated successfully:", wallet);
 
-    res.status(200).json({ 
-      message: 'Return request has been recorded successfully, and the refund amount has been credited to your wallet.' 
+    res.status(200).json({
+      message: "Return request has been recorded successfully and is pending admin approval.",
     });
-    
   } catch (error) {
-    console.error('Error processing return request:', error);
-    res.status(500).json({ message: 'Failed to process return request.' });
+    console.error("Error processing return request:", error);
+    res.status(500).json({ message: "Failed to process return request." });
   }
 };
+
 
 
 
@@ -681,5 +829,6 @@ module.exports = {
   getCoupons,
   invoiceDownload,
   getCancelOrder,
-  getReturnOrder
+  getReturnOrder,
+  paymentFailed
 }

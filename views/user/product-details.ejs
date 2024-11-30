@@ -455,24 +455,30 @@
                     </div>
 
                     <div class="price-section">
-                        <% if (product.productOffer > 0) { %>
-                            <% let productDiscountedPrice = product.salePrice - (product.salePrice * (product.productOffer / 100)); %>
-                            <span class="discounted-price">₹<%= product.regularPrice %></span>
-                            <span class="price">₹<%= productDiscountedPrice.toFixed(2) %></span>
+                        <% 
+                            let finalPrice = product.regularPrice; 
+                            let discountPercentage = 0;
+                    
+                            if (product.productOffer > 0) {
+                                discountPercentage = product.productOffer;
+                                finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                            } else if (product.category && product.category.categoryOffer > 0) {
+                                discountPercentage = product.category.categoryOffer;
+                                finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                            }
+                        %>
+                    
+                        <% if (discountPercentage > 0) { %>
+                            <span class="discounted-price" style="text-decoration: line-through; color: grey;">₹<%= product.regularPrice.toFixed(2) %></span>
+                            <span class="price" style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
                             <div class="coupon">
-                                <i class="fas fa-tag"></i> SAVE <%= product.productOffer %>%
-                            </div>
-                        <% } else if (product.category && product.category.categoryOffer > 0) { %>
-                            <% let categoryDiscountedPrice = product.salePrice - (product.salePrice * (product.category.categoryOffer / 100)); %>
-                            <span class="discounted-price">₹<%= product.regularPrice %></span>
-                            <span class="price">₹<%= categoryDiscountedPrice.toFixed(2) %></span>
-                            <div class="coupon">
-                                <i class="fas fa-tag"></i> SAVE <%= product.category.categoryOffer %>%
+                                <i class="fas fa-tag"></i> SAVE <%= discountPercentage %>%
                             </div>
                         <% } else { %>
-                            <span class="price">₹<%= product.salePrice %></span>
+                            <span class="price">₹<%= product.regularPrice.toFixed(2) %></span>
                         <% } %>
                     </div>
+                    
 
                     <div class="description">
                         <%= product.description %>

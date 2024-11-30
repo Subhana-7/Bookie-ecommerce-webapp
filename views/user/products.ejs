@@ -227,29 +227,36 @@ body {
                       <span style="color: green;">-In Stock</span>
                     <% } %>
                   </p>
-                  <p class="price">
-                    <% 
-                      let finalPrice = product.salePrice;
-                      if (product.category && product.category.categoryOffer > 0) {
-                        let discountedPrice = finalPrice - (finalPrice * (product.category.categoryOffer / 100));
-                        finalPrice = discountedPrice;
-                      }
+
+                <p class="price">
+                  <% 
+                      let finalPrice = product.regularPrice; 
+                      let discountPercentage = 0;
+
+                      // Check for product-level offer
                       if (product.productOffer > 0) {
-                        finalPrice = finalPrice - (finalPrice * (product.productOffer / 100));
+                          discountPercentage = product.productOffer;
+                          finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                      } 
+                      // Check for category-level offer (only if no product offer exists)
+                      else if (product.category && product.category.categoryOffer > 0) {
+                          discountPercentage = product.category.categoryOffer;
+                          finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                      } else {
+                          finalPrice = product.salePrice; // Default to salePrice
                       }
-                      let finalDiscountedPrice = finalPrice.toFixed(2);
-                    %>
-                    <% if (product.category && product.category.categoryOffer > 0) { %>
-                      <span style="text-decoration: line-through; color: grey;">₹<%= product.salePrice %></span><br>
-                    <% } %>
-                    <span style="color: red;">₹<%= finalDiscountedPrice %></span>
-                    <% if (product.category && product.category.categoryOffer > 0) { %>
-                      <p>Category Discount: <span style="color: red;"><%= product.category.categoryOffer %>%</span></p>
-                    <% } %>
-                    <% if (product.productOffer > 0) { %>
-                      <p>Product Discount: <span style="color: red;"><%= product.productOffer %>%</span></p>
-                    <% } %>
-                  </p>
+                  %>
+
+                  <% if (discountPercentage > 0) { %>
+                      <span style="text-decoration: line-through; color: grey;">₹<%= product.regularPrice.toFixed(2) %></span><br>
+                      <span style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
+                      <p>Offer: <span style="color: red;"><%= discountPercentage %>%</span></p>
+                  <% } else { %>
+                      <span style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
+                  <% } %>
+              </p>
+
+                  
                 </div>
               </div>
             </a>

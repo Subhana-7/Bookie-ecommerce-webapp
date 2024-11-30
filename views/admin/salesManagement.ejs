@@ -88,6 +88,28 @@
             </div>
         </div>
 
+        <div class="row my-4" id="stateBoxes">
+          <div class="col-md-4">
+              <div class="box">
+                  <h4>Total Sales Count</h4>
+                  <p id="totalSalesCount">0</p>
+              </div>
+          </div>
+          <div class="col-md-4">
+              <div class="box">
+                  <h4>Total Order Amount</h4>
+                  <p id="totalOrderAmount">₹0.00</p>
+              </div>
+          </div>
+          <div class="col-md-4">
+              <div class="box">
+                  <h4>Total Discounts</h4>
+                  <p id="totalDiscounts">₹0.00</p>
+              </div>
+          </div>
+      </div>
+      
+
         <table class="table table-bordered text-center">
             <thead>
                 <tr>
@@ -105,15 +127,15 @@
             <tbody>
                 <% orders.forEach(order => { %>
                 <tr>
-                    <td><%= order.orderId %></td>
+                    <td><%= order._id %></td>
                     <td><%= order.userId?.name || "N/A" %></td>
                     <td>
                       <% order.orderedItems.forEach(item => { %>
                         <p><%= item.product?.productName || "Unknown" %> (x<%= item.quantity %>)</p>
                       <% }); %>
                     </td>
-                    <td><%= order.totalPrice %></td>
-                    <td><%= order.finalAmount %></td>
+                    <td>₹<%= order.totalPrice %></td>
+                    <td>₹<%= order.finalAmount %></td>
                     <td><%= order.discount %></td>
                     <td><%= order.status %></td>
                     <td><%= order.paymentMethod %></td>
@@ -171,6 +193,7 @@
         const result = await response.json();
 
         if (result.success) {
+            // Update table with orders
             const tbody = document.querySelector("table tbody");
             tbody.innerHTML = "";
 
@@ -183,12 +206,12 @@
                             ${order.orderedItems
                                 .map(
                                     item =>
-                                        `<p>${item.product?.productName || "Unknown"} (x${item.quantity})</p>` 
+                                        `<p>${item.product?.productName || "Unknown"} (x${item.quantity})</p>`
                                 )
                                 .join("")}
                         </td>
-                        <td>${order.totalPrice}</td>
-                        <td>${order.finalAmount}</td>
+                        <td>₹${order.totalPrice}</td>
+                        <td>₹${order.finalAmount}</td>
                         <td>${order.discount}</td>
                         <td>${order.status}</td>
                         <td>${order.paymentMethod}</td>
@@ -197,6 +220,11 @@
                 `;
                 tbody.innerHTML += row;
             });
+
+            // Update state boxes
+            document.getElementById("totalSalesCount").textContent = result.totalSalesCount || 0;
+            document.getElementById("totalOrderAmount").textContent = `₹${result.totalOrderAmount?.toFixed(2) || '0.00'}`;
+            document.getElementById("totalDiscounts").textContent = `₹${result.totalDiscounts?.toFixed(2) || '0.00'}`;
         } else {
             alert(result.error || 'Failed to generate report');
         }

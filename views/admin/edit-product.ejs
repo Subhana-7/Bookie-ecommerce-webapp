@@ -84,8 +84,9 @@
                                <label class="form-label">Product Description</label>
                                <input name="description" value="<%=product.description %>"  class="form-control border"
                                    rows="4">
-                                   <div id="description" class="error-message"></div>
+                                   <div id="description-error" class="error-message"></div>
                            </div>
+                           
                            <div class="row">
                                <div class="col-lg-4">
                                    <div class="mb-4">
@@ -95,6 +96,8 @@
                                            <div id="regularPrice-error" class="error-message"></div>
                                    </div>
                                </div>
+                               
+                               <!--
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Sale price</label>
@@ -103,6 +106,7 @@
                                    </div>
                                    <div id="salePrice-error" class="error-message"></div>
                                </div>
+                               -->
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Quantity</label>
@@ -161,9 +165,10 @@
                                                        <img class="rounded" style="width: 50px; height: 60px;"
                                                            src="/uploads/product-images/<%=product.productImage[i]%>"
                                                            alt="">
-                                                           <i onclick="deleteSingleImage('<%=product.productImage[i]%>','<%=product._id%>')" 
+                                                           <i onclick="deleteSingleImage('<%=product.productImage[i]%>', '<%=product._id%>', event)" 
                                                             style="position: absolute; margin-left: .5rem; cursor: pointer;" 
                                                             class="fa-thin fa-x"></i>
+                                                         
                                                    </td>
                                                </div>
                                               
@@ -251,7 +256,7 @@
     }
 
 
-    async function deleteSingleImage(imagePath, productId) {
+    async function deleteSingleImage(imagePath, productId, event) {
     try {
         const imageFileName = imagePath.split('/').pop();
         
@@ -272,7 +277,7 @@
             const targetImage = event.target.closest('.col-md-12');
             if (targetImage) {
                 targetImage.remove();
-                alert('Image deleted successfully');
+                //alert('Image deleted successfully');
             }
         } else {
             throw new Error(data.message || 'Failed to delete image');
@@ -282,6 +287,7 @@
         alert(error.message || 'Error occurred while deleting image');
     }
 }
+
 
 
 function viewImage(event, index) {
@@ -397,88 +403,99 @@ function viewImage4(event) {
 
 
   function validateForm() {
-  clearErrorMessages();
+    clearErrorMessages();
 
-  const name = document.getElementsByName('productName')[0].value;
-  const author = document.getElementsByName('author')[0].value;
-  const description = document.getElementsByName('description')[0].value;
-  const regularPrice = document.getElementsByName('regularPrice')[0].value;
-  const salePrice = document.getElementsByName('salePrice')[0].value;
-  const quantity = document.getElementsByName('quantity')[0].value;
-  const publisher = document.getElementsByName('publisher')[0].value;
-  const category = document.getElementsByName('category')[0].value;
-  const images = document.getElementById('input1');
-  let isValid = true;
+    const name = document.getElementsByName('productName')[0].value;
+    const author = document.getElementsByName('author')[0].value;
+    const description = document.getElementsByName('description')[0].value;
+    const regularPrice = document.getElementsByName('regularPrice')[0].value;
+    const quantity = document.getElementsByName('quantity')[0].value;
+    const publisher = document.getElementsByName('publisher')[0].value;
+    const category = document.getElementsByName('category')[0].value;
+    const images = document.getElementById('input1');
+    let isValid = true;
 
-  if (name.trim() === "") {
-      displayErrorMessage('productName-error', 'Please enter a product name.');
-      isValid = false;
-  } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-      displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-      isValid = false;
-  }
+    // Product Name Validation: Must be at least 4 characters and not contain numbers or special characters
+    if (name.trim() === "") {
+        displayErrorMessage('productName-error', 'Please enter a product name.');
+        isValid = false;
+    } else if (name.length < 4) {
+        displayErrorMessage('productName-error', 'Product name must have at least 4 characters.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+        isValid = false;
+    }
 
-  if (author.trim() === "") {
-      displayErrorMessage('author-error', 'Please enter an author name.');
-      isValid = false;
-  } else if (!/^[a-zA-Z\s]+$/.test(author.trim())) {
-      displayErrorMessage('author-error', 'Author name should contain only alphabetic characters.');
-      isValid = false;
-  }
+    // Author Validation: Must be at least 4 characters and not contain numbers or special characters
+    if (author.trim() === "") {
+        displayErrorMessage('author-error', 'Please enter an author name.');
+        isValid = false;
+    } else if (author.length < 4) {
+        displayErrorMessage('author-error', 'Author name must have at least 4 characters.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(author.trim())) {
+        displayErrorMessage('author-error', 'Author name should contain only alphabetic characters.');
+        isValid = false;
+    }
 
-  if (publisher.trim() === "") {
-      displayErrorMessage('publisher-error', 'Please enter a publisher name.');
-      isValid = false;
-  } else if (!/^[a-zA-Z\s]+$/.test(publisher.trim())) {
-      displayErrorMessage('publisher-error', 'Publisher name should contain only alphabetic characters.');
-      isValid = false;
-  }
+    // Publisher Validation: Must be at least 4 characters and not contain numbers or special characters
+    if (publisher.trim() === "") {
+        displayErrorMessage('publisher-error', 'Please enter a publisher name.');
+        isValid = false;
+    } else if (publisher.length < 4) {
+        displayErrorMessage('publisher-error', 'Publisher name must have at least 4 characters.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(publisher.trim())) {
+        displayErrorMessage('publisher-error', 'Publisher name should contain only alphabetic characters.');
+        isValid = false;
+    }
 
-  if (description.trim() === "") {
-      displayErrorMessage('description-error', 'Please enter a product description.');
-      isValid = false;
-  }
+    // Description Validation: Must be at least 10 characters
+    if (description.trim() === "") {
+        displayErrorMessage('description-error', 'Please enter a product description.');
+        isValid = false;
+    } else if (description.length < 10) {
+        displayErrorMessage('description-error', 'Description must have at least 10 characters.');
+        isValid = false;
+    }
 
-  if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
-      displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-      isValid = false;
-  }
+    // Quantity Validation: Must be a valid non-negative number
+    if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
+        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+        isValid = false;
+    }
 
-  if (!/^\d+(\.\d{1,2})?$/.test(regularPrice) || parseFloat(regularPrice) < 0) {
-      displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-      isValid = false;
-  }
+    // Regular Price Validation: Must be a valid non-negative number
+    if (!/^\d+$/.test(regularPrice) || parseInt(regularPrice) < 0) {
+        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+        isValid = false;
+    }
 
-  if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
-      displayErrorMessage('salePrice-error', 'Please enter a valid non-negative sale price.');
-      isValid = false;
-  } else if (parseFloat(regularPrice) <= parseFloat(salePrice)) {
-      displayErrorMessage('salePrice-error', 'Sale price must be less than the regular price.');
-      isValid = false;
-  }
+    // Category Validation: Must be selected
+    if (!category) {
+        displayErrorMessage('category-error', 'Please select a category.');
+        isValid = false;
+    }
 
-  if (!category) {
-      displayErrorMessage('category-error', 'Please select a category.');
-      isValid = false;
-  }
+    // Image Validation: Only show error if no image is uploaded
+    if (images.files.length === 0) {
+        displayErrorMessage('images-error', 'Please upload at least one product image.');
+        isValid = false;
+    }
 
-  if (images.files.length === 0) {
-      displayErrorMessage('images-error', 'Please upload at least one product image.');
-      isValid = false;
-  }
-
-  return isValid;
+    return isValid;
 }
 
 function displayErrorMessage(elementId, message) {
-  const errorElement = document.getElementById(elementId);
-  errorElement.textContent = message;
-  errorElement.style.display = 'block';
+    const errorElement = document.getElementById(elementId);
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
 }
 
 function clearErrorMessages() {
-  const errorMessages = document.querySelectorAll('.error-message');
-  errorMessages.forEach((error) => error.style.display = 'none');
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach((error) => error.style.display = 'none');
 }
 
 
