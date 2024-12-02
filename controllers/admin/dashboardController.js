@@ -101,8 +101,8 @@ const renderDashboard = async (req, res) => {
           salesData,
           bestSellingProducts,
           bestSellingCategories,
-          filterTotalOrders: totalOrders, // Default value for initial render
-          filterTotalRevenue: totalRevenue, // Default value for initial render
+          filterTotalOrders: totalOrders, 
+          filterTotalRevenue: totalRevenue, 
         });
       } catch (error) {
         console.error("Error rendering dashboard:", error);
@@ -135,12 +135,9 @@ const renderDashboard = async (req, res) => {
           { $sort: { _id: 1 } },
         ]);
   
-        // Labels as day numbers (1, 2, ..., N)
         labels = dailySalesData.map((item) => `Day ${item._id}`);
-        // Sales data per day
         salesData = dailySalesData.map((item) => item.totalSales);
   
-        // Calculate the total orders and total revenue based on daily sales data
         filterTotalOrders = dailySalesData.reduce((acc, item) => acc + item.totalOrders, 0);
         filterTotalRevenue = dailySalesData.reduce((acc, item) => acc + item.totalSales, 0);
 
@@ -159,19 +156,15 @@ const renderDashboard = async (req, res) => {
           { $sort: { _id: 1 } },
         ]);
   
-        // Labels as month names
         labels = [
           "January", "February", "March", "April", "May", "June",
           "July", "August", "September", "October", "November", "December",
         ];
-        // Initialize salesData with zero values for each month
         salesData = Array(12).fill(0);
   
-        // Calculate the total orders and total revenue based on monthly sales data
         filterTotalOrders = monthlySalesData.reduce((acc, item) => acc + item.totalOrders, 0);
         filterTotalRevenue = monthlySalesData.reduce((acc, item) => acc + item.totalSales, 0);
   
-        // Fill the sales data for each month
         monthlySalesData.forEach((item) => {
           salesData[item._id - 1] = item.totalSales;
         });
@@ -188,16 +181,13 @@ const renderDashboard = async (req, res) => {
           { $sort: { _id: 1 } },
         ]);
   
-        // Labels as year labels
         labels = yearlySalesData.map((item) => `Year ${item._id}`);
         salesData = yearlySalesData.map((item) => item.totalSales);
   
-        // Calculate the total orders and total revenue based on yearly sales data
         filterTotalOrders = yearlySalesData.reduce((acc, item) => acc + item.totalOrders, 0);
         filterTotalRevenue = yearlySalesData.reduce((acc, item) => acc + item.totalSales, 0);
       }
   
-      // Log only once after all calculations are done for the selected filter
       console.log("Total Orders:", filterTotalOrders);
       console.log("Total Revenue:", filterTotalRevenue);
   

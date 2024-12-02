@@ -457,16 +457,14 @@ const invoiceDownload = async (req, res) => {
       `attachment; filename="Invoice-${orderId}.pdf"`
     );
 
-    // Color Palette
     const colors = {
-      primary: '#2C3E50',    // Deep Blue-Gray
-      secondary: '#34495E',  // Slightly Lighter Blue-Gray
-      accent: '#E74C3C',     // Vibrant Red
-      light: '#ECF0F1',      // Light Gray
-      text: '#2C3E50'        // Dark Text Color
+      primary: '#2C3E50',
+      secondary: '#34495E',
+      accent: '#E74C3C',
+      light: '#ECF0F1',
+      text: '#2C3E50' 
     };
 
-    // Background watermark
     doc.save();
     doc
       .fillOpacity(0.1)
@@ -479,7 +477,6 @@ const invoiceDownload = async (req, res) => {
       })
       .restore();
 
-    // Header with Logo Space
     doc
       .fillColor(colors.primary)
       .fontSize(26)
@@ -488,7 +485,6 @@ const invoiceDownload = async (req, res) => {
       .fillColor(colors.secondary)
       .text('   Premium E-Commerce', { continued: false });
     
-    // Invoice Title and Order Details
     doc
       .moveDown(1)
       .fillColor(colors.accent)
@@ -502,7 +498,6 @@ const invoiceDownload = async (req, res) => {
       .text(`Invoice Date: ${moment().format('MMMM Do, YYYY')}`, { align: 'right' })
       .text(`Order ID: ${orderId}`, { align: 'right' });
 
-    // Horizontal Line
     doc
       .strokeColor(colors.light)
       .lineWidth(2)
@@ -512,12 +507,10 @@ const invoiceDownload = async (req, res) => {
 
     doc.moveDown(1);
 
-    // Two-Column Layout for Billing and Shipping
     const columnGap = 50;
     const leftColumnX = 50;
     const rightColumnX = 350;
 
-    // Billing Details
     doc
       .fillColor(colors.primary)
       .fontSize(14)
@@ -531,7 +524,6 @@ const invoiceDownload = async (req, res) => {
       .text('Trendy District, Style City')
       .text('Fashion State - 123456');
 
-    // Shipping Address
     doc
       .fillColor(colors.primary)
       .fontSize(14)
@@ -548,13 +540,11 @@ const invoiceDownload = async (req, res) => {
 
     doc.moveDown(1);
 
-    // Order Summary Table
     doc
       .fillColor(colors.primary)
       .fontSize(14)
       .text('Order Summary', { underline: true });
 
-    // Table Headers
     const tableTop = doc.y + 10;
     const headers = ['#', 'Product', 'Quantity', 'Unit Price', 'Total'];
     const columnWidths = [30, 250, 70, 90, 100];
@@ -571,7 +561,6 @@ const invoiceDownload = async (req, res) => {
         .text(header, 50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + 5, tableTop + 5);
     });
 
-    // Order Items
     let yPosition = tableTop + 35;
     order.orderedItems.forEach((item, index) => {
       const totalPrice = item.price * item.quantity;
@@ -588,7 +577,6 @@ const invoiceDownload = async (req, res) => {
       yPosition += 20;
     });
 
-    // Total Summary
     doc
       .fillColor(colors.secondary)
       .rect(50, yPosition + 10, 500, 50)
@@ -600,7 +588,6 @@ const invoiceDownload = async (req, res) => {
       .text('Total:', 300, yPosition + 35, { continued: true })
       .text(`₹${order.finalAmount.toFixed(2)}`, { align: 'right' });
 
-    // Footer
     doc
       .fillColor(colors.secondary)
       .fontSize(8)
@@ -711,7 +698,6 @@ const cancelOrder = async (req, res) => {
     order.cancellationReason = reason;
     await order.save();
 
-    // Refund to wallet only if payment method is "Razorpay"
     if (order.paymentMethod === "Razorpay") {
       const refundAmount = order.finalAmount;
 

@@ -11,7 +11,7 @@ const env = require("dotenv").config();
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
-    const address = await Address.find({ userId: user._id });
+    const address = await Address.find({ userId: user._id ,isDeleted:false});
     //console.log(address);
     return res.render("profile", { user, address });
   } catch (error) {
@@ -156,10 +156,9 @@ const editAddress = async (req, res) => {
 const deleteAddress = async(req,res) => {
   try {
     const addressId = req.params.id;
-    const result = await Address.updateOne(
-      { "address._id": addressId },
-      { $pull: { address: { _id: addressId } } }
-  );
+    const result = await Address.findByIdAndUpdate(addressId,{
+      isDeleted:true
+    });
   if (result.modifiedCount > 0) {
     return res.status(200).json({ message: "Address deleted successfully." });
 } else {

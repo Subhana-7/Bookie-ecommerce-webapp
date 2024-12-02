@@ -415,7 +415,6 @@ function viewImage4(event) {
     const images = document.getElementById('input1');
     let isValid = true;
 
-    // Product Name Validation: Must be at least 4 characters and not contain numbers or special characters
     if (name.trim() === "") {
         displayErrorMessage('productName-error', 'Please enter a product name.');
         isValid = false;
@@ -427,7 +426,6 @@ function viewImage4(event) {
         isValid = false;
     }
 
-    // Author Validation: Must be at least 4 characters and not contain numbers or special characters
     if (author.trim() === "") {
         displayErrorMessage('author-error', 'Please enter an author name.');
         isValid = false;
@@ -439,7 +437,6 @@ function viewImage4(event) {
         isValid = false;
     }
 
-    // Publisher Validation: Must be at least 4 characters and not contain numbers or special characters
     if (publisher.trim() === "") {
         displayErrorMessage('publisher-error', 'Please enter a publisher name.');
         isValid = false;
@@ -451,7 +448,6 @@ function viewImage4(event) {
         isValid = false;
     }
 
-    // Description Validation: Must be at least 10 characters
     if (description.trim() === "") {
         displayErrorMessage('description-error', 'Please enter a product description.');
         isValid = false;
@@ -460,25 +456,21 @@ function viewImage4(event) {
         isValid = false;
     }
 
-    // Quantity Validation: Must be a valid non-negative number
     if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
         displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
         isValid = false;
     }
 
-    // Regular Price Validation: Must be a valid non-negative number
     if (!/^\d+$/.test(regularPrice) || parseInt(regularPrice) < 0) {
         displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
         isValid = false;
     }
 
-    // Category Validation: Must be selected
     if (!category) {
         displayErrorMessage('category-error', 'Please select a category.');
         isValid = false;
     }
 
-    // Image Validation: Only show error if no image is uploaded
     if (images.files.length === 0) {
         displayErrorMessage('images-error', 'Please upload at least one product image.');
         isValid = false;

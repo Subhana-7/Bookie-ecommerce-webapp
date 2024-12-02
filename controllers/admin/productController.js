@@ -40,7 +40,7 @@ const addProduct = async (req, res) => {
             "public",
             "uploads",
             "product-images",
-            `resized-${file.filename}` // Add a "resized-" prefix to avoid conflicts
+            `resized-${file.filename}` 
           );
 
           await sharp(originalImagePath)
@@ -156,14 +156,12 @@ const addProductOffer = async (req, res) => {
       return res.json({ status: false, message: "This product's category already has a higher category offer." });
     }
 
-    // Calculate sale price based on offer percentage
     const discountAmount = (findProduct.regularPrice * percentage) / 100;
     findProduct.salePrice = findProduct.regularPrice - discountAmount;
     findProduct.productOffer = parseInt(percentage);
 
     await findProduct.save();
 
-    // Reset category offer (if any)
     findCategory.categoryOffer = 0;
     await findCategory.save();
 
@@ -186,7 +184,7 @@ const removeProductOffer = async (req, res) => {
       return res.status(404).json({ message: "Product not found." });
     }
 
-    findProduct.salePrice = findProduct.regularPrice; // Reset to regular price
+    findProduct.salePrice = findProduct.regularPrice; 
     findProduct.productOffer = 0;
 
     await findProduct.save();
@@ -281,7 +279,7 @@ const editProduct = async (req, res) => {
           "public",
           "uploads",
           "product-images",
-          `resized-${file.filename}` // Add a "resized-" prefix
+          `resized-${file.filename}` 
         );
 
         await sharp(originalImagePath)
@@ -292,6 +290,8 @@ const editProduct = async (req, res) => {
       }
     }
 
+    const updatedImages = [...product.productImage, ...images];
+
     const updateFields = {
       productName: data.productName || product.productName,
       description: data.description || product.description,
@@ -301,7 +301,7 @@ const editProduct = async (req, res) => {
       regularPrice: data.regularPrice || product.regularPrice,
       salePrice: data.regularPrice || product.regularPrice,
       quantity: data.quantity || product.quantity,
-      ...(images.length > 0 && { productImage: images }),
+      productImage: updatedImages, 
     };
 
     const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });

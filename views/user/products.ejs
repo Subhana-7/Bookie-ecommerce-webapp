@@ -233,17 +233,15 @@ body {
                       let finalPrice = product.regularPrice; 
                       let discountPercentage = 0;
 
-                      // Check for product-level offer
                       if (product.productOffer > 0) {
                           discountPercentage = product.productOffer;
                           finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
                       } 
-                      // Check for category-level offer (only if no product offer exists)
                       else if (product.category && product.category.categoryOffer > 0) {
                           discountPercentage = product.category.categoryOffer;
                           finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
                       } else {
-                          finalPrice = product.salePrice; // Default to salePrice
+                          finalPrice = product.salePrice;
                       }
                   %>
 

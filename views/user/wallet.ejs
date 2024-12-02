@@ -92,7 +92,7 @@
                 </tr>
             </thead>
             <tbody>
-                <% wallet.transactions.slice().reverse().forEach(transaction => { %> <!-- Reverse the order -->
+                <% wallet.transactions.slice().reverse().forEach(transaction => { %> 
                     <tr>
                         <td><%= transaction.date.toLocaleDateString() %></td>
                         <td><%= transaction.type %></td>

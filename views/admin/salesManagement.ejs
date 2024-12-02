@@ -193,7 +193,6 @@
         const result = await response.json();
 
         if (result.success) {
-            // Update table with orders
             const tbody = document.querySelector("table tbody");
             tbody.innerHTML = "";
 
@@ -221,7 +220,6 @@
                 tbody.innerHTML += row;
             });
 
-            // Update state boxes
             document.getElementById("totalSalesCount").textContent = result.totalSalesCount || 0;
             document.getElementById("totalOrderAmount").textContent = `₹${result.totalOrderAmount?.toFixed(2) || '0.00'}`;
             document.getElementById("totalDiscounts").textContent = `₹${result.totalDiscounts?.toFixed(2) || '0.00'}`;

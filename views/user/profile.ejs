@@ -36,7 +36,6 @@
     <%- include("../../views/partials/user/header")%>
 
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Profile Header -->
         <div class="maroon-gradient rounded-lg p-8 mb-8 text-white">
             <div class="flex items-center space-x-4">
                 <div>
@@ -47,12 +46,9 @@
         </div>
 
         <div class="flex flex-col md:flex-row gap-8" >
-            <!-- Sidebar -->
             <%- include("../../views/partials/user/sidebar") %>
 
-            <!-- Main Content -->
             <div class="flex-1 space-y-8">
-                <!-- User Info Card -->
                 <div class="profile-card rounded-lg p-6" style="margin-left:20px; background-color: #f1f4ff;">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold text-gray-800">Personal Information</h2>
@@ -79,7 +75,6 @@
                             </div>
                         </div>
                         
-                        <!-- Referral Code Card -->
                         <div class="referral-card rounded-lg p-4 flex flex-col justify-center items-center">
                             <span class="text-gray-600 mb-2">Your Referral Code</span>
                             <div class="text-2xl font-bold text-blue-600 mb-2"><%= user.referalCode %></div>
@@ -93,7 +88,6 @@
                     </div>
                 </div>
 
-                <!-- Address Card -->
                 <div class="profile-card rounded-lg p-6" style="margin-left:20px; background-color: #ffffff;">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold text-gray-800">Addresses</h2>

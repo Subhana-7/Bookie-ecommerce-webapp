@@ -35,7 +35,7 @@ const getOrderManagementPage = async (req, res) => {
 const orderManagement = async (req, res) => {
   try {
     const status = req.body.status;
-    const returnAction = req.body.returnAction; // New returnAction field
+    const returnAction = req.body.returnAction; 
     const orderId = req.params.orderId;
 
     const order = await Order.findById(orderId).populate("orderedItems.product");
@@ -44,15 +44,38 @@ const orderManagement = async (req, res) => {
       return res.status(404).send("Order not found");
     }
 
-    // Handle Return Action (Allow or Deny)
     if (order.status === "Return Request" && returnAction) {
       if (returnAction === "allow") {
-        order.status = "Returned"; // If allowed, change status to 'Returned'
+        order.status = "Returned"; 
 
-        // Wallet refund logic for Razorpay payments
+        const userId = order.userId;
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+          wallet = await Wallet.create({ userId, transactions: [] });
+        }
+
+        const lastBalance = wallet.transactions.length
+          ? wallet.transactions[wallet.transactions.length - 1].balance
+          : 0;
+        const newBalance = lastBalance + order.finalAmount;
+
+        wallet.transactions.push({
+          date: new Date(),
+          type: "Credit",
+          amount: order.finalAmount,
+          balance: newBalance,
+          description: `Refund for returned order #${orderId}`,
+        });
+
+        await wallet.save();
+        console.log("Wallet updated successfully:", wallet);
+      } else if (returnAction === "deny") {
+        order.status = "Delivered"; 
+      }
+    } else if (status) {
+      if (status === "Cancelled" && order.status !== "Cancelled") {
         if (order.paymentMethod === "Razorpay") {
           const userId = order.userId;
-
           let wallet = await Wallet.findOne({ userId });
           if (!wallet) {
             wallet = await Wallet.create({ userId, transactions: [] });
@@ -61,25 +84,20 @@ const orderManagement = async (req, res) => {
           const lastBalance = wallet.transactions.length
             ? wallet.transactions[wallet.transactions.length - 1].balance
             : 0;
-          const newBalance = lastBalance + order.finalAmount;
+          const newBalance = lastBalance + order.totalPrice;
 
           wallet.transactions.push({
             date: new Date(),
             type: "Credit",
-            amount: order.finalAmount,
+            amount: order.totalPrice,
             balance: newBalance,
-            description: `Refund for returned order #${orderId}`,
+            description: `Refund for cancelled order #${orderId}`,
           });
 
           await wallet.save();
           console.log("Wallet updated successfully:", wallet);
         }
-      } else if (returnAction === "deny") {
-        order.status = "Delivered"; // If denied, change status to 'Delivered'
-      }
-    } else if (status) {
-      // General status update
-      if (status === "Cancelled" && order.status !== "Cancelled") {
+
         for (let item of order.orderedItems) {
           const product = await Product.findById(item.product._id);
           if (product) {
@@ -89,7 +107,6 @@ const orderManagement = async (req, res) => {
         }
       }
 
-      // Update status and paymentStatus if 'Delivered'
       order.status = status;
       if (status === "Delivered") {
         order.paymentStatus = "completed";
@@ -103,6 +120,7 @@ const orderManagement = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+
 
 
 

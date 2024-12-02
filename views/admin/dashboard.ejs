@@ -183,12 +183,10 @@
     const response = await fetch(`/admin/dashboard-data?filter=${filter}`);
     const data = await response.json();
 
-    // Update chart data
     salesChart.data.labels = data.labels;
     salesChart.data.datasets[0].data = data.sales;
     salesChart.update();
 
-    // Update dashboard stats
     document.querySelector(".dashboard-stats .stat-box:nth-child(1) p").innerText = data.filterTotalOrders;
     document.querySelector(".dashboard-stats .stat-box:nth-child(2) p").innerText = `₹${data.filterTotalRevenue.toFixed(2)}`;
   } catch (error) {
@@ -196,10 +194,8 @@
   }
 }
 
-// Initialize with default filter
 updateChart(filterDropdown.value);
 
-// Add event listener for filter change
 filterDropdown.addEventListener("change", (e) => {
   updateChart(e.target.value);
 });

@@ -8,6 +8,7 @@ const orderController = require("../controllers/user/orderController");
 const wishlistController = require("../controllers/user/wishlistController");
 const walletController = require("../controllers/user/walletController");
 const retryPaymentController = require("../controllers/user/retryPaymentController");
+const chatBoxController = require("../controllers/user/chatBoxController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
 
@@ -32,9 +33,12 @@ router.get('/auth/google/callback',
       failureFlash: true
   }),
   (req, res) => {
-      res.redirect('/'); 
+      req.session.user = req.user;
+      console.log("Authentication successful:", req.user);
+      res.redirect('/');
   }
 );
+
 
 const isAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -118,6 +122,11 @@ router.get('/download-invoice/:orderId',userAuth,orderController.invoiceDownload
 router.get("/continue-payment/:orderId",userAuth,retryPaymentController.getContinuePaymentPage);
 router.post("/continue-payment/:orderId",userAuth,retryPaymentController.initiatePayment);
 router.post("/payment-success/:orderId",userAuth,retryPaymentController.handlePaymentSuccess);
+
+//chatBox
+
+router.get("/chat",userAuth,chatBoxController.loadChatBox);
+router.post("/chat",userAuth,chatBoxController.chatbox);
 
 
 module.exports = router;

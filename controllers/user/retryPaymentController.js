@@ -43,10 +43,9 @@ const initiatePayment = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found." });
         }
 
-        const amount = order.finalAmount * 100; // Convert to paise
+        const amount = order.finalAmount * 100; 
         const currency = "INR";
 
-        // Create Razorpay order
         const razorpayOrder = await razorpayInstance.orders.create({
             amount,
             currency,
@@ -62,7 +61,7 @@ const initiatePayment = async (req, res) => {
             key_id: razorpayInstance.key_id,
             amount,
             currency,
-            order_id: razorpayOrder.id // Send Razorpay order ID
+            order_id: razorpayOrder.id 
         });
     } catch (error) {
         console.error(error);
@@ -70,7 +69,6 @@ const initiatePayment = async (req, res) => {
     }
 };
 
-// Handle Payment Success
 const handlePaymentSuccess = async (req, res) => {
     console.log("inside the controller block of handle payment success");
     

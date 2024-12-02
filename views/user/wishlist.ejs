@@ -52,24 +52,6 @@
         <div class="row">
             <% Wishlist.forEach(item => { 
                 let product = item.productId;
-                let originalPrice = product.salePrice;
-                let finalPrice = originalPrice;
-                let discountAmount = 0;
-
-                if (product.category && product.category.categoryOffer > 0) {
-                    let categoryDiscount = originalPrice * (product.category.categoryOffer / 100);
-                    discountAmount += categoryDiscount;
-                    finalPrice -= categoryDiscount;
-                }
-
-                if (product.productOffer > 0) {
-                    let productDiscount = originalPrice * (product.productOffer / 100);
-                    discountAmount += productDiscount;
-                    finalPrice -= productDiscount;
-                }
-
-                let finalDiscountedPrice = finalPrice.toFixed(2);
-                let totalDiscount = discountAmount.toFixed(2);
             %>
             <div class="col-md-12">
                 <a style="text-decoration: none;" href="/product-details/<%= product._id %>">
@@ -89,12 +71,12 @@
 
                             <% if (product.quantity > 0) { %>
                                 <p class="price">
-                                    <% if (discountAmount > 0) { %>
-                                        <span style="text-decoration: line-through; color: grey;">₹<%= originalPrice %></span><br>
-                                        <span style="color: green; font-weight: bold;">₹<%= finalDiscountedPrice %></span>
-                                        <small style="color: red;">(You save ₹<%= totalDiscount %>)</small>
+                                    <% if (product.regularPrice !== product.salePrice) { %>
+                                        <span style="text-decoration: line-through; color: grey;">₹<%= product.regularPrice %></span><br>
+                                        <span style="color: green; font-weight: bold;">₹<%= product.salePrice %></span>
+                                        <small style="color: red;">(Buy this product for offer amount)</small>
                                     <% } else { %>
-                                        <span style="color: black; font-weight: bold;">₹<%= originalPrice %></span>
+                                        <span style="color: black; font-weight: bold;">₹<%= product.regularPrice %></span>
                                     <% } %>
                                 </p>
                             <% } %>

@@ -64,7 +64,6 @@
         document.getElementById("continue-payment-btn").addEventListener("click", function () {
             const orderId = "<%= order._id %>";
 
-            // Fetch payment details from the server
             fetch(`/continue-payment/${orderId}`, {
                 method: "POST",
                 headers: {
@@ -77,30 +76,29 @@
                 })
                 .then((data) => {
                     const options = {
-                        key: data.key_id, // Razorpay API key
-                        amount: data.amount, // Amount in paise
+                        key: data.key_id, 
+                        amount: data.amount, 
                         currency: data.currency,
                         name: "Your Shop Name",
                         description: "Order Payment",
-                        order_id: data.order_id, // Razorpay Order ID
+                        order_id: data.order_id, 
                         handler: function (response) {
-                        // Send payment confirmation to the server
                         fetch(`/payment-success/${orderId}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                order_id: data.order_id, // Razorpay Order ID
-                                payment_id: response.razorpay_payment_id, // Razorpay Payment ID
-                                signature: response.razorpay_signature,  // Razorpay Signature
+                                order_id: data.order_id, 
+                                payment_id: response.razorpay_payment_id, 
+                                signature: response.razorpay_signature,  
                             }),
                         })
                             .then((successResponse) => successResponse.json())
                             .then((successData) => {
                                 if (successData.success) {
                                     Swal.fire("Success", "Payment completed successfully!", "success").then(() => {
-                                        window.location.href = "/orders-list"; // Redirect after success
+                                        window.location.href = "/orders-list"; 
                                     });
                                 } else {
                                     Swal.fire("Error", "Payment verification failed.", "error");

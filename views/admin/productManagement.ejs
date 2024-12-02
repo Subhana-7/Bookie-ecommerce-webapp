@@ -195,7 +195,7 @@ async function addOffer(productId) {
         inputPlaceholder: "%",
     });
 
-    if (amount) { // Ensure the user provides an input
+    if (amount) { 
         $.ajax({
             url: "/admin/addProductOffer",
             method: "post",

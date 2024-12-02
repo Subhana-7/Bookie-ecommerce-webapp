@@ -177,7 +177,7 @@ const verifyOtp = async (req, res) => {
 
 const loadHomePage = async(req,res) => {
   try{
-    const user = req.session.user;
+    const user =req.user || req.session.user;
     const categories = await Category.find({isListed:true});
     let productData = await Product.find(
       {isBlocked:false,

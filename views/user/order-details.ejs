@@ -287,17 +287,14 @@
                 <div class="mt-4 d-flex justify-content-between align-items-center">
                     <div>
                         <% if (order.status === 'Pending') { %>
-                          <!-- Show 'Shop More' button -->
                           <button id="shop-more-btn" class="btn shop-more-btn">
                             <a href="/products" style="color: inherit; text-decoration: none;">Shop More</a>
                           </button>
                         <% } else if (order.status && order.status.toLowerCase() === 'delivered') { %>
-                          <!-- Show 'Return Request' button -->
                           <button id="return-request-btn" class="btn return-request-btn">
                             <a href="/return-order-page/<%= order._id %>" style="color: inherit; text-decoration: none;">Return Request</a>
                           </button>
                         <% } else { %>
-                          <!-- Show 'Cancel Order' button -->
                           <button id="cancel-order-btn" class="btn cancel-order-btn">
                             <a href="/cancel-order-page/<%= order._id %>" style="color: inherit; text-decoration: none;">Cancel Order</a>
                           </button>

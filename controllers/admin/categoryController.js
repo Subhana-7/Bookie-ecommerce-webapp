@@ -82,11 +82,9 @@ const addCategoryOffer = async (req, res) => {
       });
     }
 
-    // Update category offer
     category.categoryOffer = percentage;
     await category.save();
 
-    // Update sale price for all products in the category
     for (const product of products) {
       if (product.productOffer === 0) {
         const discountAmount = (product.regularPrice * percentage) / 100;
@@ -118,10 +116,10 @@ const removeCategoryOffer = async (req, res) => {
     if (products.length > 0) {
       for (const product of products) {
         if (product.productOffer === 0) {
-          product.salePrice = product.regularPrice; // Reset sale price to regular price
+          product.salePrice = product.regularPrice; 
         } else {
           const discountAmount = (product.regularPrice * product.productOffer) / 100;
-          product.salePrice = product.regularPrice - discountAmount; // Maintain product offer
+          product.salePrice = product.regularPrice - discountAmount; 
         }
         await product.save();
       }

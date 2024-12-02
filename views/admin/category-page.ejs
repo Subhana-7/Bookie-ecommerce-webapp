@@ -18,9 +18,6 @@
     margin-top: 20px; 
   }
 
-
-
-
   .create-category-box {
     width: 30%; 
     float: left; 
@@ -32,7 +29,7 @@
   }
 
   .create-category-box .card-header {
-    background-color: #0d6efd; 
+    background-color:  rgb(59, 59, 59); 
     color: white;
   }
 
@@ -42,7 +39,7 @@
   }
 
   .search-form {
-    width: 60%;
+    width: 40%;
     margin-left: 320px;
     margin-bottom: 20px; 
     padding: 10px 0;
@@ -60,11 +57,11 @@
 
   .search-form input[type="search"]:focus {
     background-color: transparent;
-    border-color: #0d6efd; 
+    border-color:  rgb(59, 59, 59); 
   }
 
   .search-form .btn {
-    background-color: #0d6efd;
+    background-color: rgb(59, 59, 59);
     color: white;
   }
 
@@ -101,14 +98,14 @@
   <%-include("../../views/partials/admin/header")%>
 
   <div class="container-fluid">
-    <div class="heading">
+    <div class="heading text-center text-decoration-underline">
       <h2>Category Management</h2>
     </div>
     <div class="row">
       <%-include("../../views/partials/admin/sidebar")%>
 
       <main class="col-md-9 col-lg-10">
-        <div class="card create-category-box">
+        <div class="card create-category-box" style="margin-left: 850px;" >
           <div class="card-header">
             Create Category
           </div>
@@ -131,26 +128,23 @@
           </div>
         </div>
 
-        <div class="card search-form">
-          <form method="get" action="/admin/category">
-            <input class="form-control d-inline" type="search" name="search" placeholder="Search" aria-label="Search">
+          <form method="get" action="/admin/category" style="margin-left: 400px;">
+            <input class="form-control d-inline" type="search" name="search" placeholder="Search" aria-label="Search" style="margin-bottom: 10px; margin-top: 10px;">
             <button class="btn btn-primary d-inline" type="submit">Search</button>
           </form>
-          
-        </div>  
-
+     
 <table class="table table-striped mt-3">
   <thead>
-    <tr>
-      <th>#</th>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Offer</th>
-      <th></th>
-      <th>List/Unlist</th>
-      <th></th>
-      <th>Edit</th>
-      <th>Delete</th>
+    <tr style="background-color: rgb(59, 59, 59);">
+      <th style="color: white;">#</th>
+      <th style="color: white;">Name</th>
+      <th style="color: white;">Description</th>
+      <th style="color: white;">Offer</th>
+      <th style="color: white;"></th>
+      <th style="color: white;">List/Unlist</th>
+      <th style="color: white;"></th>
+      <th style="color: white;">Edit</th>
+      <th style="color: white;">Delete</th>
     </tr>
   </thead>
   <tbody>
