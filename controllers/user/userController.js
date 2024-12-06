@@ -3,6 +3,7 @@ const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const Wallet = require("../../models/walletSchema");
 const env = require("dotenv").config();
 const crypto = require("crypto"); 
 const transporter = require('../../config/emailConfig'); 
@@ -66,24 +67,6 @@ const generateReferralCode = () => {
 }
 
 
-const redeemReferralCode = async (referredUserId, referralCode) => {
-  const referredUser = await User.findById(referredUserId);
-  const referringUser = await User.findOne({ referalCode: referralCode });
-
-  if (!referringUser) {
-    throw new Error("Invalid referral code.");
-  }
-
-  referredUser.wallet += 10; 
-  referringUser.wallet += 5; 
-
-  referredUser.redeemed = true;
-  await referredUser.save();
-  await referringUser.save();
-
-  return { referredUser, referringUser };
-};
-
 
 
 const signup = async (req, res) => {
@@ -120,9 +103,6 @@ const signup = async (req, res) => {
 
 
 
-
-
-
 const securePassword = async(password) => {
   try {
     const passwordHash = await bcrypt.hash(password,10)
@@ -137,15 +117,13 @@ const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
 
-    console.log(otp);
-
     if (otp === req.session.userOtp) {
       const user = req.session.userData;
       const passwordHash = await securePassword(user.password);
 
-      const referralCode = user.referalCode || generateReferralCode();
+      const referralCode = generateReferralCode();
 
-      const saveUserData = new User({
+      const newUser = new User({
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -153,53 +131,67 @@ const verifyOtp = async (req, res) => {
         referalCode: referralCode,
       });
 
-      await saveUserData.save();
+      await newUser.save();
 
-      req.session.user = saveUserData._id;
-      
+      const newUserWallet = new Wallet({
+        userId: newUser._id,
+        transactions: [
+          {
+            type: "Credit",
+            amount: 50,
+            balance: 50,
+            description: "Signup bonus",
+          },
+        ],
+      });
+
+      await newUserWallet.save();
+
+      req.session.user = newUser._id;
+
       return res.json({ success: true, redirectUrl: "/" });
     } else {
-      return res.status(400).json({ success: false, message: "Invalid OTP, Please try again" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP, Please try again",
+      });
     }
-
   } catch (error) {
     console.error("Error Verifying OTP", error);
     res.status(500).json({ success: false, message: "An error occurred" });
   }
 };
 
-  
 
 
 
-  
-
-
-const loadHomePage = async(req,res) => {
-  try{
-    const user =req.user || req.session.user;
-    const categories = await Category.find({isListed:true});
-    let productData = await Product.find(
-      {isBlocked:false,
-        category:{$in:categories.map(category=>category._id)},quantity:{$gt:0}
-      }
-    )
-
-    productData.sort((a,b)=>new Date(b.createdOn)-new Date(a.createdOn));
-    productData = productData.slice(0,4);
-
-    if(user) {
-      const userData = await User.findOne({_id:user._id});
-      return res.render("home",{user:userData,products:productData});
-    }else {
-      return res.render("home",{products:productData});
-    }
+const loadHomePage = async (req, res) => {
+  try {
+    const user = req.user || req.session.user; 
+    const categories = await Category.find({ isListed: true }); 
     
-  }catch(error) {
-    console.log("Home page not found",error);
+    let productData = await Product.find({
+      isBlocked: false,       
+      isDeleted: false,          
+      category: { $in: categories.map(category => category._id) },
+      quantity: { $gt: 0 }, 
+    });
+    productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+
+    productData = productData.slice(0, 4);
+
+    if (user) {
+      const userData = await User.findOne({ _id: user._id });
+      return res.render("home", { user: userData, products: productData });
+    } else {
+      return res.render("home", { products: productData });
+    }
+  } catch (error) {
+    console.log("Home page not found", error);
     res.status(500).send("Server error");
   }
-}
+};
+
 
 const resendOtp = async(req,res) => {
   try {

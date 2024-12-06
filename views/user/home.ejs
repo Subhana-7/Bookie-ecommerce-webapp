@@ -188,7 +188,7 @@ body {
 .product-content-wrap {
     padding: 15px;
     text-align: center;
-    height: 136px; 
+    height: 110px; 
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -248,6 +248,32 @@ body {
 .product-content-wrap a:hover {
     background: #0056b3;
 }
+
+.Product__filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Add consistent spacing */
+    justify-content: center;
+}
+
+.product-cart-wrap {
+    width: 100%; 
+    max-width: 300px; /* Constrain card size */
+    margin: 0 auto; /* Center align */
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.product-img img {
+    width: 100%; 
+    height: 200px; 
+    object-fit: cover; 
+}
+
 
 
     </style>
@@ -325,41 +351,41 @@ body {
 
 
 
-    <section class="product spad">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <ul class="filter__controls">
-                        <li class="active" data-filter=".new-arrivals">New Arrivals</li>
-                    </ul>
-                </div>
+<section class="product spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <ul class="filter__controls">
+                    <li class="active" data-filter=".new-arrivals">New Arrivals</li>
+                </ul>
             </div>
-            <div class="row Product__filter">
-                <% for (let i = 0; i < Math.min(products.length, 3); i++) { %>
-                    <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-                        <div class="product-cart-wrap mb-30">
-                            <div class="product-img-action-wrap">
-                                <div class="product-img product-img-zoom">
-                                    <a href="/productDetails?id=<%= products[i]._id %>">
-                                        <img class="default-img" src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="product-action-1">
-                                <a aria-label="Add to Wishlist" class="action-btn hover-up" href="#"></a>
-                            </div>
-                            <div class="product-content-wrap">
-                                <h6><%= products[i].productName %></h6>
-                                <h5><%= products[i].salePrice %></h5>
-                                <a href="/product-details/<%= products[i]._id %>">View Details
+        </div>
+        <div class="row g-3 Product__filter">
+            <% for (let i = 0; i < Math.min(products.length, 3); i++) { %>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="product-cart-wrap mb-30">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/product-details/<%= products[i]._id %> %>">
+                                    <img class="default-img" src="/uploads/product-images/<%= products[i].productImage[0] %>" alt="<%= products[i].productName %>">
+                                </a>
                             </div>
                         </div>
+                        <div class="product-action-1">
+                            <a aria-label="Add to Wishlist" class="action-btn hover-up" href="#"></a>
+                        </div>
+                        <div class="product-content-wrap">
+                            <h6><%= products[i].productName %></h6>
+                            <h5><%= products[i].salePrice %></h5>
+                            <a href="/product-details/<%= products[i]._id %>">View Details</a>
+                        </div>
                     </div>
-                <% } %>
-            </div>
-            
+                </div>
+            <% } %>
         </div>
-    </section>
+    </div>
+</section>
+
     
 
     <%- include("../../views/partials/user/footer") %>

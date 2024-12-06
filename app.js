@@ -22,8 +22,6 @@ app.locals.razorpayInstance = razorpayInstance;
 
 db();
 
-//const openaiApiKey = process.env.OPENAI_API_KEY;
-//const geminiApiKey = process.env.GEMINI_API_KEY;
  
 app.use(express.urlencoded({extended:true})); 
 app.use(express.json());

@@ -167,7 +167,7 @@
     
     <div class="text-center">
       <h2>Order Successfully Placed!</h2>
-      <div class="order-id">Order ID: #<%= order._id %></div>
+      <div class="order-id">Order ID: #<%= order.orderId %></div>
       
       <div class="payment-badge">
         <i class="fas fa-<%= order.paymentMethod === 'Cash On Delivery' ? 'money-bill' : 'credit-card' %>"></i>
@@ -205,6 +205,13 @@
               <td colspan="4" class="text-end">Total Amount:</td>
               <td class="text-end price-column">₹<%= order.totalPrice.toLocaleString() %></td>
             </tr>
+
+            <tr class="discount-row">
+              <td colspan="4" class="text-end">Discount:</td>
+              <td class="text-end price-column">₹<%= order.discount.toLocaleString() %>.00</td>
+            </tr>
+
+
             <tr class="final-row">
               <td colspan="4" class="text-end" style="font-weight: bold;">
                 <%= order.couponApplied === true? "Final Amount (discount applied):" : "Final Amount:" %>

@@ -8,7 +8,6 @@ const orderController = require("../controllers/user/orderController");
 const wishlistController = require("../controllers/user/wishlistController");
 const walletController = require("../controllers/user/walletController");
 const retryPaymentController = require("../controllers/user/retryPaymentController");
-const chatBoxController = require("../controllers/user/chatBoxController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 
 
@@ -90,7 +89,9 @@ router.post("/payment", userAuth, orderController.placeOrder);
 router.post("/create-razorpay-order", userAuth, orderController.createRazorpayOrder);
 router.post("/verify-razorpay-payment",userAuth,orderController.verifyRazorpayPayment);
 router.get("/order-confirmation/:orderId", userAuth, orderController.orderConfirmation);
-router.get("/payment-failed",userAuth,orderController.paymentFailed);
+router.get("/payment-failed/:orderId", userAuth, orderController.paymentFailed);
+
+
 
 //coupon
 
@@ -115,7 +116,7 @@ router.post("/wishlist/remove",userAuth,wishlistController.removeItemFromWishlis
 router.get("/wallet",userAuth,walletController.loadWallet);
 
 //invoice
-router.get('/download-invoice/:orderId',userAuth,orderController.invoiceDownload);
+router.get('/download-invoice/:id',userAuth,orderController.invoiceDownload);
 
 //continue payment
 
@@ -123,10 +124,7 @@ router.get("/continue-payment/:orderId",userAuth,retryPaymentController.getConti
 router.post("/continue-payment/:orderId",userAuth,retryPaymentController.initiatePayment);
 router.post("/payment-success/:orderId",userAuth,retryPaymentController.handlePaymentSuccess);
 
-//chatBox
 
-router.get("/chat",userAuth,chatBoxController.loadChatBox);
-router.post("/chat",userAuth,chatBoxController.chatbox);
 
 
 module.exports = router;

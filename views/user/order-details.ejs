@@ -219,7 +219,7 @@
                 <div class="order-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="order-id">Order #<%= order._id %></span>
+                            <span class="order-id">Order #<%= order.orderId %></span>
                             <p class="text-muted mb-0">Placed on <%= order.createdOn.toDateString() %></p>
                         </div>
                         
@@ -229,7 +229,7 @@
                         <span class="payment-method">Payment Method:
                             <%= order.paymentMethod.toUpperCase() %>
                         </span>
-                        <span class="status-badge badge-<%= order.paymentStatus === 'completed' ? 'delivered' : 'pending' %>">Payement Status:
+                        <span class="status-badge badge-<%= order.paymentStatus === 'completed' ? 'delivered' : 'pending' %>">Payment Status:
                             <%= order.paymentStatus.toUpperCase() %>
                         </span>
                     </div>
@@ -344,19 +344,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-const addressId = $("input[name='address']:checked").val(); 
-if (!addressId) {
-    Swal.fire('Error', 'Please select an address.', 'error');
-    return;
-}
-
-</script>
-
-<script>
-    console.log("order",orderId);
-</script>
-
 
 
 </body>

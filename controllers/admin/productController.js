@@ -1,19 +1,16 @@
-
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const User = require("../../models/userSchema");
 const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
-const flash = require('express-flash');
 
 
 
-const getAddProduct = async(req,res) => {
+const getAddProduct = async (req, res) => {
   try {
-    category = await Category.find({isListed:true});
-    res.render("addProduct",{
-      cat:category
+    category = await Category.find({ isListed: true });
+    res.render("addProduct", {
+      cat: category
     });
 
   } catch (error) {
@@ -40,7 +37,7 @@ const addProduct = async (req, res) => {
             "public",
             "uploads",
             "product-images",
-            `resized-${file.filename}` 
+            `resized-${file.filename}`
           );
 
           await sharp(originalImagePath)
@@ -77,7 +74,6 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ message: "Product already exists, please try with another name." });
     }
   } catch (error) {
-    console.error("Error saving product", error);
     return res.redirect("/admin/pageNotFound");
   }
 };
@@ -93,10 +89,10 @@ const getProductManagementPage = async (req, res) => {
 
     const productData = await Product.find({
       $and: [
-        { isDeleted: false}, 
+        { isDeleted: false },
         {
           $or: [
-            { productName: { $regex: new RegExp(".*" + search + ".*", "i") } }, 
+            { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
           ],
         },
       ],
@@ -127,11 +123,9 @@ const getProductManagementPage = async (req, res) => {
         cat: category,
       });
     } else {
-      console.log("Category fetch failed.");
       res.render("pageNotFound");
     }
   } catch (error) {
-    console.log("Error in getProductManagementPage:", error);
     res.redirect("pageNotFound");
   }
 };
@@ -167,7 +161,6 @@ const addProductOffer = async (req, res) => {
 
     return res.json({ status: true });
   } catch (error) {
-    console.error("Error in addProductOffer:", error);
     return res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
@@ -184,23 +177,22 @@ const removeProductOffer = async (req, res) => {
       return res.status(404).json({ message: "Product not found." });
     }
 
-    findProduct.salePrice = findProduct.regularPrice; 
+    findProduct.salePrice = findProduct.regularPrice;
     findProduct.productOffer = 0;
 
     await findProduct.save();
     res.json({ status: true });
   } catch (error) {
-    console.error("Error in removeProductOffer:", error);
     res.status(500).json({ status: false, message: "Internal Server Error" });
   }
 };
 
 
 
-const blockProduct = async(req,res) => {
+const blockProduct = async (req, res) => {
   try {
     let id = req.query.id;
-    await Product.updateOne({_id:id},{$set:{isBlocked:true}});
+    await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
     res.redirect("/admin/productManagement")
   } catch (error) {
     res.redirect("/pageNotFound");
@@ -208,10 +200,10 @@ const blockProduct = async(req,res) => {
 }
 
 
-const unblockProduct = async(req,res) => {
+const unblockProduct = async (req, res) => {
   try {
     let id = req.query.id;
-    await Product.updateOne({_id:id},{$set:{isBlocked:false}});
+    await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
     res.redirect("/admin/productManagement");
   } catch (error) {
     res.redirect("/pageNotFound");
@@ -222,34 +214,31 @@ const unblockProduct = async(req,res) => {
 
 
 
-const deleteProduct = async(req,res) => {
-   try {
+const deleteProduct = async (req, res) => {
+  try {
     const id = req.query.id;
     await Product.findByIdAndUpdate(id, {
-      isDeleted:true
+      isDeleted: true
     })
     res.redirect("/admin/productManagement");
-    req.flash('success', 'Product deleted successfully'); 
-   } catch (error) {
-    console.log("product not found");
-    req.flash('error', 'An error occurred while deleting the product'); 
-    res.redirect("pageNotFound");
-   }
+    req.flash('success', 'Product deleted successfully');
+  } catch (error) {
+    req.flash('error', 'An error occurred while deleting the product');
+    res.redirect("/pageNotFound");
+  }
 }
 
 
 
-const getEditProduct = async(req,res) => {
-  console.log("inside getEditProduct block-controller")
+const getEditProduct = async (req, res) => {
   try {
-    console.log("Inside the try block of getEditproduct");
     const id = req.query.id;
-    const product = await Product.findOne({_id:id});
+    const product = await Product.findOne({ _id: id });
     const category = await Category.find({});
 
-    res.render("edit-product",{
-      product:product,
-      cat:category,
+    res.render("edit-product", {
+      product: product,
+      cat: category,
     })
   } catch (error) {
     res.redirect("/pageNotFound");
@@ -279,7 +268,7 @@ const editProduct = async (req, res) => {
           "public",
           "uploads",
           "product-images",
-          `resized-${file.filename}` 
+          `resized-${file.filename}`
         );
 
         await sharp(originalImagePath)
@@ -301,15 +290,13 @@ const editProduct = async (req, res) => {
       regularPrice: data.regularPrice || product.regularPrice,
       salePrice: data.regularPrice || product.regularPrice,
       quantity: data.quantity || product.quantity,
-      productImage: updatedImages, 
+      productImage: updatedImages,
     };
 
     const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });
-    console.log("Updated successfully:", updatedProduct);
 
     res.redirect("/admin/productManagement");
   } catch (error) {
-    console.error(error);
     res.redirect("/pageNotFound");
   }
 };
@@ -318,66 +305,59 @@ const editProduct = async (req, res) => {
 
 const deleteSingleImage = async (req, res) => {
   try {
-      console.log("Inside the try block of deleteSingleImage");
 
-      const { imageNameToServer, productIdToServer } = req.body;
+    const { imageNameToServer, productIdToServer } = req.body;
 
-      console.log("Image to delete:", imageNameToServer);
-      console.log("Product ID:", productIdToServer);
 
-      if (!imageNameToServer || !productIdToServer) {
-          return res.status(400).json({ 
-              success: false, 
-              message: "Missing required parameters" 
-          });
-      }
+    if (!imageNameToServer || !productIdToServer) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required parameters"
+      });
+    }
 
-      const product = await Product.findByIdAndUpdate(
-          productIdToServer,
-          { $pull: { productImage: imageNameToServer } },
-          { new: true }
-      );
+    const product = await Product.findByIdAndUpdate(
+      productIdToServer,
+      { $pull: { productImage: imageNameToServer } },
+      { new: true }
+    );
 
-      if (!product) {
-          return res.status(404).json({ 
-              success: false, 
-              message: "Product not found" 
-          });
-      }
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
+    }
 
-      const imagePath = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          "product-images",
-          imageNameToServer
-      );
+    const imagePath = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      "product-images",
+      imageNameToServer
+    );
 
-      console.log("Full image path:", imagePath);
 
-      if (fs.existsSync(imagePath)) {
-          await fs.promises.unlink(imagePath);
-          console.log(`Image ${imageNameToServer} deleted successfully`);
-          
-          res.json({ 
-              success: true, 
-              message: "Image deleted successfully" 
-          });
-      } else {
-          console.log(`Image ${imageNameToServer} not found at ${imagePath}`);
-          res.json({ 
-              success: true, 
-              message: "Image reference removed from database successfully" 
-          });
-      }
+    if (fs.existsSync(imagePath)) {
+      await fs.promises.unlink(imagePath);
+
+      res.json({
+        success: true,
+        message: "Image deleted successfully"
+      });
+    } else {
+      res.json({
+        success: true,
+        message: "Image reference removed from database successfully"
+      });
+    }
 
   } catch (error) {
-      console.error("Error in deleteSingleImage:", error);
-      res.status(500).json({ 
-          success: false, 
-          message: "Internal server error",
-          error: error.message 
-      });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
   }
 };
 

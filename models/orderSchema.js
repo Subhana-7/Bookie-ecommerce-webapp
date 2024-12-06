@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
-const {Schema} = mongoose;
-const {v4:uuidv4} = require('uuid');
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require('uuid');
 
 const orderSchema = new Schema({
-    userId : {
-        type:Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     orderId: {
         type: String,
@@ -17,6 +17,10 @@ const orderSchema = new Schema({
         product: {
             type: Schema.Types.ObjectId,
             ref: 'Product',
+            required: true
+        },
+        productName: {
+            type: String,
             required: true
         },
         quantity: {
@@ -40,8 +44,8 @@ const orderSchema = new Schema({
         type: Number,
         required: true
     },
-    address: {  
-        type:  Schema.Types.ObjectId,
+    address: {
+        type: Schema.Types.ObjectId,
         ref: 'Address',
         required: true
     },
@@ -51,7 +55,7 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending','Payment Pending' ,'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
+        enum: ['Pending', 'Payment Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
     },
     cancellationReason: {
         type: String,
@@ -71,19 +75,19 @@ const orderSchema = new Schema({
         default: false
     },
     paymentId: {
-        type: String 
+        type: String
     },
     paymentMethod: {
         type: String,
-        enum: ['Cash On Delivery', 'Razorpay','pending'],
-        default:'Cash On Delivery' 
+        enum: ['Cash On Delivery', 'Razorpay', 'pending'],
+        default: 'Cash On Delivery'
     },
     paymentStatus: {
-        type:String,
-        enum: ["completed","Pending"],
-        default:'Pending'
+        type: String,
+        enum: ["completed", "Pending"],
+        default: 'Pending'
     },
 });
 
-const Order = mongoose.model("Order",orderSchema);
+const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

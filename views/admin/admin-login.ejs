@@ -111,48 +111,34 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        const adminEmailId = document.getElementById("admin-email");
-        const adminPassId = document.getElementById("admin-password");
-        const adminLoginError1 = document.getElementById("admin-login-error1");
-        const adminLoginError2 = document.getElementById("admin-login-error2");
-        const adminLoginForm = document.getElementById("adminLoginForm");
+    const adminEmailId = document.getElementById("admin-email");
+    const adminLoginError1 = document.getElementById("admin-login-error1");
+    const adminLoginForm = document.getElementById("adminLoginForm");
 
-        function adminEmailValidation() {
-            const emailVal = adminEmailId.value.trim();
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    function adminEmailValidation() {
+        const emailVal = adminEmailId.value.trim();
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 
-            if (!emailPattern.test(emailVal)) {
-                adminLoginError1.style.display = "block";
-                adminLoginError1.innerHTML = "Invalid Email Format";
-            } else {
-                adminLoginError1.style.display = "none";
-                adminLoginError1.innerHTML = "";
-            }
+        if (!emailPattern.test(emailVal)) {
+            adminLoginError1.style.display = "block";
+            adminLoginError1.innerHTML = "Invalid Email Format";
+        } else {
+            adminLoginError1.style.display = "none";
+            adminLoginError1.innerHTML = "";
         }
+    }
 
-        function adminPassValidation() {
-            const passVal = adminPassId.value.trim();
-            if (passVal.length < 8) {
-                adminLoginError2.style.display = "block";
-                adminLoginError2.innerHTML = "Password must be at least 8 characters";
-            } else {
-                adminLoginError2.style.display = "none";
-                adminLoginError2.innerHTML = "";
-            }
+    adminLoginForm.addEventListener("submit", function (e) {
+        adminEmailValidation();
+
+        if (adminLoginError1.innerHTML !== "") {
+            e.preventDefault(); 
         }
+    });
 
-        adminLoginForm.addEventListener("submit", function (e) {
-            adminEmailValidation();
-            adminPassValidation();
+    adminEmailId.addEventListener("input", adminEmailValidation);
+</script>
 
-            if (adminLoginError1.innerHTML !== "" || adminLoginError2.innerHTML !== "") {
-                e.preventDefault(); 
-            }
-        });
-
-        adminEmailId.addEventListener("input", adminEmailValidation);
-        adminPassId.addEventListener("input", adminPassValidation);
-    </script>
 
 </body>
 </html>

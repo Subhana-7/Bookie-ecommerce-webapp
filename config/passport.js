@@ -16,7 +16,6 @@ async (accessToken, refreshToken, profile, done) => {
             await user.save();
             return done(null, user);
         } else {
-            // Create new user
             const newUser = new User({
                 name: profile.displayName,
                 email: profile.emails[0].value,

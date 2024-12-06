@@ -71,9 +71,9 @@
       </select>
     </div>
 
-    <p class="total"><strong>Total:</strong> ₹<%= cart.items.reduce((sum, item)=> sum + item.totalPrice, 0).toFixed(2) %>
+    <p class="total" id="totalPrice"><strong>Total:</strong> ₹<%= cart.items.reduce((sum, item)=> sum + item.totalPrice, 0).toFixed(2) %>
     </p>
-
+    <p class="total" id="discount"><strong>Discount:</strong> ₹<span id="discountAmount">0.00</span></p>
     <p class="total"><strong>Final Price:</strong> <span id="finalPrice">₹<%= cart.items.reduce((sum, item)=> sum +
           item.totalPrice, 0).toFixed(2) %></span></p>
 
@@ -118,110 +118,151 @@
 
 <script>
   async function placeOrder() {
-  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-  const couponId = document.getElementById("coupon").value; 
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const couponId = document.getElementById("coupon").value; 
 
-  if (!paymentMethod) {
-    alert('Please select a payment method.');
-    return;
+    if (!paymentMethod) {
+      alert('Please select a payment method.');
+      return;
+    }
+
+    const finalAmount = parseFloat(document.getElementById("finalPrice").innerText.replace('₹', '').trim());
+
+    const orderData = {
+      addressId: "<%= selectedAddress._id %>",
+      paymentMethod: paymentMethod,
+      finalAmount: finalAmount,
+      couponId: couponId || null,
+    };
+
+    try {
+      if (paymentMethod === "Razorpay") {
+        const response = await fetch('/create-razorpay-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create Razorpay order.");
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          const options = {
+            key: data.keyId,
+            amount: data.amount,
+            currency: data.currency,
+            order_id: data.razorpayOrderId,
+            name: 'Bookie',
+            description: 'Order Payment',
+            handler: function(paymentResponse) {
+              verifyPayment(paymentResponse, data.orderId, data.razorpayOrderId);
+            },
+            prefill: {
+              name: "<%= selectedAddress.name %>",
+              email: "<%= user.email %>",
+              contact: "<%= selectedAddress.contactNo %>"
+            },
+            // Add modal close and payment failure handlers
+            modal: {
+              ondismiss: function() {
+                // Handle modal dismissal (user closed payment window)
+                handlePaymentFailure(data.orderId);
+              }
+            },
+            // Capture payment failure events
+            "theme": {
+              "color": "#3399cc"
+            }
+          };
+
+          const rzp1 = new Razorpay(options);
+          
+          // Add event listener for payment failure
+          rzp1.on('payment.failed', function(response) {
+            handlePaymentFailure(data.orderId, response);
+          });
+
+          rzp1.open();
+        } else {
+          alert('Failed to create Razorpay order.');
+        }
+      } else if (paymentMethod === "Cash On Delivery") {
+        const response = await fetch('/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          window.location.href = '/order-confirmation/' + data.orderId;
+        } else {
+          alert('Failed to place order.');
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while processing your order.');
+    }
   }
 
-  const finalAmount = parseFloat(document.getElementById("finalPrice").innerText.replace('₹', '').trim());
+  // New function to handle payment failures
+  async function handlePaymentFailure(orderId, paymentResponse = null) {
+    try {
+      // If paymentResponse is provided, it means payment actually failed
+      if (paymentResponse) {
+        console.error('Payment failed:', paymentResponse.error);
+      }
+      
+      // Redirect to payment failed page
+      window.location.href = `/payment-failed/${orderId}`;
+    } catch (error) {
+      console.error('Error handling payment failure:', error);
+      alert('An error occurred during payment processing.');
+    }
+  }
 
-  const orderData = {
-    addressId: "<%= selectedAddress._id %>",
-    paymentMethod: paymentMethod,
-    finalAmount: finalAmount,
-    couponId: couponId || null,
-  };
-
-  try {
-    if (paymentMethod === "Razorpay") {
-      const response = await fetch('/create-razorpay-order', {
+  async function verifyPayment(paymentResponse, orderId, razorpayOrderId) {
+    try {
+      const response = await fetch('/verify-razorpay-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify({
+          orderId: orderId,
+          razorpayOrderId: razorpayOrderId,
+          paymentId: paymentResponse.razorpay_payment_id,
+          signature: paymentResponse.razorpay_signature
+        })
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to create Razorpay order.");
-      }
 
       const data = await response.json();
 
       if (data.success) {
-        const options = {
-          key: data.keyId,
-          amount: data.amount,
-          currency: data.currency,
-          order_id: data.razorpayOrderId,
-          name: 'Bookie',
-          description: 'Order Payment',
-          handler: function(paymentResponse) {
-            verifyPayment(paymentResponse, data.orderId, data.razorpayOrderId);
-          },
-          prefill: {
-            name: "<%= selectedAddress.name %>",
-            email: "<%= user.email %>",
-            contact: "<%= selectedAddress.contactNo %>"
-          }
-        };
-
-        const rzp1 = new Razorpay(options);
-        rzp1.open();
+        window.location.href = '/order-confirmation/' + orderId;
       } else {
-        alert('Failed to create Razorpay order.');
+        alert(data.message || 'Payment verification failed.');
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          // If no specific redirect, send to payment failed page
+          handlePaymentFailure(orderId);
+        }
       }
-    } else if (paymentMethod === "Cash On Delivery") {
-      const response = await fetch('/payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        window.location.href = '/order-confirmation/' + data.orderId;
-      } else {
-        alert('Failed to place order.');
-      }
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    alert('An error occurred while processing your order.');
-  }
-}
-
-async function verifyPayment(paymentResponse, orderId, razorpayOrderId) {
-  try {
-    const response = await fetch('/verify-razorpay-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderId: orderId,
-        razorpayOrderId: razorpayOrderId,
-        paymentId: paymentResponse.razorpay_payment_id,
-        signature: paymentResponse.razorpay_signature
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-    window.location.href = '/order-confirmation/' + orderId;
-    } else {
-    alert(data.message || 'Payment verification failed.');
-    if (data.redirect) {
-        window.location.href = data.redirect;
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while verifying payment.');
+      handlePaymentFailure(orderId);
     }
   }
 
-  } catch (error) {
-    console.error('Error:', error);
-    alert('An error occurred while verifying payment.');
-  }
-}
+
+
+
+
 
 
 const coupons = JSON.parse('<%- JSON.stringify(coupons || []) %>'); 
@@ -259,6 +300,38 @@ document.getElementById("coupon").addEventListener("change", (event) => {
       codLabel.innerText += " (Unavailable for orders above ₹1000)";
     }
   });
+
+
+
+  // Function to update the discount and final price
+function updateDiscountAndPrice() {
+  const selectedCouponId = document.getElementById("coupon").value;
+  const totalPrice = parseFloat("<%= cart.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) %>"); 
+
+  let discount = 0;
+  let finalPrice = totalPrice;
+
+  if (selectedCouponId) {
+    const selectedCoupon = coupons.find(coupon => coupon._id === selectedCouponId);
+    if (selectedCoupon) {
+      discount = (selectedCoupon.offerPrice / 100) * totalPrice;  // Calculate discount
+      finalPrice = Math.max(0, totalPrice - discount);  // Final price after applying the discount
+    }
+  }
+
+  // Update the discount and final price on the UI
+  document.getElementById("discountAmount").innerText = discount.toFixed(2); // Update discount field
+  document.getElementById("finalPrice").innerText = `₹${finalPrice.toFixed(2)}`;  // Update final price
+}
+
+document.getElementById("coupon").addEventListener("change", (event) => {
+  updateDiscountAndPrice();  // Update discount and final price when coupon changes
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateDiscountAndPrice();  // Initial calculation on page load
+});
+
 </script>
 
 </body>

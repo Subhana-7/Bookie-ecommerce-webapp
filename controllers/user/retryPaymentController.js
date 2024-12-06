@@ -2,6 +2,7 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Order = require("../../models/orderSchema");
+const Product = require("../../models/productSchema");
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -103,6 +104,14 @@ const handlePaymentSuccess = async (req, res) => {
             { new: true }
         );
 
+
+        for (const item of order.orderedItems) {
+            await Product.updateOne(
+              { _id: item.product },
+              { $inc: { quantity: -item.quantity } }
+            );
+          }
+
         
 
         if (!order) {
@@ -121,4 +130,3 @@ module.exports = {
     initiatePayment,
     handlePaymentSuccess
 };
-

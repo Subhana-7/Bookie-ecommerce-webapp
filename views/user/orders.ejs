@@ -134,7 +134,7 @@
                         <% orders.forEach(order => { %>
                             <div class="card mb-4">
                                 <div class="card-body">
-                                    <h5 class="card-title">Order ID: <%= order._id %></h5>
+                                    <h5 class="card-title">Order ID: <%= order.orderId %></h5>
                                     <p class="card-text"><strong>Order Date:</strong> <%= order.createdOn.toDateString() %></p>
                                     <p class="card-text"><strong>Order Status:</strong> 
                                         <span class="badge badge-<%= order.status === 'delivered' ? 'success' : 'warning' %>">

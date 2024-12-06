@@ -70,7 +70,7 @@
 
         <div class="order-details">
           <h5 class="section-title">Order Details</h5>
-          <p><strong>Order ID:</strong> <%= order._id %></p>
+          <p><strong>Order ID:</strong> <%= order.orderId %></p>
           <p><strong>Total Price:</strong> ₹<%= order.totalPrice.toFixed(2) %></p>
 
           <tr class="final-row">
@@ -152,7 +152,7 @@
           <% }) %>
         </div>
 
-      <button><a href="/admin/order-management">Go back</a></button>
+      <button style="background-color:maroon;"><a style="color:white" href="/admin/order-management">Go back</a></button>
       </div>
     </div>
   </div>

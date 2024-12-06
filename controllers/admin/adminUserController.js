@@ -4,7 +4,7 @@ const userInfo = async (req, res) => {
   try {
     let search = "";
     if (req.query.search) {
-      search = req.query.search;  
+      search = req.query.search;
     }
 
     let page = 1;
@@ -14,17 +14,17 @@ const userInfo = async (req, res) => {
 
     const limit = 5;
     const userData = await User.find({
-      isAdmin: false,  
+      isAdmin: false,
       $or: [
-        { name: { $regex: ".*" + search + ".*", $options: 'i' } },  
+        { name: { $regex: ".*" + search + ".*", $options: 'i' } },
         { email: { $regex: ".*" + search + ".*", $options: 'i' } }
       ],
     })
-      .limit(limit * 1) 
-      .skip((page - 1) * limit)  
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
       .exec();
 
-   
+
     const count = await User.find({
       isAdmin: false,
       $or: [
@@ -33,42 +33,37 @@ const userInfo = async (req, res) => {
       ],
     }).countDocuments();
 
-    
+
     res.render("userManagement", {
-      data: userData,        
-      totalPages: Math.ceil(count / limit),  
-      currentPage: parseInt(page),  
-      search: search        
+      data: userData,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+      search: search
     });
 
   } catch (error) {
-    console.log("Error in user management page", error);
-    res.redirect("/pageError");  
+    res.redirect("/pageError");
   }
 };
 
 
-const userBlocked = async(req,res) => {
+const userBlocked = async (req, res) => {
   try {
     let id = req.query.id;
-    console.log("Blocking user ID: ", id);
-    const result  = await User.updateOne({_id:id},{$set:{isBlocked:true}});
-    console.log("Update result:", result);
+    await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
     res.redirect("/admin/users?status=blocked");
   } catch (error) {
-    res.redirect("/pageError",error);
+    res.redirect("/pageError", error);
   }
 };
 
-const userUnBlocked = async(req,res) => {
+const userUnBlocked = async (req, res) => {
   try {
     let id = req.query.id;
-    console.log("unBlocking user ID: ", id)
-    const result = await User.updateOne({_id:id},{$set:{isBlocked:false}});
-    console.log("Update result:", result);
+    await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
     res.redirect("/admin/users?status=unblocked");
   } catch (error) {
-    res.redirect("/pageError",error);
+    res.redirect("/pageError", error);
   }
 }
 

@@ -141,7 +141,7 @@
         <tbody>
           <% orders.forEach(order => { %>
           <tr>
-            <td><%= order._id %></td>
+            <td><%= order.orderId %></td>
             <td><%= order.createdOn.toDateString() %></td>
             <td><%= order.userId.name %></td> 
             <td>₹<%= order.finalAmount.toFixed(2) %></td>

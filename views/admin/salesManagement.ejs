@@ -127,7 +127,7 @@
             <tbody>
                 <% orders.forEach(order => { %>
                 <tr>
-                    <td><%= order._id %></td>
+                    <td><%= order.orderId %></td>
                     <td><%= order.userId?.name || "N/A" %></td>
                     <td>
                       <% order.orderedItems.forEach(item => { %>
