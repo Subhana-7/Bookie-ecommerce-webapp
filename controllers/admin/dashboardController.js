@@ -98,7 +98,7 @@ const renderDashboard = async (req, res) => {
         filterTotalRevenue: totalRevenue,
       });
     } catch (error) {
-      res.redirect("/pageNotFound");
+      res.redirect("/page-not-found");
     }
   } else {
     res.redirect("/admin/login");

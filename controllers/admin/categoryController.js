@@ -27,7 +27,7 @@ const categoryInfo = async (req, res) => {
       totalCategories: totalCategories,
     });
   } catch (error) {
-    res.redirect("/pageError");
+    res.redirect("/page-error");
   }
 };
 
@@ -140,7 +140,7 @@ const getListCategory = async (req, res) => {
     await Category.updateOne({ _id: id }, { $set: { isListed: true } });
     res.redirect("/admin/category");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -151,7 +151,7 @@ const getUnlistCategory = async (req, res) => {
 
     res.redirect("/admin/category");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -163,7 +163,7 @@ const getEditCategory = async (req, res) => {
     res.render("edit-category", { category: category });
 
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -202,7 +202,7 @@ const deleteCategory = async (req, res) => {
     });
     res.redirect("/admin/category");
   } catch (error) {
-    res.redirect("pageNotFound");
+    res.redirect("page-not-found");
   }
 }
 

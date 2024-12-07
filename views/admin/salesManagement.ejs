@@ -1,213 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%- include("../../views/partials/admin/header") %>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    h1 {
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-    .box {
-      background-color: #d9a9a9;
-      padding: 20px;
-      border-radius: 8px;
-      color: #fff;
-    }
-    .box h4 {
-      margin-bottom: 10px;
-    }
-    table {
-      background-color: #fff;
-    }
-    thead th {
-      background-color: #d9a9a9;
-      color: white;
-    }
-    table td, table th {
-      vertical-align: middle;
-      color: black;
-    }
-    .btn-success {
-      margin-left: 10px;
-    }
-    #customDateRange {
-      display: none;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <%- include("../../views/partials/admin/sidebar") %>
-    <div class="container " style="margin-left: 400px;">
-        <h1 class="text-center">Sales Report</h1>
-        <div class="row text-center ">
-            <div class="col-md-4">
-                <div class="box">
-                    <h4>Overall sales count</h4>
-                    <p><%= totalOrders %></p>
+<%- include("../../views/partials/admin/header") %>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sales Management</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+
+            h1 {
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+
+            .box {
+                background-color: #d9a9a9;
+                padding: 20px;
+                border-radius: 8px;
+                color: #fff;
+            }
+
+            .box h4 {
+                margin-bottom: 10px;
+            }
+
+            table {
+                background-color: #fff;
+            }
+
+            thead th {
+                background-color: #d9a9a9;
+                color: white;
+            }
+
+            table td,
+            table th {
+                vertical-align: middle;
+                color: black;
+            }
+
+            .btn-success {
+                margin-left: 10px;
+            }
+
+            #customDateRange {
+                display: none;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <%- include("../../views/partials/admin/sidebar") %>
+            <div class="container " style="margin-left: 400px;">
+                <h1 class="text-center">Sales Report</h1>
+                <div class="row text-center ">
+                    <div class="col-md-4">
+                        <div class="box">
+                            <h4>Overall sales count</h4>
+                            <p>
+                                <%= totalOrders %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box">
+                            <h4>Overall order amount</h4>
+                            <p>
+                                <%= totalOrderAmount %>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box">
+                            <h4>Overall discount</h4>
+                            <p>
+                                <%= totalDiscount %>
+                            </p>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="row my-4">
+                    <div class="col-md-6 mx-auto text-center">
+                        <label for="reportType" class="form-label">Report type:</label>
+                        <select id="reportType" class="form-select d-inline-block w-auto">
+                            <% reportTypes.forEach(type=> { %>
+                                <option value="<%= type.value %>">
+                                    <%= type.label %>
+                                </option>
+                                <% }); %>
+                        </select>
+                        <div id="customDateRange">
+                            <input type="date" id="startDate" class="form-control my-2" placeholder="Start Date">
+                            <input type="date" id="endDate" class="form-control my-2" placeholder="End Date">
+                        </div>
+                        <button class="btn btn-success" onclick="generateReport()">Generate Report</button>
+                        <div class="text-center my-3">
+                            <button class="btn btn-danger" onclick="downloadReport('pdf')">Download PDF</button>
+                            <button class="btn btn-primary" onclick="downloadReport('excel')">Download Excel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row my-4" id="stateBoxes">
+                    <div class="col-md-4">
+                        <div class="box">
+                            <h4>Total Sales Count</h4>
+                            <p id="totalSalesCount">0</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box">
+                            <h4>Total Order Amount</h4>
+                            <p id="totalOrderAmount">₹0.00</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="box">
+                            <h4>Total Discounts</h4>
+                            <p id="totalDiscounts">₹0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <table class="table table-bordered text-center">
+                    <thead>
+                        <tr>
+                            <th>OrderId</th>
+                            <th>User Name</th>
+                            <th>Ordered Items</th>
+                            <th>Total Price</th>
+                            <th>Final Amount</th>
+                            <th>Discount</th>
+                            <th>Status</th>
+                            <th>Payment Method</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order=> { %>
+                            <tr>
+                                <td>
+                                    <%= order.orderId %>
+                                </td>
+                                <td>
+                                    <%= order.userId?.name || "N/A" %>
+                                </td>
+                                <td>
+                                    <% order.orderedItems.forEach(item=> { %>
+                                        <p>
+                                            <%= item.product?.productName || "Unknown" %> (x<%= item.quantity %>)
+                                        </p>
+                                        <% }); %>
+                                </td>
+                                <td>₹<%= order.totalPrice %>
+                                </td>
+                                <td>₹<%= order.finalAmount %>
+                                </td>
+                                <td>
+                                    <%= order.discount %>
+                                </td>
+                                <td>
+                                    <%= order.status %>
+                                </td>
+                                <td>
+                                    <%= order.paymentMethod %>
+                                </td>
+                                <td>
+                                    <%= order.createdOn ? order.createdOn.toDateString() : "N/A" %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="/admin/sales-report?page=<%= currentPage - 1 %>">Previous</a>
+                        </li>
+
+                        <% for (let i=1; i <=totalPages; i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                <a class="page-link" href="/admin/sales-report?page=<%= i %>">
+                                    <%= i %>
+                                </a>
+                            </li>
+                            <% } %>
+
+                                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage + 1 %>">Next</a>
+                                </li>
+                    </ul>
+                </nav>
             </div>
-            <div class="col-md-4">
-                <div class="box">
-                    <h4>Overall order amount</h4>
-                    <p><%= totalOrderAmount %></p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="box">
-                    <h4>Overall discount</h4>
-                    <p><%= totalDiscount %></p>
-                </div>
-            </div>
-        </div>
 
-        <div class="row my-4">
-            <div class="col-md-6 mx-auto text-center">
-                <label for="reportType" class="form-label">Report type:</label>
-                <select id="reportType" class="form-select d-inline-block w-auto">
-                    <% reportTypes.forEach(type => { %>
-                        <option value="<%= type.value %>"><%= type.label %></option>
-                    <% }); %>
-                </select>
-                <div id="customDateRange">
-                  <input type="date" id="startDate" class="form-control my-2" placeholder="Start Date">
-                  <input type="date" id="endDate" class="form-control my-2" placeholder="End Date">
-                </div>
-                <button class="btn btn-success" onclick="generateReport()">Generate Report</button>
-                <div class="text-center my-3">
-                  <button class="btn btn-danger" onclick="downloadReport('pdf')">Download PDF</button>
-                  <button class="btn btn-primary" onclick="downloadReport('excel')">Download Excel</button>
-                </div>
-            </div>
-        </div>
+            <script>
+                document.getElementById('reportType').addEventListener('change', function () {
+                    const customDateRange = document.getElementById('customDateRange');
+                    if (this.value === 'custom') {
+                        customDateRange.style.display = 'block';
+                    } else {
+                        customDateRange.style.display = 'none';
+                    }
+                });
 
-        <div class="row my-4" id="stateBoxes">
-          <div class="col-md-4">
-              <div class="box">
-                  <h4>Total Sales Count</h4>
-                  <p id="totalSalesCount">0</p>
-              </div>
-          </div>
-          <div class="col-md-4">
-              <div class="box">
-                  <h4>Total Order Amount</h4>
-                  <p id="totalOrderAmount">₹0.00</p>
-              </div>
-          </div>
-          <div class="col-md-4">
-              <div class="box">
-                  <h4>Total Discounts</h4>
-                  <p id="totalDiscounts">₹0.00</p>
-              </div>
-          </div>
-      </div>
-      
+                async function generateReport() {
+                    const reportType = document.getElementById('reportType').value;
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
 
-        <table class="table table-bordered text-center">
-            <thead>
-                <tr>
-                    <th>OrderId</th>
-                    <th>User Name</th>
-                    <th>Ordered Items</th>
-                    <th>Total Price</th>
-                    <th>Final Amount</th>
-                    <th>Discount</th>
-                    <th>Status</th>
-                    <th>Payment Method</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% orders.forEach(order => { %>
-                <tr>
-                    <td><%= order.orderId %></td>
-                    <td><%= order.userId?.name || "N/A" %></td>
-                    <td>
-                      <% order.orderedItems.forEach(item => { %>
-                        <p><%= item.product?.productName || "Unknown" %> (x<%= item.quantity %>)</p>
-                      <% }); %>
-                    </td>
-                    <td>₹<%= order.totalPrice %></td>
-                    <td>₹<%= order.finalAmount %></td>
-                    <td><%= order.discount %></td>
-                    <td><%= order.status %></td>
-                    <td><%= order.paymentMethod %></td>
-                    <td><%= order.createdOn ? order.createdOn.toDateString() : "N/A" %></td>
-                </tr>
-                <% }); %>
-            </tbody>
-        </table>
+                    let query = `?reportType=${reportType}`;
+                    if (reportType === 'custom') {
+                        if (!startDate || !endDate) {
+                            alert('Please select both start and end dates for a custom report.');
+                            return;
+                        }
+                        query += `&startDate=${startDate}&endDate=${endDate}`;
+                    }
 
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage - 1 %>">Previous</a>
-                </li>
+                    try {
+                        const response = await fetch(`/admin/generate-report${query}`);
+                        const result = await response.json();
 
-                <% for (let i = 1; i <= totalPages; i++) { %>
-                <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                    <a class="page-link" href="/admin/sales-report?page=<%= i %>"><%= i %></a>
-                </li>
-                <% } %>
+                        if (result.success) {
+                            const tbody = document.querySelector("table tbody");
+                            tbody.innerHTML = "";
 
-                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                    <a class="page-link" href="/admin/sales-report?page=<%= currentPage + 1 %>">Next</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-
-    <script>
-      document.getElementById('reportType').addEventListener('change', function () {
-          const customDateRange = document.getElementById('customDateRange');
-          if (this.value === 'custom') {
-              customDateRange.style.display = 'block';
-          } else {
-              customDateRange.style.display = 'none';
-          }
-      });
-
-      async function generateReport() {
-    const reportType = document.getElementById('reportType').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-
-    let query = `?reportType=${reportType}`;
-    if (reportType === 'custom') {
-        if (!startDate || !endDate) {
-            alert('Please select both start and end dates for a custom report.');
-            return;
-        }
-        query += `&startDate=${startDate}&endDate=${endDate}`;
-    }
-
-    try {
-        const response = await fetch(`/admin/generate-report${query}`);
-        const result = await response.json();
-
-        if (result.success) {
-            const tbody = document.querySelector("table tbody");
-            tbody.innerHTML = "";
-
-            result.orders.forEach(order => {
-                const row = `
+                            result.orders.forEach(order => {
+                                const row = `
                     <tr>
                         <td>${order.orderId}</td>
                         <td>${order.userId?.name || "N/A"}</td>
                         <td>
                             ${order.orderedItems
-                                .map(
-                                    item =>
-                                        `<p>${item.product?.productName || "Unknown"} (x${item.quantity})</p>`
-                                )
-                                .join("")}
+                                        .map(
+                                            item =>
+                                                `<p>${item.product?.productName || "Unknown"} (x${item.quantity})</p>`
+                                        )
+                                        .join("")}
                         </td>
                         <td>₹${order.totalPrice}</td>
                         <td>₹${order.finalAmount}</td>
@@ -217,41 +254,41 @@
                         <td>${order.createdOn ? new Date(order.createdOn).toDateString() : "N/A"}</td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
-            });
+                                tbody.innerHTML += row;
+                            });
 
-            document.getElementById("totalSalesCount").textContent = result.totalSalesCount || 0;
-            document.getElementById("totalOrderAmount").textContent = `₹${result.totalOrderAmount?.toFixed(2) || '0.00'}`;
-            document.getElementById("totalDiscounts").textContent = `₹${result.totalDiscounts?.toFixed(2) || '0.00'}`;
-        } else {
-            alert(result.error || 'Failed to generate report');
-        }
-    } catch (error) {
-        console.error('Error fetching report:', error);
-        alert('An error occurred while generating the report.');
-    }
-}
+                            document.getElementById("totalSalesCount").textContent = result.totalSalesCount || 0;
+                            document.getElementById("totalOrderAmount").textContent = `₹${result.totalOrderAmount?.toFixed(2) || '0.00'}`;
+                            document.getElementById("totalDiscounts").textContent = `₹${result.totalDiscounts?.toFixed(2) || '0.00'}`;
+                        } else {
+                            alert(result.error || 'Failed to generate report');
+                        }
+                    } catch (error) {
+                        alert('An error occurred while generating the report.');
+                    }
+                }
 
-    </script>
+            </script>
 
-<script>
-  function downloadReport(format) {
-    const reportType = document.getElementById('reportType').value;
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
+            <script>
+                function downloadReport(format) {
+                    const reportType = document.getElementById('reportType').value;
+                    const startDate = document.getElementById('startDate').value;
+                    const endDate = document.getElementById('endDate').value;
 
-    let query = `?format=${format}&reportType=${reportType}`;
-    if (reportType === 'custom') {
-        if (!startDate || !endDate) {
-            alert('Please select both start and end dates for a custom report.');
-            return;
-        }
-        query += `&startDate=${startDate}&endDate=${endDate}`;
-    }
+                    let query = `?format=${format}&reportType=${reportType}`;
+                    if (reportType === 'custom') {
+                        if (!startDate || !endDate) {
+                            alert('Please select both start and end dates for a custom report.');
+                            return;
+                        }
+                        query += `&startDate=${startDate}&endDate=${endDate}`;
+                    }
 
-    window.location.href = `/admin/download-report${query}`;
-  }
-</script>
+                    window.location.href = `/admin/download-report${query}`;
+                }
+            </script>
 
-</body>
+    </body>
+
 </html>

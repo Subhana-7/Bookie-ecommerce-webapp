@@ -1,5 +1,4 @@
 const User = require("../../models/userSchema");
-const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 const Address = require("../../models/addressSchema");
 const Cart = require("../../models/cartSchema");
@@ -11,26 +10,25 @@ const env = require("dotenv").config();
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
-    const address = await Address.find({ userId: user._id ,isDeleted:false});
-    //console.log(address);
+    const address = await Address.find({ userId: user._id, isDeleted: false });
     return res.render("profile", { user, address });
   } catch (error) {
-    return res.render("PageNotFound");
+    return res.render("page-not-found");
   }
 };
 
 
-const loadEditProfile = async(req, res) => {
+const loadEditProfile = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
     return res.render("edit-profile", { user: user });
   } catch (error) {
-    return res.redirect("/pageNotFound");
+    return res.redirect("/page-not-found");
   }
 }
 
 
-const editProfile = async(req, res) => {
+const editProfile = async (req, res) => {
   try {
     const { name, email, phone } = req.body;
     const updateDetails = await User.findByIdAndUpdate(req.session.user,
@@ -38,7 +36,7 @@ const editProfile = async(req, res) => {
         name: name,
         email: email,
         phone: phone,
-      },{ new: true }
+      }, { new: true }
     );
 
     if (updateDetails) {
@@ -47,16 +45,16 @@ const editProfile = async(req, res) => {
       res.status(404).json({ error: "Profile details not found" });
     }
   } catch (error) {
-    return res.redirect("/pageNotFound");
+    return res.redirect("/page-not-found");
   }
 }
 
-const loadAddAddress = async(req,res) => {
+const loadAddAddress = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
-    return res.render("add-address",{user});
+    return res.render("add-address", { user });
   } catch (error) {
-    return res.redirect("/pageNotFound");
+    return res.redirect("/page-not-found");
   }
 }
 
@@ -64,9 +62,7 @@ const addAddress = async (req, res) => {
   const { name, addressType, streetName, landmark, locality, city, state, pin, contactNo } = req.body;
   const user = req.session.user;
 
-  console.log("User ID:", user);
   if (!user) {
-    console.error("User not found in session.");
     return res.status(400).send("User session not found.");
   }
 
@@ -86,7 +82,6 @@ const addAddress = async (req, res) => {
     await newAddress.save();
     res.redirect('/profile');
   } catch (error) {
-    console.error("Error adding address:", error);
     res.status(500).send('Server Error');
   }
 };
@@ -101,22 +96,21 @@ const loadEditAddress = async (req, res) => {
   try {
     const user = await User.findById(req.session.user);
     const addressId = req.params.id;
-    const address = await Address.findById(addressId); 
+    const address = await Address.findById(addressId);
 
     if (!address) {
-      return res.redirect("/pageNotFound");
+      return res.redirect("/page-not-found");
     }
 
     return res.render("edit-address", { user, address });
   } catch (error) {
-    console.error("Error loading address for edit:", error);
-    return res.redirect("/pageNotFound");
+    return res.redirect("/page-not-found");
   }
 };
 
 
 const editAddress = async (req, res) => {
-  const addressId = req.params.id; 
+  const addressId = req.params.id;
   const { name, addressType, streetName, landmark, locality, city, state, pin, contactNo } = req.body;
   const user = req.session.user;
 
@@ -142,10 +136,9 @@ const editAddress = async (req, res) => {
     address.pin = pin;
     address.contactNo = contactNo;
 
-    await address.save();  
+    await address.save();
     res.redirect('/profile');
   } catch (error) {
-    console.error("Error updating address:", error);
     res.status(500).send('Server Error');
   }
 };
@@ -153,19 +146,19 @@ const editAddress = async (req, res) => {
 
 
 
-const deleteAddress = async(req,res) => {
+const deleteAddress = async (req, res) => {
   try {
     const addressId = req.params.id;
-    const result = await Address.findByIdAndUpdate(addressId,{
-      isDeleted:true
+    const result = await Address.findByIdAndUpdate(addressId, {
+      isDeleted: true
     });
-  if (result.modifiedCount > 0) {
-    return res.status(200).json({ message: "Address deleted successfully." });
-} else {
-    return res.status(404).json({ error: "Address not found." });
-}
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({ message: "Address deleted successfully." });
+    } else {
+      return res.status(404).json({ error: "Address not found." });
+    }
   } catch (error) {
-    return res.redirect("pageNotFound");
+    return res.redirect("page-not-found");
   }
 }
 
@@ -181,7 +174,7 @@ const cart = async (req, res) => {
     const cartItems = await Cart.findOne({ userId: user._id })
       .populate({
         path: 'items.productId',
-        match: { isBlocked: false, isDeleted: false }, 
+        match: { isBlocked: false, isDeleted: false },
         populate: {
           path: 'category',
           match: { isListed: true, isDeleted: false },
@@ -202,14 +195,13 @@ const cart = async (req, res) => {
 
     const totalItems = filteredItems.reduce((total, item) => total + item.quantity, 0);
 
-    return res.render("cart", { 
-      cart: filteredItems, 
-      message: null, 
-      totalItems 
+    return res.render("cart", {
+      cart: filteredItems,
+      message: null,
+      totalItems
     });
   } catch (error) {
-    console.error("Error fetching cart items:", error);
-    return res.redirect("pageNotFound");
+    return res.redirect("page-not-found");
   }
 };
 
@@ -220,13 +212,12 @@ const getCartItemCount = async (req, res) => {
 
     const cart = await Cart.findOne({ userId });
 
-    const totalItems = cart 
-      ? cart.items.reduce((total, item) => total + item.quantity, 0) 
+    const totalItems = cart
+      ? cart.items.reduce((total, item) => total + item.quantity, 0)
       : 0;
 
     return res.status(200).json({ totalItems });
   } catch (error) {
-    console.error("Error fetching cart item count:", error);
     return res.status(500).json({ message: "An error occurred while fetching the cart item count" });
   }
 };
@@ -251,7 +242,7 @@ const addItemToCart = async (req, res) => {
     if (typeof product.salePrice !== "number") {
       return res.status(500).json({ message: "Product price is invalid" });
     }
-  
+
     if (parsedQuantity > product.stock) {
       return res.status(400).json({ message: `Cannot add more than ${product.stock} of the same product. Only ${product.stock} left in stock.` });
     }
@@ -294,8 +285,7 @@ const addItemToCart = async (req, res) => {
     await cart.save();
     return res.redirect("/cart");
   } catch (error) {
-    console.error("Error adding to cart:", error);
-    return res.redirect("/pageNotFound");
+    return res.redirect("/page-not-found");
   }
 };
 
@@ -324,9 +314,9 @@ const updateCart = async (req, res) => {
       }
 
       if (parsedQuantity > product.stock) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: `Cannot update to more than ${product.stock} of the same product. Only ${product.stock} left in stock.`,
-          availableStock: product.stock 
+          availableStock: product.stock
         });
       }
 
@@ -338,16 +328,15 @@ const updateCart = async (req, res) => {
       const cartTotal = cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0);
       const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
 
-      return res.status(200).json({ 
-        message: "Cart updated successfully", 
-        cartTotal, 
-        totalItems 
+      return res.status(200).json({
+        message: "Cart updated successfully",
+        cartTotal,
+        totalItems
       });
     } else {
       return res.status(404).json({ message: "Item not found in cart" });
     }
   } catch (error) {
-    console.error("Error updating cart:", error);
     return res.status(500).json({ message: "An error occurred while updating the cart" });
   }
 };
@@ -373,16 +362,15 @@ const removeItemFromCart = async (req, res) => {
       const cartTotal = cart.items.reduce((total, item) => total + (item.productId.salePrice * item.quantity), 0);
       const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
 
-      return res.status(200).json({ 
-        message: "Item removed from cart", 
-        cartTotal, 
-        totalItems 
+      return res.status(200).json({
+        message: "Item removed from cart",
+        cartTotal,
+        totalItems
       });
     } else {
       return res.status(404).json({ message: "Item not found in cart" });
     }
   } catch (error) {
-    console.error("Error removing item from cart:", error);
     return res.status(500).json({ message: "An error occurred while removing the item from the cart" });
   }
 };

@@ -25,7 +25,7 @@ const getOrderManagementPage = async (req, res) => {
       totalPages: totalPages
     });
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 
@@ -100,7 +100,6 @@ const orderManagement = async (req, res) => {
           });
 
           await wallet.save();
-          console.log("Wallet updated successfully:", wallet);
         }
 
         for (let item of order.orderedItems) {
@@ -121,7 +120,7 @@ const orderManagement = async (req, res) => {
     await order.save();
     res.redirect("/admin/order-management");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 
@@ -142,7 +141,7 @@ const getOrderDetails = async (req, res) => {
     }
     res.render("admin-order-details", { order });
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 

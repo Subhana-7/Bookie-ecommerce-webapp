@@ -30,7 +30,7 @@ const login = async (req, res) => {
       return res.render("admin-login", { message: "Admin not found" });
     }
   } catch (error) {
-    return res.redirect("/pageError");
+    return res.redirect("/page-error");
   }
 };
 
@@ -40,7 +40,7 @@ const loadDashboard = async (req, res) => {
     try {
       res.render("dashboard")
     } catch (error) {
-      res.redirect("/pageError");
+      res.redirect("/page-error");
     }
   } else {
     res.redirect("/admin/login");
@@ -51,12 +51,12 @@ const logout = async (req, res) => {
   try {
     req.session.destroy(err => {
       if (err) {
-        return res.redirect("/pageNotFound");
+        return res.redirect("/page-not-found");
       }
       res.redirect("/admin/login")
     })
   } catch (error) {
-    res.redirect("/pageError");
+    res.redirect("/page-error");
   }
 }
 

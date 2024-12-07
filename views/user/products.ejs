@@ -1,8 +1,9 @@
+<html>
+
 <head>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-
-body {
+    body {
       font-family: 'Arial', sans-serif;
       background-color: #f9f9f9;
     }
@@ -13,16 +14,18 @@ body {
     }
 
     .sidebar {
-      background-color: rgb(140, 25, 25); 
+      background-color: rgb(140, 25, 25);
       color: white;
       padding: 40px;
       height: auto;
       border-radius: 8px;
       width: 500px;
-      margin-right:50px;
+      margin-right: 50px;
     }
 
-    .sidebar h2, .sidebar h4, .sidebar h5 {
+    .sidebar h2,
+    .sidebar h4,
+    .sidebar h5 {
       font-weight: bold;
     }
 
@@ -38,7 +41,7 @@ body {
       margin-bottom: 10px;
     }
 
-    
+
     .breadcrumbs {
       font-size: 20px;
       margin-bottom: 20px;
@@ -53,7 +56,7 @@ body {
       text-decoration: underline;
     }
 
- 
+
     .search-bar {
       margin-bottom: 20px;
       display: flex;
@@ -72,7 +75,7 @@ body {
       border-radius: 5px;
     }
 
-   
+
     .product-list h2 {
       font-weight: bold;
       margin-bottom: 20px;
@@ -117,7 +120,7 @@ body {
       font-size: 1rem;
     }
 
-  
+
     .product-card p {
       margin-bottom: 8px;
     }
@@ -136,31 +139,31 @@ body {
 </head>
 
 <%- include("../../views/partials/user/header") %>
-<div class="container-fluid">
-  <nav class="breadcrumbs" style="margin-left:50px;">
-    <a href="/">Home</a> &gt; <span>Products</span>
-  </nav>
+  <div class="container-fluid">
+    <nav class="breadcrumbs" style="margin-left:50px;">
+      <a href="/">Home</a> &gt; <span>Products</span>
+    </nav>
 
-  <div>
-    <h2 style="
+    <div>
+      <h2 style="
       text-decoration: none;
       text-align: center;
       background-color: #f0f0f0; /* Light gray for a professional background */
       color: #333; /* Dark gray for better contrast and readability */
       padding: 10px 0;
     ">
-      Product List
-    </h2>
-    <br>
-  </div>
-  
+        Product List
+      </h2>
+      <br>
+    </div>
 
-  <div class="content-wrapper d-flex" style="margin-left: 50px; margin-right: 50px;">
-    <aside class="sidebar">
-      <h2 class="text-white">Filter & Sort</h2>
-      <div class="filter-section"><br>
-        <h5 class="text-white">Sort By:</h5>
-        <select id="sortOptions" class="form-control">
+
+    <div class="content-wrapper d-flex" style="margin-left: 50px; margin-right: 50px;">
+      <aside class="sidebar">
+        <h2 class="text-white">Filter & Sort</h2>
+        <div class="filter-section"><br>
+          <h5 class="text-white">Sort By:</h5>
+          <select id="sortOptions" class="form-control">
             <option value="default">Default</option>
             <option value="popularity">Popularity</option>
             <option value="priceAsc">Price: Low to High</option>
@@ -170,147 +173,148 @@ body {
             <option value="newest">Newest Arrivals</option>
             <option value="aToZ">A - Z</option>
             <option value="zToA">Z - A</option>
-        </select>
-      </div><br>
-    
-      <div class="filter-section">
-        <ul class="list-unstyled">
-          <li>
-            <input type="checkbox" id="in-stock" onchange="applyFilters()" <%= inStock ? 'checked' : '' %> />
-            <label for="in-stock">Show only in-stock Books</label>
-          </li>
-          <h4 class="text-white">Categories</h4><br>
-          <% categories.forEach(category => { %>
+          </select>
+        </div><br>
+
+        <div class="filter-section">
+          <ul class="list-unstyled">
             <li>
-              <input 
-                type="checkbox" 
-                id="category-<%= category._id %>" 
-                value="<%= category._id %>" 
-                onchange="applyFilters()" 
-                <% if (categoryFilter && categoryFilter.split(',').includes(category._id)) { %> checked <% } %> 
-              />
-              <label for="category-<%= category._id %>"><%= category.name %></label>   
+              <input type="checkbox" id="in-stock" onchange="applyFilters()" <%=inStock ? 'checked' : '' %> />
+              <label for="in-stock">Show only in-stock Books</label>
             </li>
-          <% }) %>
-        </ul>
-      </div>
-    </aside>
+            <h4 class="text-white">Categories</h4><br>
+            <% categories.forEach(category=> { %>
+              <li>
+                <input type="checkbox" id="category-<%= category._id %>" value="<%= category._id %>"
+                  onchange="applyFilters()" <% if (categoryFilter && categoryFilter.split(',').includes(category._id)) {
+                  %> checked <% } %>
+                  />
+                  <label for="category-<%= category._id %>">
+                    <%= category.name %>
+                  </label>
+              </li>
+              <% }) %>
+          </ul>
+        </div>
+      </aside>
 
-    <main class="product-list flex-grow-1" style="margin-left: 10px; ">
-      <div class="search-bar d-flex " >
-        <input
-          type="text"
-          placeholder="Search products..."
-          class="form-control search-input"
-          value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
-        />
-        <button class="btn btn-primary ml-2 search-btn">Search</button>
-      </div>
+      <main class="product-list flex-grow-1" style="margin-left: 10px; ">
+        <div class="search-bar d-flex ">
+          <input type="text" placeholder="Search products..." class="form-control search-input"
+            value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" />
+          <button class="btn btn-primary ml-2 search-btn">Search</button>
+        </div>
 
-      <div class="row" style="margin: 50px;">
-        <% products.forEach(product => { %>
-          <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-            <a href="/product-details/<%= product._id %>">
-              <div class="product-card card" style="margin-left: 20px; margin-bottom: 20px;">
-                <img src="uploads/product-images/<%= product.productImage[0] %>" class="card-img-top" alt="<%= product.productName %>" />
-                <div class="card-body">
-                  <h3 class="card-title"><%= product.productName %></h3>
-                  <p class="card-text">Category: <%= product.category.name %></p>
-                  <p class="card-text">Author: <%= product.author %></p>
-                  <p class="card-text">Publisher: <%= product.publisher %></p>
-                  <p>
-                    Stock Status: 
-                    <% if (product.quantity <= 0) { %>
-                      <span style="color: red;">Out of Stock</span>
-                    <% } else { %>
-                      <span style="color: green;" ><%=product.quantity%> Stock left</span><br>
-                      <span style="color: green;">-In Stock</span>
-                    <% } %>
-                  </p>
+        <div class="row" style="margin: 50px;">
+          <% products.forEach(product=> { %>
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+              <a href="/product-details/<%= product._id %>">
+                <div class="product-card card" style="margin-left: 20px; margin-bottom: 20px;">
+                  <img src="uploads/product-images/<%= product.productImage[0] %>" class="card-img-top"
+                    alt="<%= product.productName %>" />
+                  <div class="card-body">
+                    <h3 class="card-title">
+                      <%= product.productName %>
+                    </h3>
+                    <p class="card-text">Category: <%= product.category.name %>
+                    </p>
+                    <p class="card-text">Author: <%= product.author %>
+                    </p>
+                    <p class="card-text">Publisher: <%= product.publisher %>
+                    </p>
+                    <p>
+                      Stock Status:
+                      <% if (product.quantity <=0) { %>
+                        <span style="color: red;">Out of Stock</span>
+                        <% } else { %>
+                          <span style="color: green;">
+                            <%=product.quantity%> Stock left
+                          </span><br>
+                          <span style="color: green;">-In Stock</span>
+                          <% } %>
+                    </p>
 
-                <p class="price">
-                  <% 
-                      let finalPrice = product.regularPrice; 
-                      let discountPercentage = 0;
+                    <p class="price">
+                      <% let finalPrice=product.regularPrice; let discountPercentage=0; if (product.productOffer> 0) {
+                        discountPercentage = product.productOffer;
+                        finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                        }
+                        else if (product.category && product.category.categoryOffer > 0) {
+                        discountPercentage = product.category.categoryOffer;
+                        finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                        } else {
+                        finalPrice = product.salePrice;
+                        }
+                        %>
 
-                      if (product.productOffer > 0) {
-                          discountPercentage = product.productOffer;
-                          finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
-                      } 
-                      else if (product.category && product.category.categoryOffer > 0) {
-                          discountPercentage = product.category.categoryOffer;
-                          finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
-                      } else {
-                          finalPrice = product.salePrice;
-                      }
-                  %>
+                        <% if (discountPercentage> 0) { %>
+                          <span style="text-decoration: line-through; color: grey;">₹<%= product.regularPrice.toFixed(2)
+                              %></span><br>
+                          <span style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
+                          <p>Offer: <span style="color: red;">
+                              <%= discountPercentage %>%
+                            </span></p>
+                          <% } else { %>
+                            <span style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
+                            <% } %>
+                    </p>
 
-                  <% if (discountPercentage > 0) { %>
-                      <span style="text-decoration: line-through; color: grey;">₹<%= product.regularPrice.toFixed(2) %></span><br>
-                      <span style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
-                      <p>Offer: <span style="color: red;"><%= discountPercentage %>%</span></p>
-                  <% } else { %>
-                      <span style="color: red;">₹<%= finalPrice.toFixed(2) %></span>
-                  <% } %>
-              </p>
 
-                  
+                  </div>
                 </div>
-              </div>
-            </a>
-          </div>
-        <% }) %>
-      </div>
-    </main>
+              </a>
+            </div>
+            <% }) %>
+        </div>
+      </main>
+    </div>
   </div>
-</div>
 
 
-<%- include("../../views/partials/user/footer") %>
+  <%- include("../../views/partials/user/footer") %>
 
 
-<script>
-document.querySelector('.search-btn').addEventListener('click', function() {
-  const searchValue = document.querySelector('.search-input').value.trim();
-  
-  if (!searchValue) {
-    window.location.href = `/products`; 
-  } else {
-    window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
-  }
-});
+    <script>
+      document.querySelector('.search-btn').addEventListener('click', function () {
+        const searchValue = document.querySelector('.search-input').value.trim();
+
+        if (!searchValue) {
+          window.location.href = `/products`;
+        } else {
+          window.location.href = `/products?search=${encodeURIComponent(searchValue)}`;
+        }
+      });
 
 
-document.getElementById('sortOptions').addEventListener('change', function() {
-    const sortValue = this.value;
+      document.getElementById('sortOptions').addEventListener('change', function () {
+        const sortValue = this.value;
 
-    if (sortValue === 'default') {
-        window.location.href = '/products';
-    } else {
-        window.location.href = `/products?sort=${sortValue}`;
-    }
-});
-
-
-    
-
-function applyFilters() {
-  let filters = new URLSearchParams();
-
-  const inStockChecked = document.getElementById('in-stock').checked;
-  filters.set('inStock', inStockChecked ? 'true' : 'false');
-
-  const categoryCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="category-"]'); 
-  categoryCheckboxes.forEach((checkbox) => {
-    if (checkbox.checked) {
-      filters.append('category', checkbox.value); 
-    }
-  });
-
-  window.location.href = '/products?' + filters.toString();
-}
+        if (sortValue === 'default') {
+          window.location.href = '/products';
+        } else {
+          window.location.href = `/products?sort=${sortValue}`;
+        }
+      });
 
 
-    
 
-</script>
+
+      function applyFilters() {
+        let filters = new URLSearchParams();
+
+        const inStockChecked = document.getElementById('in-stock').checked;
+        filters.set('inStock', inStockChecked ? 'true' : 'false');
+
+        const categoryCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="category-"]');
+        categoryCheckboxes.forEach((checkbox) => {
+          if (checkbox.checked) {
+            filters.append('category', checkbox.value);
+          }
+        });
+
+        window.location.href = '/products?' + filters.toString();
+      }
+
+    </script>
+
+</html>

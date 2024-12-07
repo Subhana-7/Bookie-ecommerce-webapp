@@ -1,103 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout Page</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
+
   <style>
     body {
       background-color: #f8f9fa;
     }
+
     .container {
       max-width: 900px;
       margin-top: 50px;
     }
-    .order-summary, .address-card {
+
+    .order-summary,
+    .address-card {
       background-color: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .total {
       font-weight: bold;
       font-size: 1.25rem;
     }
+
     .btn-maroon {
       background-color: #800000;
       color: #fff;
     }
+
     .btn-maroon:hover {
       background-color: #660000;
     }
+
     .text-dark-link {
       color: #000;
       text-decoration: none;
     }
+
     .text-dark-link:hover {
       color: #000;
       text-decoration: underline;
     }
   </style>
 </head>
+
 <body style="background-color: rgb(204, 201, 198);">
   <%- include("../../views/partials/user/header") %>
 
-<div class="container">
-  <h2 class="text-center mb-4">Checkout</h2>
+    <div class="container">
+      <h2 class="text-center mb-4">Checkout</h2>
 
-  <div class="mb-4">
-    <h5>Saved Addresses</h5>
-    <form action="/order" method="POST">
-      <div class="row">
-        <% if (address && address.length > 0) { %> 
-          <% address.forEach(addr => { %> 
-            <div class="col-md-6">
-              <div class="address-card p-3 mb-3">
-                <p><strong><%= addr.addressType %></strong></p>
-                <p><%= addr.name %><br><%= addr.streetName %>, <%= addr.locality %>, <%= addr.city %>, <%= addr.state %></p>
-                <p>Landmark: <%= addr.landmark %><br>Pincode: <%= addr.pin %><br>Mobile: <%= addr.contactNo %></p>
-                
-                <input type="radio" name="selectedAddress" value="<%= addr._id %>" required> Use this address
-              </div>
-            </div>
-          <% }) %>
-        <% } else { %>
-          <p>No saved addresses found.</p>
-        <% } %>
+      <div class="mb-4">
+        <h5>Saved Addresses</h5>
+        <form action="/order" method="POST">
+          <div class="row">
+            <% if (address && address.length> 0) { %>
+              <% address.forEach(addr=> { %>
+                <div class="col-md-6">
+                  <div class="address-card p-3 mb-3">
+                    <p><strong>
+                        <%= addr.addressType %>
+                      </strong></p>
+                    <p>
+                      <%= addr.name %><br>
+                        <%= addr.streetName %>, <%= addr.locality %>, <%= addr.city %>, <%= addr.state %>
+                    </p>
+                    <p>Landmark: <%= addr.landmark %><br>Pincode: <%= addr.pin %><br>Mobile: <%= addr.contactNo %>
+                    </p>
+
+                    <input type="radio" name="selectedAddress" value="<%= addr._id %>" required> Use this address
+                  </div>
+                </div>
+                <% }) %>
+                  <% } else { %>
+                    <p>No saved addresses found.</p>
+                    <% } %>
+          </div>
+
+          <div>
+            <a href="/add-address" class="btn btn-success mt-3 text-dark-link">Add New Address</a>
+          </div>
+          <br>
+
+          <button class="btn btn-primary w-100" type="submit">Proceed to Checkout</button>
+        </form>
       </div>
-      
-      <div>
-        <a href="/add-address" class="btn btn-success mt-3 text-dark-link">Add New Address</a>
+
+      <div class="order-summary">
+        <h5>Order Summary</h5>
+        <ul class="list-group mb-3">
+          <% if (cart && cart.items.length> 0) { %>
+            <% cart.items.forEach(item=> { %>
+              <li class="list-group-item d-flex justify-content-between">
+                <span>
+                  <%= item.productId.productName %>
+                </span>
+                <span>₹<%= item.price.toFixed(2) %></span>
+              </li>
+              <% }) %>
+                <li class="list-group-item d-flex justify-content-between total">
+                  <span>Total</span>
+                  <strong>₹<%= cart.items.reduce((total, item)=> total + item.totalPrice, 0).toFixed(2) %></strong>
+                </li>
+                <% } else { %>
+                  <li class="list-group-item">Your cart is empty.</li>
+                  <% } %>
+        </ul>
       </div>
-      <br>
+    </div>
 
-      <button class="btn btn-primary w-100" type="submit">Proceed to Checkout</button>
-    </form>
-  </div>
-
-  <div class="order-summary">
-    <h5>Order Summary</h5>
-    <ul class="list-group mb-3">
-      <% if (cart && cart.items.length > 0) { %>
-        <% cart.items.forEach(item => { %>
-          <li class="list-group-item d-flex justify-content-between">
-            <span><%= item.productId.productName %></span>
-            <span>₹<%= item.price.toFixed(2) %></span>
-          </li>
-        <% }) %>
-        <li class="list-group-item d-flex justify-content-between total">
-          <span>Total</span>
-          <strong>₹<%= cart.items.reduce((total, item) => total + item.totalPrice, 0).toFixed(2) %></strong>
-        </li>
-      <% } else { %>
-        <li class="list-group-item">Your cart is empty.</li>
-      <% } %>
-    </ul>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

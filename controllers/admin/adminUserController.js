@@ -42,7 +42,7 @@ const userInfo = async (req, res) => {
     });
 
   } catch (error) {
-    res.redirect("/pageError");
+    res.redirect("/page-error");
   }
 };
 
@@ -53,7 +53,7 @@ const userBlocked = async (req, res) => {
     await User.updateOne({ _id: id }, { $set: { isBlocked: true } });
     res.redirect("/admin/users?status=blocked");
   } catch (error) {
-    res.redirect("/pageError", error);
+    res.redirect("/page-error", error);
   }
 };
 
@@ -63,7 +63,7 @@ const userUnBlocked = async (req, res) => {
     await User.updateOne({ _id: id }, { $set: { isBlocked: false } });
     res.redirect("/admin/users?status=unblocked");
   } catch (error) {
-    res.redirect("/pageError", error);
+    res.redirect("/page-error", error);
   }
 }
 

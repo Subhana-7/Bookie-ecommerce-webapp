@@ -6,7 +6,7 @@ const loadCoupon = async (req, res) => {
     const coupons = await Coupon.find({ isDeleted: false });
     res.render("couponManagement", { coupons });
   } catch (error) {
-    return res.redirect("/pageNotFound");
+    return res.redirect("/page-not-found");
   }
 };
 
@@ -14,7 +14,7 @@ const loadCreateCoupon = async (req, res) => {
   try {
     res.render("createCoupon")
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -32,7 +32,7 @@ const createCoupon = async (req, res) => {
     await newCoupon.save();
     res.redirect("/admin/coupon-management");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -42,7 +42,7 @@ const loadEditCoupon = async (req, res) => {
     const coupon = await Coupon.findOne({ _id: id });
     res.render("edit-coupon", { coupon: coupon });
   } catch (error) {
-    res.redirect("pageNotFound");
+    res.redirect("page-not-found");
   }
 }
 
@@ -64,7 +64,7 @@ const editCoupon = async (req, res) => {
       res.status(404).json({ error: "Coupon Not Found" });
     }
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -76,7 +76,7 @@ const deleteCoupon = async (req, res) => {
     });
     res.redirect("/admin/coupon-management");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 

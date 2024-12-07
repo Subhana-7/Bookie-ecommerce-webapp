@@ -1,106 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive Sidebar</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
   <style>
     body {
-        background-color: #f8f9fa; 
-        font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      font-family: 'Arial', sans-serif;
     }
 
     .sidebar {
-        width: 220px;
-        background-color:  rgb(140, 25, 25);
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 20px;
-        height: auto; 
+      width: 220px;
+      background-color: rgb(140, 25, 25);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 20px;
+      height: auto;
     }
 
     .sidebar .nav-link {
-        color: #bdc0c3;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        padding: 10px 12px;
-        transition: all 0.3s ease;
-        border-radius: 8px;
+      color: #bdc0c3;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      transition: all 0.3s ease;
+      border-radius: 8px;
     }
 
 
     .sidebar .nav-link:hover {
-        background-color: #010101;
-        color: #fff;
-        box-shadow: 0 2px 4px rgba(143, 116, 116, 0.15);
+      background-color: #010101;
+      color: #fff;
+      box-shadow: 0 2px 4px rgba(143, 116, 116, 0.15);
     }
 
     .sidebar .nav-link i {
-        margin-right: 10px;
-        font-size: 18px;
+      margin-right: 10px;
+      font-size: 18px;
     }
 
     .sidebar h4 {
-        text-align: center;
-        margin-bottom: 15px;
-        color: #ffffff;
-        font-weight: bold;
-        font-size: 18px;
-        text-decoration: underline;
+      text-align: center;
+      margin-bottom: 15px;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 18px;
+      text-decoration: underline;
     }
 
 
 
     @media (max-width: 768px) {
-        .sidebar {
-            width: 100%; 
-            margin-bottom: 20px;
-        }
-        .content {
-            margin-left: 0;
-        }
+      .sidebar {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .content {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<div class="container mt-4 d-flex">
-  <div class="sidebar">
-    <h4>User Dashboard</h4>
-    <ul class="nav flex-column">
-      <li class="nav-item">
-        <a class="nav-link active" href="/profile">
-          <i class="bi bi-person-circle"></i> Profile
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/cart">
-          <i class="bi bi-cart-fill"></i> Cart
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/wishlist">
-          <i class="bi bi-heart-fill"></i> Wishlist
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/orders-list">
-          <i class="bi bi-box-seam"></i> Orders
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/wallet">
-          <i class="bi bi-wallet2"></i> Wallet
-        </a>
-      </li>
-    </ul>
-  </div>
+  <div class="container mt-4 d-flex">
+    <div class="sidebar">
+      <h4>User Dashboard</h4>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="/profile">
+            <i class="bi bi-person-circle"></i> Profile
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/cart">
+            <i class="bi bi-cart-fill"></i> Cart
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/wishlist">
+            <i class="bi bi-heart-fill"></i> Wishlist
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/orders-list">
+            <i class="bi bi-box-seam"></i> Orders
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/wallet">
+            <i class="bi bi-wallet2"></i> Wallet
+          </a>
+        </li>
+      </ul>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.js"></script>
 </body>
+
 </html>

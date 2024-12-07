@@ -1,134 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%-include("../../views/partials/user/header")%>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Address</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        .btn-maroon {
-            background-color: #800000; 
-            color: white;
-        }
-        .error-message {
-            color: red;
-            font-size: 0.9em;
-        }
-    </style>
-</head>
-<body>
-    <div class="container mt-5">
-        <h2>Edit Address</h2>
-        <form action="/edit-address/<%= address._id %>" method="POST" id="addressForm">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" class="form-control" id="name" name="name" value="<%= address.name %>" required>
-                <small class="error-message" id="nameError"></small>
-            </div>
-            <div class="form-group">
-                <label for="addressType">Address Type:</label>
-                <select id="addressType" name="addressType" class="form-control" required>
-                    <option value="">Select an address type</option>
-                    <option value="Home" <%= address.addressType === "Home" ? 'selected' : '' %>>Home</option>
-                    <option value="Office" <%= address.addressType === "Office" ? 'selected' : '' %>>Office</option>
-                </select>
-                <small class="error-message" id="addressTypeError"></small>
-            </div>
+    <%- include("../../views/partials/user/header")%>
 
-            <div class="form-group">
-                <label for="streetName">Street Name</label>
-                <input type="text" class="form-control" id="streetName" name="streetName" value="<%= address.streetName %>" required>
-            </div>
 
-            <div class="form-group">
-                <label for="landmark">Landmark</label>
-                <input type="text" class="form-control" id="landmark" name="landmark" value="<%= address.landmark %>" required>
-            </div>
-
-            <div class="form-group">
-                <label for="locality">Locality</label>
-                <input type="text" class="form-control" id="locality" name="locality" value="<%= address.locality %>" required>
-            </div>
-
-            <div class="form-group">
-                <label for="city">City</label>
-                <input type="text" class="form-control" id="city" name="city" value="<%= address.city %>" required>
-            </div>
-
-            <div class="form-group">
-                <label for="state">State</label>
-                <input type="text" class="form-control" id="state" name="state" value="<%= address.state %>" required>
-            </div>
-
-            <div class="form-group">
-                <label for="pincode">Pin Code</label>
-                <input type="text" class="form-control" id="pincode" name="pin" value="<%= address.pin %>" required pattern="^\d{6}$">
-                <small class="error-message" id="pinError"></small>
-            </div>
-
-            <div class="form-group">
-                <label for="contactNo">Contact Number</label>
-                <input type="text" class="form-control" id="contactNo" name="contactNo" value="<%= address.contactNo %>" required pattern="^\d{10}$">
-                <small class="error-message" id="contactNoError"></small>
-            </div>
-
-            <button type="submit" class="btn btn-maroon">Update Address</button>
-            <a href="/profile" class="btn btn-secondary ml-2">Cancel</a>
-        </form>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-    <script>
-        function validateField(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
-            const field = document.getElementById(fieldId);
-            const error = document.getElementById(errorId);
-            const value = field.value.trim();
-
-            if (!value || (regex && !regex.test(value))) {
-                error.textContent = errorMessage;
-                error.style.display = 'block';
-                return false;
-            } else {
-                error.textContent = '';
-                error.style.display = 'none';
-                return true;
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Address</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <style>
+            .btn-maroon {
+                background-color: #800000;
+                color: white;
             }
-        }
 
-        function attachValidationListeners(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
-            const field = document.getElementById(fieldId);
-
-            field.addEventListener('blur', () => {
-                validateField(fieldId, errorId, regex, errorMessage);
-            });
-
-            field.addEventListener('input', () => {
-                validateField(fieldId, errorId, regex, errorMessage);
-            });
-        }
-
-        attachValidationListeners('name', 'nameError', /^[A-Za-z\s]+$/, 'Name should only contain letters and spaces.');
-        attachValidationListeners('pincode', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
-        attachValidationListeners('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
-        attachValidationListeners('addressType', 'addressTypeError', null, 'Please select an address type.');
-
-        document.getElementById('addressForm').addEventListener('submit', function (event) {
-            let isValid = true;
-
-            isValid &= validateField('name', 'nameError', /^[A-Za-z\s]+$/, 'Name should only contain letters and spaces.');
-            isValid &= validateField('pincode', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
-            isValid &= validateField('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
-            isValid &= validateField('addressType', 'addressTypeError', null, 'Please select an address type.');
-
-            if (!isValid) {
-                event.preventDefault(); 
+            .error-message {
+                color: red;
+                font-size: 0.9em;
             }
-        });
-    </script>
+        </style>
+    </head>
 
-</body>
+    <body>
+        <div class="container mt-5">
+            <h2>Edit Address</h2>
+            <form action="/edit-address/<%= address._id %>" method="POST" id="addressForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<%= address.name %>" required>
+                    <small class="error-message" id="nameError"></small>
+                </div>
+                <div class="form-group">
+                    <label for="addressType">Address Type:</label>
+                    <select id="addressType" name="addressType" class="form-control" required>
+                        <option value="">Select an address type</option>
+                        <option value="Home" <%=address.addressType==="Home" ? 'selected' : '' %>>Home</option>
+                        <option value="Office" <%=address.addressType==="Office" ? 'selected' : '' %>>Office</option>
+                    </select>
+                    <small class="error-message" id="addressTypeError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="streetName">Street Name</label>
+                    <input type="text" class="form-control" id="streetName" name="streetName"
+                        value="<%= address.streetName %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="landmark">Landmark</label>
+                    <input type="text" class="form-control" id="landmark" name="landmark"
+                        value="<%= address.landmark %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="locality">Locality</label>
+                    <input type="text" class="form-control" id="locality" name="locality"
+                        value="<%= address.locality %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="<%= address.city %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <input type="text" class="form-control" id="state" name="state" value="<%= address.state %>"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="pincode">Pin Code</label>
+                    <input type="text" class="form-control" id="pincode" name="pin" value="<%= address.pin %>" required
+                        pattern="^\d{6}$">
+                    <small class="error-message" id="pinError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="contactNo">Contact Number</label>
+                    <input type="text" class="form-control" id="contactNo" name="contactNo"
+                        value="<%= address.contactNo %>" required pattern="^\d{10}$">
+                    <small class="error-message" id="contactNoError"></small>
+                </div>
+
+                <button type="submit" class="btn btn-maroon">Update Address</button>
+                <a href="/profile" class="btn btn-secondary ml-2">Cancel</a>
+            </form>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+        <script>
+            function validateField(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
+                const field = document.getElementById(fieldId);
+                const error = document.getElementById(errorId);
+                const value = field.value.trim();
+
+                if (!value || (regex && !regex.test(value))) {
+                    error.textContent = errorMessage;
+                    error.style.display = 'block';
+                    return false;
+                } else {
+                    error.textContent = '';
+                    error.style.display = 'none';
+                    return true;
+                }
+            }
+
+            function attachValidationListeners(fieldId, errorId, regex = null, errorMessage = 'This field is required.') {
+                const field = document.getElementById(fieldId);
+
+                field.addEventListener('blur', () => {
+                    validateField(fieldId, errorId, regex, errorMessage);
+                });
+
+                field.addEventListener('input', () => {
+                    validateField(fieldId, errorId, regex, errorMessage);
+                });
+            }
+
+            attachValidationListeners('name', 'nameError', /^[A-Za-z\s]+$/, 'Name should only contain letters and spaces.');
+            attachValidationListeners('pincode', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
+            attachValidationListeners('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
+            attachValidationListeners('addressType', 'addressTypeError', null, 'Please select an address type.');
+
+            document.getElementById('addressForm').addEventListener('submit', function (event) {
+                let isValid = true;
+
+                isValid &= validateField('name', 'nameError', /^[A-Za-z\s]+$/, 'Name should only contain letters and spaces.');
+                isValid &= validateField('pincode', 'pinError', /^\d{6}$/, 'Pin code must be a 6-digit number.');
+                isValid &= validateField('contactNo', 'contactNoError', /^\d{10}$/, 'Contact number must be a 10-digit number.');
+                isValid &= validateField('addressType', 'addressTypeError', null, 'Please select an address type.');
+
+                if (!isValid) {
+                    event.preventDefault();
+                }
+            });
+        </script>
+
+    </body>
+
 </html>

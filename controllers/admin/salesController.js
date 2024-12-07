@@ -59,7 +59,7 @@ const renderSalesReportPage = async (req, res) => {
       totalPages: totalPages,
     });
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 

@@ -14,7 +14,7 @@ const getAddProduct = async (req, res) => {
     });
 
   } catch (error) {
-    res.redirect("pageNotFound");
+    res.redirect("page-not-found");
   }
 }
 
@@ -74,7 +74,7 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ message: "Product already exists, please try with another name." });
     }
   } catch (error) {
-    return res.redirect("/admin/pageNotFound");
+    return res.redirect("/admin/page-not-found");
   }
 };
 
@@ -123,10 +123,10 @@ const getProductManagementPage = async (req, res) => {
         cat: category,
       });
     } else {
-      res.render("pageNotFound");
+      res.render("page-not-found");
     }
   } catch (error) {
-    res.redirect("pageNotFound");
+    res.redirect("page-not-found");
   }
 };
 
@@ -195,7 +195,7 @@ const blockProduct = async (req, res) => {
     await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
     res.redirect("/admin/productManagement")
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -206,7 +206,7 @@ const unblockProduct = async (req, res) => {
     await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
     res.redirect("/admin/productManagement");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -224,7 +224,7 @@ const deleteProduct = async (req, res) => {
     req.flash('success', 'Product deleted successfully');
   } catch (error) {
     req.flash('error', 'An error occurred while deleting the product');
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -241,7 +241,7 @@ const getEditProduct = async (req, res) => {
       cat: category,
     })
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 
@@ -297,7 +297,7 @@ const editProduct = async (req, res) => {
 
     res.redirect("/admin/productManagement");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 

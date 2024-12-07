@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,23 +41,27 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="payment-card">
             <h3 class="text-center">Complete Your Payment</h3>
-            <p class="text-center text-muted">Order ID: <%= order.orderId %></p>
+            <p class="text-center text-muted">Order ID: <%= order.orderId %>
+            </p>
             <p>Total Amount: <strong>₹<%= order.finalAmount %></strong></p>
-            <p>Payment Status: <strong><%= order.paymentStatus %></strong></p>
+            <p>Payment Status: <strong>
+                    <%= order.paymentStatus %>
+                </strong></p>
 
-            <% if (order.paymentStatus.toLowerCase() === 'pending') { %>
+            <% if (order.paymentStatus.toLowerCase()==='pending' ) { %>
                 <div class="text-center mt-4">
                     <button id="continue-payment-btn" class="btn btn-primary">Continue Payment</button>
                 </div>
-            <% } else { %>
-                <div class="alert alert-success text-center">
-                    Payment already completed for this order.
-                </div>
-            <% } %>
+                <% } else { %>
+                    <div class="alert alert-success text-center">
+                        Payment already completed for this order.
+                    </div>
+                    <% } %>
         </div>
     </div>
 
@@ -76,39 +81,38 @@
                 })
                 .then((data) => {
                     const options = {
-                        key: data.key_id, 
-                        amount: data.amount, 
+                        key: data.key_id,
+                        amount: data.amount,
                         currency: data.currency,
-                        name: "Your Shop Name",
+                        name: "Bookie",
                         description: "Order Payment",
-                        order_id: data.order_id, 
+                        order_id: data.order_id,
                         handler: function (response) {
-                        fetch(`/payment-success/${orderId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                order_id: data.order_id, 
-                                payment_id: response.razorpay_payment_id, 
-                                signature: response.razorpay_signature,  
-                            }),
-                        })
-                            .then((successResponse) => successResponse.json())
-                            .then((successData) => {
-                                if (successData.success) {
-                                    Swal.fire("Success", "Payment completed successfully!", "success").then(() => {
-                                        window.location.href = "/orders-list"; 
-                                    });
-                                } else {
-                                    Swal.fire("Error", "Payment verification failed.", "error");
-                                }
+                            fetch(`/payment-success/${orderId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    order_id: data.order_id,
+                                    payment_id: response.razorpay_payment_id,
+                                    signature: response.razorpay_signature,
+                                }),
                             })
-                            .catch((error) => {
-                                Swal.fire("Error", "Something went wrong. Please try again.", "error");
-                                console.error(error);
-                            });
-                    },
+                                .then((successResponse) => successResponse.json())
+                                .then((successData) => {
+                                    if (successData.success) {
+                                        Swal.fire("Success", "Payment completed successfully!", "success").then(() => {
+                                            window.location.href = "/orders-list";
+                                        });
+                                    } else {
+                                        Swal.fire("Error", "Payment verification failed.", "error");
+                                    }
+                                })
+                                .catch((error) => {
+                                    Swal.fire("Error", "Something went wrong. Please try again.", "error");
+                                });
+                        },
 
                         theme: {
                             color: "#3399cc",
@@ -120,9 +124,9 @@
                 })
                 .catch((error) => {
                     Swal.fire("Error", error.message, "error");
-                    console.error(error);
                 });
         });
     </script>
 </body>
+
 </html>

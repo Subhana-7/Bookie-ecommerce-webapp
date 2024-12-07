@@ -1,9 +1,4 @@
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
-const User = require("../../models/userSchema");
 const Wallet = require("../../models/walletSchema");
-const mongoose = require("mongoose");
-
 
 const loadWallet = async(req,res) => {
   try {
@@ -17,7 +12,7 @@ const loadWallet = async(req,res) => {
 
     res.render("wallet",{wallet});
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 

@@ -1,11 +1,8 @@
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
-const User = require("../../models/userSchema");
-const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const mongoose = require("mongoose");
-const { console } = require("inspector");
 
 
 const getProducts = async (req, res) => {
@@ -15,7 +12,7 @@ const getProducts = async (req, res) => {
     const searchQuery = req.query.search || '';
     const sortOption = req.query.sort || 'default';
     const inStock = req.query.inStock === 'true';
-    const categoryFilter = req.query.category || ''; 
+    const categoryFilter = req.query.category || '';
 
     const filter = {
       isDeleted: false,
@@ -23,21 +20,19 @@ const getProducts = async (req, res) => {
     };
 
     if (searchQuery) {
-      filter.productName = new RegExp(searchQuery, 'i'); 
+      filter.productName = new RegExp(searchQuery, 'i');
     }
 
     if (inStock) {
-      filter.quantity = { $gt: 0 }; 
+      filter.quantity = { $gt: 0 };
     }
 
     if (categoryFilter) {
       const selectedCategories = categoryFilter.split(',');
-      filter.category = { $in: selectedCategories }; 
+      filter.category = { $in: selectedCategories };
     } else {
       filter.category = { $in: categories.map(category => category._id) };
     }
-
-    console.log("Filter:", filter); 
 
     const sortOptions = {
       popularity: { popularity: -1 },
@@ -59,10 +54,9 @@ const getProducts = async (req, res) => {
       searchQuery,
       sortOption,
       inStock,
-      categoryFilter,  
+      categoryFilter,
     });
   } catch (error) {
-    console.error("Error retrieving products:", error); 
     res.status(500).send("An error occurred while retrieving products.");
   }
 };
@@ -75,7 +69,7 @@ const getProducts = async (req, res) => {
 
 
 
-const productDetails = async(req,res) => {
+const productDetails = async (req, res) => {
   try {
     const id = req.params.id;
 
@@ -85,17 +79,16 @@ const productDetails = async(req,res) => {
 
     const product = await Product.findById(id).populate('category');
 
-      const relatedProducts = await Product.find({
-        category: product.category,
-        _id: { $ne: id }
-      }).limit(3); 
+    const relatedProducts = await Product.find({
+      category: product.category,
+      _id: { $ne: id }
+    }).limit(3);
 
     res.render('product-details', {
-       product:product,
-       relatedProducts
-      });
+      product: product,
+      relatedProducts
+    });
   } catch (error) {
-    console.error(error);
     res.status(500).send("Error retrieving product details");
   }
 }

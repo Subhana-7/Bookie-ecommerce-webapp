@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -110,6 +111,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <section class="sign-up-section d-flex justify-content-center align-items-center">
@@ -149,32 +151,29 @@
                 <div class="alert alert-danger text-center" id="referral-error" style="display: none;">
                     Invalid referral code.
                 </div>
-                <%if(locals.message && message.length > 0){%>
+                <%if(locals.message && message.length> 0){%>
                     <div class="alert alert-danger text-center">
-  
-                      <%=message%>
-  
+
+                        <%=message%>
+
                     </div>
-                  <%}%>
-                <button type="submit" class="btn btn-signup w-100">Sign Up</button>
-                <p class="text-center mt-3">Already have an account? <a href="/login" class="link">Sign in here</a></p>
+                    <%}%>
+                        <button type="submit" class="btn btn-signup w-100">Sign Up</button>
+                        <p class="text-center mt-3">Already have an account? <a href="/login" class="link">Sign in
+                                here</a></p>
 
-                <div class="or-separator">
-                    <span>or</span>
-                </div>
+                        <div class="or-separator">
+                            <span>or</span>
+                        </div>
 
-                <div class="social btns">
-                    <a href="/auth/google" type="button" class="btn btn-outline-danger">
-                        <img
-                        src="img/google.webp"
-                        alt="Google Logo"
-                        style="width: 24px; height:24px"
-                        />
-                        <p>Sign up with Google</p>
-                    </a>
-                </div>
+                        <div class="social btns">
+                            <a href="/auth/google" type="button" class="btn btn-outline-danger">
+                                <img src="img/google.webp" alt="Google Logo" style="width: 24px; height:24px" />
+                                <p>Sign up with Google</p>
+                            </a>
+                        </div>
 
-               
+
             </form>
         </div>
     </section>
@@ -271,7 +270,7 @@
             passValidationChecking();
 
             if (error1.innerHTML !== "" || error2.innerHTML !== "" || error3.innerHTML !== "" || error4.innerHTML !== "" || error5.innerHTML !== "") {
-                e.preventDefault();  
+                e.preventDefault();
             }
         });
 
@@ -281,13 +280,12 @@
         passId.addEventListener("input", passValidationChecking);
         cpassId.addEventListener("input", passValidationChecking);
 
-        //referal code
         const referralCodeInput = document.getElementById('referral-code');
         const referralError = document.getElementById('error-referral');
 
         function validateReferralCode() {
             const referralCode = referralCodeInput.value.trim();
-            if (referralCode && referralCode.length < 6) { 
+            if (referralCode && referralCode.length < 6) {
                 referralError.style.display = "block";
                 referralError.innerHTML = "Referral code must be at least 6 characters.";
             } else {
@@ -300,4 +298,5 @@
     </script>
 
 </body>
+
 </html>

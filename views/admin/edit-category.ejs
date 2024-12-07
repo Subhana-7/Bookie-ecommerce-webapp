@@ -1,79 +1,92 @@
-<%- include("../../views/partials/admin/header") %>
+<!DOCTYPE html>
+<html>
 
-<div class="container-fluid">
-  <div class="row">
-    <%- include("../../views/partials/admin/sidebar") %>
+<head>
+  <%- include("../../views/partials/admin/header") %>
+</head>
 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-5">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-md-6 mt-60">
-            <h3 class="mb-4">Update Category</h3>
-            
-            <form method="post" action="/admin/editCategory/<%=category._id%>" onsubmit="return validateForm()">
-              <div class="mb-4 mt-30">
-                <label for="categoryName" class="form-label">Name</label>
-                <input type="text" id="categoryName" name="categoryName" value="<%=category.name%>" class="form-control border" />
-                <div id="categoryName-error" class="error-message text-danger"></div>
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <%- include("../../views/partials/admin/sidebar") %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-5">
+          <div class="container">
+            <div class="row justify-content-center">
+              <div class="col-md-6 mt-60">
+                <h3 class="mb-4">Update Category</h3>
+
+                <form method="post" action="/admin/edit-category/<%=category._id%>" onsubmit="return validateForm()">
+                  <div class="mb-4 mt-30">
+                    <label for="categoryName" class="form-label">Name</label>
+                    <input type="text" id="categoryName" name="categoryName" value="<%=category.name%>"
+                      class="form-control border" />
+                    <div id="categoryName-error" class="error-message text-danger"></div>
+                  </div>
+                  <div class="mb-4">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description"
+                      class="form-control border"><%=category.description%></textarea>
+                    <div id="description-error" class="error-message text-danger"></div>
+                  </div>
+                  <div class="d-grid text-end mt-30 col-md-5">
+                    <button class="btn btn-primary" type="submit">Update category</button>
+                  </div>
+                </form>
               </div>
-              <div class="mb-4">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" name="description" class="form-control border"><%=category.description%></textarea>
-                <div id="description-error" class="error-message text-danger"></div>
-              </div>
-              <div class="d-grid text-end mt-30 col-md-5">
-                <button class="btn btn-primary" type="submit">Update category</button>
-              </div>
-            </form>
+            </div>
           </div>
-        </div>
-      </div>
-    </main>
+        </main>
+    </div>
   </div>
-</div>
 
-<script>
-  function validateForm() {
-    clearErrorMessages();
-    let isValid = true;
+  <script>
+    function validateForm() {
+      clearErrorMessages();
+      let isValid = true;
 
-    const categoryName = document.getElementById('categoryName').value.trim();
-    if (categoryName === "") {
-      displayErrorMessage('categoryName-error', 'Please enter a category name.');
-      isValid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(categoryName)) {
-      displayErrorMessage('categoryName-error', 'Category name should contain only alphabetic characters.');
-      isValid = false;
+      const categoryName = document.getElementById('categoryName').value.trim();
+      if (categoryName === "") {
+        displayErrorMessage('categoryName-error', 'Please enter a category name.');
+        isValid = false;
+      } else if (!/^[a-zA-Z\s]+$/.test(categoryName)) {
+        displayErrorMessage('categoryName-error', 'Category name should contain only alphabetic characters.');
+        isValid = false;
+      }
+
+      const description = document.getElementById('description').value.trim();
+      if (description === "") {
+        displayErrorMessage('description-error', 'Please enter a category description.');
+        isValid = false;
+      }
+
+      return isValid;
     }
 
-    const description = document.getElementById('description').value.trim();
-    if (description === "") {
-      displayErrorMessage('description-error', 'Please enter a category description.');
-      isValid = false;
+    function displayErrorMessage(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      errorElement.innerText = message;
+      errorElement.style.display = 'block';
     }
 
-    return isValid;
-  }
+    function clearErrorMessages() {
+      const errorElements = document.getElementsByClassName('error-message');
+      Array.from(errorElements).forEach(element => {
+        element.innerText = '';
+        element.style.display = 'none';
+      });
+    }
+  </script>
 
-  function displayErrorMessage(elementId, message) {
-    const errorElement = document.getElementById(elementId);
-    errorElement.innerText = message;
-    errorElement.style.display = 'block';
-  }
+  <style>
+    .error-message {
+      font-size: 0.875em;
+      color: red;
+      display: none;
+    }
+  </style>
 
-  function clearErrorMessages() {
-    const errorElements = document.getElementsByClassName('error-message');
-    Array.from(errorElements).forEach(element => {
-      element.innerText = '';
-      element.style.display = 'none';
-    });
-  }
-</script>
+</body>
 
-<style>
-  .error-message {
-    font-size: 0.875em;
-    color: red;
-    display: none;
-  }
-</style>
+</html>

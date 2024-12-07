@@ -1,130 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-<%-include("../../views/partials/user/header")%>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #ddd;
-        }
-        .header {
-            text-align: center;
-            color: #800000;
-            margin-bottom: 20px;
-        }
-        .btn-maroon {
-            background-color: #800000 !important;
-            color: #fff !important;
-            border: none;
-        }
-        .btn-maroon:hover {
-            background-color: #a00000 !important;
-        }
-        .error-message {
-            color: red;
-            font-size: 0.9rem;
-            margin-top: 5px;
-            display: none;
-        }
-    </style>
-</head>
-<body>
+    <%- include("../../views/partials/user/header")%>
 
-<div class="container">
-    <h2 class="header">Edit Profile</h2>
-    <form id="editProfileForm" action="/edit-profile" method="POST">
-        <div class="form-group">
-            <label for="name">Name:</label>
-            <input type="text" class="form-control" id="name" name="name" value="<%=user.name%>" required>
-            <div id="nameError" class="error-message"></div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Edit Profile</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f9f9f9;
+                color: #333;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 40px auto;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #ddd;
+            }
+
+            .header {
+                text-align: center;
+                color: #800000;
+                margin-bottom: 20px;
+            }
+
+            .btn-maroon {
+                background-color: #800000 !important;
+                color: #fff !important;
+                border: none;
+            }
+
+            .btn-maroon:hover {
+                background-color: #a00000 !important;
+            }
+
+            .error-message {
+                color: red;
+                font-size: 0.9rem;
+                margin-top: 5px;
+                display: none;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="container">
+            <h2 class="header">Edit Profile</h2>
+            <form id="editProfileForm" action="/edit-profile" method="POST">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<%=user.name%>" required>
+                    <div id="nameError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" value="<%=user.email%>" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="text" class="form-control" id="phone" name="phone" value="<%=user.phone%>" required>
+                    <div id="phoneError" class="error-message"></div>
+                </div>
+
+                <button type="submit" class="btn btn-maroon btn-block">Save Changes</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="/profile" class="btn btn-link">Cancel</a>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" class="form-control" id="email" name="email" value="<%=user.email%>" disabled>
-        </div>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script>
+            const nameInput = document.getElementById("name");
+            const phoneInput = document.getElementById("phone");
+            const nameError = document.getElementById("nameError");
+            const phoneError = document.getElementById("phoneError");
+            const form = document.getElementById("editProfileForm");
 
-        <div class="form-group">
-            <label for="phone">Phone:</label>
-            <input type="text" class="form-control" id="phone" name="phone" value="<%=user.phone%>" required>
-            <div id="phoneError" class="error-message"></div>
-        </div>
+            function validateName() {
+                const name = nameInput.value.trim();
+                const nameRegex = /^[A-Za-z\s]+$/;
 
-        <button type="submit" class="btn btn-maroon btn-block">Save Changes</button>
-    </form>
+                if (!nameRegex.test(name) || name.length === 0 || name === "") {
+                    nameError.textContent = "Name must contain only alphabets and spaces (no empty input).";
+                    nameError.style.display = "block";
+                    return false;
+                } else {
+                    nameError.textContent = "";
+                    nameError.style.display = "none";
+                    return true;
+                }
+            }
 
-    <div class="text-center mt-3">
-        <a href="/profile" class="btn btn-link">Cancel</a>
-    </div>
-</div>
+            function validatePhone() {
+                const phone = phoneInput.value.trim();
+                const phoneRegex = /^\d{10}$/;
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
-    const nameInput = document.getElementById("name");
-    const phoneInput = document.getElementById("phone");
-    const nameError = document.getElementById("nameError");
-    const phoneError = document.getElementById("phoneError");
-    const form = document.getElementById("editProfileForm");
+                if (!phoneRegex.test(phone)) {
+                    phoneError.textContent = "Phone number must be exactly 10 digits.";
+                    phoneError.style.display = "block";
+                    return false;
+                } else {
+                    phoneError.textContent = "";
+                    phoneError.style.display = "none";
+                    return true;
+                }
+            }
 
-    function validateName() {
-        const name = nameInput.value.trim();
-        const nameRegex = /^[A-Za-z\s]+$/;
+            form.addEventListener("submit", (e) => {
+                const isNameValid = validateName();
+                const isPhoneValid = validatePhone();
 
-        if (!nameRegex.test(name) || name.length === 0 || name === "") {
-            nameError.textContent = "Name must contain only alphabets and spaces (no empty input).";
-            nameError.style.display = "block";
-            return false;
-        } else {
-            nameError.textContent = "";
-            nameError.style.display = "none";
-            return true;
-        }
-    }
+                if (!isNameValid || !isPhoneValid) {
+                    e.preventDefault();
+                }
+            });
 
-    function validatePhone() {
-        const phone = phoneInput.value.trim();
-        const phoneRegex = /^\d{10}$/;
+            nameInput.addEventListener("input", validateName);
+            phoneInput.addEventListener("input", validatePhone);
+        </script>
+    </body>
 
-        if (!phoneRegex.test(phone)) {
-            phoneError.textContent = "Phone number must be exactly 10 digits.";
-            phoneError.style.display = "block";
-            return false;
-        } else {
-            phoneError.textContent = "";
-            phoneError.style.display = "none";
-            return true;
-        }
-    }
-
-    form.addEventListener("submit", (e) => {
-        const isNameValid = validateName();
-        const isPhoneValid = validatePhone();
-
-        if (!isNameValid || !isPhoneValid) {
-            e.preventDefault();
-        }
-    });
-
-    nameInput.addEventListener("input", validateName);
-    phoneInput.addEventListener("input", validatePhone);
-</script>
-</body>
 </html>

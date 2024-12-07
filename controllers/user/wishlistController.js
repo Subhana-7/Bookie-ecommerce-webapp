@@ -1,10 +1,5 @@
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
 const User = require("../../models/userSchema");
 const Wishlist = require("../../models/wishlistSchema");
-const fs = require("fs");
-const path = require("path");
-const mongoose = require("mongoose");
 
 
 const loadWishlist = async (req, res) => {
@@ -14,10 +9,10 @@ const loadWishlist = async (req, res) => {
     const wishlistItem = await Wishlist.findOne({ userId: user._id })
       .populate({
         path: 'products.productId',
-        match: { isBlocked: false, isDeleted: false }, 
+        match: { isBlocked: false, isDeleted: false },
         populate: {
           path: 'category',
-          match: { isListed: true, isDeleted: false }, 
+          match: { isListed: true, isDeleted: false },
         },
       });
 
@@ -35,8 +30,7 @@ const loadWishlist = async (req, res) => {
 
     res.render("wishlist", { Wishlist: filteredProducts, message: null });
   } catch (error) {
-    console.error("Error loading wishlist:", error);
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 
@@ -65,19 +59,15 @@ const addItemToWishlist = async (req, res) => {
     await wishlist.save();
     res.redirect("/wishlist");
   } catch (error) {
-    console.error(error);
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 };
 
 
-const removeItemFromWishlist = async(req,res) => {
-  //console.log("controller block of removeItemFromwishlist");
+const removeItemFromWishlist = async (req, res) => {
   try {
-    //console.log("try block of remove wishlist itsm from")
-    const {productId} = req.body;
+    const { productId } = req.body;
     const userId = req.session.user;
-    //console.log(userId,productId)
 
     await Wishlist.findOneAndUpdate(
       { userId: userId },
@@ -85,9 +75,8 @@ const removeItemFromWishlist = async(req,res) => {
     );
 
     res.redirect("/wishlist");
-
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page-not-found");
   }
 }
 

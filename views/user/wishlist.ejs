@@ -1,103 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <%- include("../../views/partials/user/header") %>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wishlist</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .wishlist-container {
-            margin-top: 30px;
-        }
-        .wishlist-item {
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: white;
-        }
-        .wishlist-item img {
-            width: 100px;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        .wishlist-item .btn {
-            margin-right: 5px;
-        }
-        .wishlist-header {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #343a40;
-        }
-        .price {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
 
-<div class="container wishlist-container" >
-    <div class="wishlist-header">Your Wishlist</div>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Wishlist</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
 
-    <% if (message) { %>
-        <p class="text-center text-muted"><%= message %></p>
-    <% } else { %>
-        <div class="row">
-            <% Wishlist.forEach(item => { 
-                let product = item.productId;
-            %>
-            <div class="col-md-12">
-                <a style="text-decoration: none;" href="/product-details/<%= product._id %>">
-                    <div class="wishlist-item d-flex align-items-center">
-                        <img src="/uploads/product-images/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="img-fluid mr-3">
-                        <div class="wishlist-details">
-                            <h5 class="mb-1"><%= product.productName %></h5>
-                            <p class="text-muted mb-2">Author: <%= product.author %></p>
-                            <p class="mb-2">
-                                Stock Status: 
-                                <% if (product.quantity <= 0) { %>
-                                    <span style="color: red;">Out of Stock</span>
-                                <% } else { %>
-                                    <span style="color: green;"><%= product.quantity %> Stock left - In Stock</span>
-                                <% } %>
-                            </p>
+            .wishlist-container {
+                margin-top: 30px;
+            }
 
-                            <% if (product.quantity > 0) { %>
-                                <p class="price">
-                                    <% if (product.regularPrice !== product.salePrice) { %>
-                                        <span style="text-decoration: line-through; color: grey;">₹<%= product.regularPrice %></span><br>
-                                        <span style="color: green; font-weight: bold;">₹<%= product.salePrice %></span>
-                                        <small style="color: red;">(Buy this product for offer amount)</small>
-                                    <% } else { %>
-                                        <span style="color: black; font-weight: bold;">₹<%= product.regularPrice %></span>
-                                    <% } %>
-                                </p>
-                            <% } %>
-                        </div>
-                        <div class="ml-auto">
-                            <form action="/wishlist/remove" method="POST" class="d-inline">
-                                <input type="hidden" name="productId" value="<%= product._id %>">
-                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                            </form>
-                        </div>
+            .wishlist-item {
+                border: 1px solid #dee2e6;
+                border-radius: 5px;
+                padding: 15px;
+                margin-bottom: 20px;
+                background-color: white;
+            }
+
+            .wishlist-item img {
+                width: 100px;
+                height: 150px;
+                object-fit: cover;
+                border-radius: 5px;
+            }
+
+            .wishlist-item .btn {
+                margin-right: 5px;
+            }
+
+            .wishlist-header {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 20px;
+                color: #343a40;
+            }
+
+            .price {
+                color: red;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="container wishlist-container">
+            <div class="wishlist-header">Your Wishlist</div>
+
+            <% if (message) { %>
+                <p class="text-center text-muted">
+                    <%= message %>
+                </p>
+                <% } else { %>
+                    <div class="row">
+                        <% Wishlist.forEach(item=> {
+                            let product = item.productId;
+                            %>
+                            <div class="col-md-12">
+                                <a style="text-decoration: none;" href="/product-details/<%= product._id %>">
+                                    <div class="wishlist-item d-flex align-items-center">
+                                        <img src="/uploads/product-images/<%= product.productImage[0] %>"
+                                            alt="<%= product.productName %>" class="img-fluid mr-3">
+                                        <div class="wishlist-details">
+                                            <h5 class="mb-1">
+                                                <%= product.productName %>
+                                            </h5>
+                                            <p class="text-muted mb-2">Author: <%= product.author %>
+                                            </p>
+                                            <p class="mb-2">
+                                                Stock Status:
+                                                <% if (product.quantity <=0) { %>
+                                                    <span style="color: red;">Out of Stock</span>
+                                                    <% } else { %>
+                                                        <span style="color: green;">
+                                                            <%= product.quantity %> Stock left - In Stock
+                                                        </span>
+                                                        <% } %>
+                                            </p>
+
+                                            <% if (product.quantity> 0) { %>
+                                                <p class="price">
+                                                    <% if (product.regularPrice !==product.salePrice) { %>
+                                                        <span style="text-decoration: line-through; color: grey;">₹<%=
+                                                                product.regularPrice %></span><br>
+                                                        <span style="color: green; font-weight: bold;">₹<%=
+                                                                product.salePrice %></span>
+                                                        <small style="color: red;">(Buy this product for offer
+                                                            amount)</small>
+                                                        <% } else { %>
+                                                            <span style="color: black; font-weight: bold;">₹<%=
+                                                                    product.regularPrice %></span>
+                                                            <% } %>
+                                                </p>
+                                                <% } %>
+                                        </div>
+                                        <div class="ml-auto">
+                                            <form action="/wishlist/remove" method="POST" class="d-inline">
+                                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <% }); %>
                     </div>
-                </a>
-            </div>
-            <% }); %> 
+                    <% } %>
         </div>
-    <% } %>
-</div>
 
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </body>
+
 </html>
