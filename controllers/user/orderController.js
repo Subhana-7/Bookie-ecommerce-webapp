@@ -6,7 +6,6 @@ const Cart = require("../../models/cartSchema");
 const Wallet = require("../../models/walletSchema");
 const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/couponSchema");
-const razorpay = require("razorpay");
 const crypto = require("crypto");
 const PDFDocument = require('pdfkit');
 const moment = require('moment');
