@@ -22,7 +22,6 @@ app.locals.razorpayInstance = razorpayInstance;
 db();
 
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -46,8 +45,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(passport.initialize());
-app.use(passport.session());
+
 
 app.use((req, res, next) => {
   res.set("cache-control", "no-store")
