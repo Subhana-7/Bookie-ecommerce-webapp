@@ -17,12 +17,15 @@ const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+
 app.locals.razorpayInstance = razorpayInstance;
 
 db();
 
 
-app.use(express.urlencoded({ extended: true }));
+const openaiApiKey = process.env.OPENAI_API_KEY;
+ 
+app.use(express.urlencoded({extended:true})); 
 app.use(express.json());
 
 app.use(session({
@@ -47,8 +50,13 @@ app.use((req, res, next) => {
 
 
 
-app.use((req, res, next) => {
-  res.set("cache-control", "no-store")
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+app.use((req,res,next) => {
+  res.set("cache-control","no-store")
   next();
 })
 

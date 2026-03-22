@@ -135,6 +135,19 @@
                                             onsubmit="return validateAndSubmit(event)">
 
 
+            <section class="content-main col-md-9 col-lg-10">
+                <div class="row">
+                    <div class="col-9">
+                        <div class="content-header">
+                            <h2 class="content-title">Add New Product</h2>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <form method="POST" action="/admin/addProduct" enctype="multipart/form-data" onsubmit="return validateAndSubmit(event)">
+
+                                    
                                     </div>
                                     <div class="mb-4">
                                         <label for="product_name" class="form-label">Product Name</label>
@@ -266,11 +279,16 @@
                                         </div>
                                     </div>
                                     <div>
+<<<<<<< HEAD
                                         <button class="btn btn-md rounded font-sm hover-up btn-success " type="submit"
                                             onclick="validateAndSubmit()">Publish</button>
                                         </form>
                                     </div>
                                 </div>
+=======
+                                        <button class="btn btn-md rounded font-sm hover-up btn-success " type="submit" onclick="validateAndSubmit()">Publish</button>
+                                </form>
+>>>>>>> a957519 (changes)
                             </div>
                         </div>
                     </section>
@@ -279,6 +297,7 @@
 
         <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
 
+<<<<<<< HEAD
         <script>
             function validateAndSubmit(event) {
                 if (validateForm()) {
@@ -398,6 +417,151 @@
                 ];
 
                 let isValid = true;
+=======
+    <script>
+function validateAndSubmit(event) {
+    console.log("block of validateAndSubmit");
+    if (validateForm()) {
+        console.log("if block of validateForm of validateAndSubmit");
+        return true; // Allow the form to submit
+    } else {
+        event.preventDefault(); // Prevent form submission if validation fails
+        return false; // Prevent default form submission behavior
+    }
+}
+
+
+function viewImage1(event) {
+  document.getElementById("imgView1").src = URL.createObjectURL(event.target.files[0]);
+}
+
+function viewImage2(event) {
+  document.getElementById("imgView2").src = URL.createObjectURL(event.target.files[0]);
+}
+
+function viewImage3(event) {
+  document.getElementById("imgView3").src = URL.createObjectURL(event.target.files[0]);
+}
+
+function viewImage4(event) {
+  document.getElementById("imgView4").src = URL.createObjectURL(event.target.files[0]);
+}
+
+function viewImage(event, index) {
+  let input = event.target;
+  let reader = new FileReader();
+  reader.onload = function() {
+    let dataURL = reader.result;
+    let image = document.getElementById("imgView" + index);
+    image.src = dataURL;
+    let cropper = new Cropper(image, {
+      aspectRatio: 1,
+      guides: true,
+      background: false,
+      autoCropArea: 1,
+      zoomable: true
+    });
+
+    let cropperContainer = document.querySelector("#croppedImg" + index).parentNode;
+    cropperContainer.style.display = "block";
+
+    let saveButton = document.querySelector("#saveButton" + index);
+    saveButton.addEventListener("click", async function () {
+      let croppedCanvas = cropper.getCroppedCanvas();
+      let croppedImage = document.getElementById("croppedImg" + index);
+      croppedImage.src = croppedCanvas.toDataURL("image/jpeg", 1.0);
+
+      let timestamp = new Date().getTime();
+      let fileName = `cropped-img-${timestamp}-${index}.png`;
+
+      await croppedCanvas.toBlob(blob => {
+        let input = document.getElementById("input" + index);
+        let imgFile = new File([blob], fileName, { type: "image/png" });
+        const fileList = new DataTransfer();
+        fileList.items.add(imgFile);
+        input.files = fileList.files;
+      });
+
+      cropperContainer.style.display = "none";
+      cropper.destroy();
+    });
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+const selectedImages = [];
+document.getElementById("input1").addEventListener("change", handleFileSelect);
+
+function handleFileSelect(event) {
+  const addedImagesContainer = document.getElementById("addedImagesContainer");
+  addedImagesContainer.innerHTML = "";
+  const files = event.target.files;
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    selectedImages.push(file); // Fix the push method
+    const thumbnail = document.createElement("div");
+    thumbnail.classList.add("thumbnail");
+
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.alt = "thumbnail";
+    img.style.width = "50px";
+    img.style.height = "auto";
+
+    const removeIcon = document.createElement("span");
+    removeIcon.classList.add("remove-icon");
+    removeIcon.innerHTML = "&times";
+    removeIcon.addEventListener("click", function () {
+      const index = selectedImages.indexOf(file);
+      if (index !== -1) {
+        selectedImages.splice(index, 1);
+      }
+      thumbnail.remove();
+    });
+
+    thumbnail.appendChild(img);
+    thumbnail.appendChild(removeIcon);
+    addedImagesContainer.appendChild(thumbnail);
+  }
+}
+
+function validateForm() {
+    clearErrorMessages();
+
+    const fields = [
+        { name: 'productName', label: 'Product Name', regex: /^[a-zA-Z\s]+$/, errorMessage: 'Please enter a valid product name (only alphabetic characters allowed).' },
+        { name: 'author', label: 'Author', regex: /^[a-zA-Z\s]+$/, errorMessage: 'Please enter a valid author name (only alphabetic characters allowed).' },
+        { name: 'publisher', label: 'Publisher', regex: /^[a-zA-Z\s]+$/, errorMessage: 'Please enter a valid publisher name (only alphabetic characters allowed).' },
+        { name: 'description', label: 'Description', regex: /^.+$/, errorMessage: 'Please enter a valid description.' },
+        { name: 'quantity', label: 'Quantity', regex: /^\d+$/, errorMessage: 'Please enter a valid quantity (only numeric values allowed).' },
+        { name: 'regularPrice', label: 'Regular Price', regex: /^\d+(\.\d{1,2})?$/, errorMessage: 'Please enter a valid regular price.' },
+        { name: 'category', label: 'Category', regex: /.+/, errorMessage: 'Please select a category.' },
+    ];
+
+    let isValid = true;
+
+    // Loop through all fields and apply validation
+    fields.forEach(field => {
+        const value = document.getElementsByName(field.name)[0].value.trim();
+        if (!field.regex.test(value)) {
+            displayErrorMessage(`${field.name}-error`, field.errorMessage);
+            isValid = false;
+        } else {
+            // Clear error message if the field value is valid
+            displayErrorMessage(`${field.name}-error`, '');
+        }
+    });
+
+    // Check for image files selection
+    const images = document.getElementById('input1');
+    if (images.files.length === 0) {
+        displayErrorMessage('images-error', 'Please select at least one image.');
+        isValid = false;
+    } else {
+        // Clear error message if images are selected
+        displayErrorMessage('images-error', '');
+    }
+>>>>>>> a957519 (changes)
 
                 fields.forEach(field => {
                     const value = document.getElementsByName(field.name)[0].value.trim();
@@ -409,6 +573,7 @@
                     }
                 });
 
+<<<<<<< HEAD
                 const images = document.getElementById('input1');
                 if (images.files.length === 0) {
                     displayErrorMessage('images-error', 'Please select at least one image.');
@@ -445,3 +610,29 @@
     </body>
 
 </html>
+=======
+// Add this after the validateForm function
+document.querySelectorAll('.form-control').forEach(input => {
+    input.addEventListener('input', function() {
+        validateForm(); // Re-validate the form on input
+    });
+});
+
+function displayErrorMessage(elementId, message) {
+  var errorElement = document.getElementById(elementId);
+  errorElement.innerText = message;
+  errorElement.style.display = message ? "block" : "none";
+}
+
+function clearErrorMessages() {
+  const errorElements = document.getElementsByClassName('error-message');
+  Array.from(errorElements).forEach(element => {
+    element.innerText = '';
+    element.style.display = 'none';
+  });
+}
+
+      </script>
+      
+</body>
+>>>>>>> a957519 (changes)

@@ -8,7 +8,8 @@ const orderController = require("../controllers/user/orderController");
 const wishlistController = require("../controllers/user/wishlistController");
 const walletController = require("../controllers/user/walletController");
 const retryPaymentController = require("../controllers/user/retryPaymentController");
-const { userAuth, adminAuth } = require("../middlewares/auth");
+const chatBoxController = require("../controllers/user/chatBoxController");
+const {userAuth,adminAuth} = require("../middlewares/auth");
 
 
 //User Signup 
@@ -114,6 +115,11 @@ router.get("/wallet", userAuth, walletController.loadWallet);
 //Invoice
 router.get('/download-invoice/:id', userAuth, orderController.invoiceDownload);
 
+
+//chatBox
+
+router.get("/chat",userAuth,chatBoxController.loadChatBox);
+router.post("/chat",userAuth,chatBoxController.chatbox);
 
 
 module.exports = router;
