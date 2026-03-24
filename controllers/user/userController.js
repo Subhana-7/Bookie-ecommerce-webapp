@@ -1,14 +1,14 @@
 const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');
 const bcrypt = require("bcrypt");
 const Wallet = require("../../models/walletSchema");
 const env = require("dotenv").config();
 const crypto = require("crypto");
-const transporter = require('../../config/emailConfig');
+// const transporter = require('../../config/emailConfig');
 
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const pagNotFound = async (req, res) => {
   try {
@@ -31,31 +31,47 @@ function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// async function sendVerificationEmail(email, otp) {
+//   try {
+//     const transporter = nodemailer.createTransport({
+//       service: "gmail",
+//       port: 587,
+//       secure: false,
+//       requireTLS: true,
+//       auth: {
+//         user: process.env.NODEMAILER_EMAIL,
+//         pass: process.env.NODEMAILER_PASSWORD
+//       }
+//     })
+
+
+//     const info = await transporter.sendMail({
+//       from: process.env.NODEMAILER_EMAIL,
+//       to: email,
+//       subject: "Verify your account",
+//       text: `your otp is ${otp}`,
+//       html: `<b>Your OTP:${otp}</b>`
+//     })
+
+//     return info.accepted.length > 0
+
+//   } catch (error) {
+//     return false;
+//   }
+// }
+
 async function sendVerificationEmail(email, otp) {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      auth: {
-        user: process.env.NODEMAILER_EMAIL,
-        pass: process.env.NODEMAILER_PASSWORD
-      }
-    })
-
-
-    const info = await transporter.sendMail({
-      from: process.env.NODEMAILER_EMAIL,
+    const response = await resend.emails.send({
+      from: 'onboarding@resend.dev', 
       to: email,
-      subject: "Verify your account",
-      text: `your otp is ${otp}`,
-      html: `<b>Your OTP:${otp}</b>`
-    })
+      subject: 'Verify your account',
+      html: `<b>Your OTP: ${otp}</b>`
+    });
 
-    return info.accepted.length > 0
-
+    return !!response.id;
   } catch (error) {
+    console.error(error);
     return false;
   }
 }
