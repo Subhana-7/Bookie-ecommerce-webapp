@@ -553,22 +553,37 @@
             </div>
         </div>
 
-        <div id="product-data" data-available-stock="<%= product.quantity %>" data-product-id="<%= product._id %>">
+        <div id="product-data" data-available-stock="<%= product.quantity %>" data-product-id="<%= product._id %>"
+             data-logged-in="<%= isLoggedIn %>" >
         </div>
 
         <%- include("../../views/partials/user/footer") %>
 
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+            
 </body>
 
 </html>
 
 <div id="product-data" data-available-stock="<%= product.quantity %>" data-product-id="<%= product._id %>"></div>
 
+
 <script>
     async function addToCart() {
 
         const productData = document.getElementById('product-data');
+
+            const isLoggedIn =
+        productData.getAttribute('data-logged-in') === 'true';
+
+        if (!isLoggedIn) {
+            window.location.href = "/login";
+            return;
+        }
+
+
+
         const availableStock = parseInt(productData.getAttribute('data-available-stock'), 10);
         const productId = productData.getAttribute('data-product-id');
 

@@ -59,7 +59,7 @@ router.get("/logout", userAuth, userController.logout);
 
 //Product routes
 router.get("/products", userProductController.getProducts);
-router.get("/product-details/:id", userAuth, userProductController.productDetails);
+router.get("/product-details/:id",  userProductController.productDetails);
 
 //User Profile
 router.get("/profile", userAuth, profileController.getProfile);

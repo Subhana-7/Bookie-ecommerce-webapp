@@ -1,7 +1,7 @@
 const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
-const { Resend } = require('resend');
+const { Resend } = require("resend");
 const bcrypt = require("bcrypt");
 const Wallet = require("../../models/walletSchema");
 const env = require("dotenv").config();
@@ -15,8 +15,7 @@ const pagNotFound = async (req, res) => {
   } catch (error) {
     res.redirect("/page-not-found");
   }
-}
-
+};
 
 const loadSignup = async (req, res) => {
   try {
@@ -24,7 +23,7 @@ const loadSignup = async (req, res) => {
   } catch (error) {
     res.status(500).send("Server error");
   }
-}
+};
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -33,10 +32,10 @@ function generateOtp() {
 async function sendVerificationEmail(email, otp) {
   try {
     const response = await resend.emails.send({
-      from: "noreply@bookieshop.online", 
+      from: "noreply@bookieshop.online",
       to: email,
-      subject: 'Verify your account',
-      html: `<b>Your OTP: ${otp}</b>`
+      subject: "Verify your account",
+      html: `<b>Your OTP: ${otp}</b>`,
     });
 
     return !!response.data?.id;
@@ -46,12 +45,9 @@ async function sendVerificationEmail(email, otp) {
   }
 }
 
-
 const generateReferralCode = () => {
   return Math.random().toString(36).substring(2, 8);
-}
-
-
+};
 
 const signup = async (req, res) => {
   try {
@@ -63,7 +59,9 @@ const signup = async (req, res) => {
 
     const findUser = await User.findOne({ email });
     if (findUser) {
-      return res.render("signup", { message: "User with this email already exists" });
+      return res.render("signup", {
+        message: "User with this email already exists",
+      });
     }
 
     const otp = generateOtp();
@@ -82,8 +80,6 @@ const signup = async (req, res) => {
   }
 };
 
-
-
 const securePassword = async (password) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -91,7 +87,7 @@ const securePassword = async (password) => {
   } catch (error) {
     res.redirect("/page-not-found");
   }
-}
+};
 
 const verifyOtp = async (req, res) => {
   try {
@@ -141,9 +137,6 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-
-
-
 const loadHomePage = async (req, res) => {
   try {
     const user = req.user || req.session.user;
@@ -152,7 +145,7 @@ const loadHomePage = async (req, res) => {
     let productData = await Product.find({
       isBlocked: false,
       isDeleted: false,
-      category: { $in: categories.map(category => category._id) },
+      category: { $in: categories.map((category) => category._id) },
       quantity: { $gt: 0 },
     });
     productData.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
@@ -170,13 +163,14 @@ const loadHomePage = async (req, res) => {
   }
 };
 
-
 const resendOtp = async (req, res) => {
   try {
     const { email } = req.session.userData;
 
     if (!email) {
-      return res.status(400).json({ success: false, message: "Email not found in session" })
+      return res
+        .status(400)
+        .json({ success: false, message: "Email not found in session" });
     }
 
     const otp = generateOtp();
@@ -185,14 +179,21 @@ const resendOtp = async (req, res) => {
     const emailSent = await sendVerificationEmail(email, otp);
 
     if (emailSent) {
-      res.status(200).json({ success: true, message: "OTP Resend Successfully" })
+      res
+        .status(200)
+        .json({ success: true, message: "OTP Resend Successfully" });
     } else {
-      res.status(500).json({ success: false, message: "Internal Server Error, please try again" });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Internal Server Error, please try again",
+        });
     }
   } catch (error) {
     res.redirect("/page-not-found");
   }
-}
+};
 
 const loadLogin = async (req, res) => {
   try {
@@ -213,8 +214,6 @@ const loadLogin = async (req, res) => {
   }
 };
 
-
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -222,37 +221,37 @@ const login = async (req, res) => {
     const findUser = await User.findOne({ isAdmin: 0, email: email });
 
     if (!findUser) {
-      return res.render("login", { message: "User not found" })
+      return res.render("login", { message: "User not found" });
     }
     if (findUser.isBlocked) {
-      return res.render("login", { message: "User is blocked by admin" })
+      return res.render("login", { message: "User is blocked by admin" });
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
 
     if (!passwordMatch) {
-      return res.render("login", { message: "Incorrect Password" })
+      return res.render("login", { message: "Incorrect Password" });
     }
 
     req.session.user = findUser._id;
     res.redirect("/");
   } catch (error) {
-    res.render("login", { message: "login failed. please try again later" })
+    res.render("login", { message: "login failed. please try again later" });
   }
-}
+};
 
 const logout = async (req, res) => {
   try {
     req.session.destroy((err) => {
       if (err) {
-        return res.redirect("/page-not-found")
+        return res.redirect("/page-not-found");
       }
-      return res.redirect("/login")
-    })
+      return res.redirect("/login");
+    });
   } catch (error) {
     res.redirect("page-not-found");
   }
-}
+};
 
 const getResetPassword = async (req, res) => {
   try {
@@ -262,8 +261,6 @@ const getResetPassword = async (req, res) => {
   }
 };
 
-
-
 const sendResetPasswordOTP = async (req, res) => {
   const { email } = req.body;
   try {
@@ -271,37 +268,39 @@ const sendResetPasswordOTP = async (req, res) => {
     if (!user) {
       return res.json({
         success: false,
-        message: 'No account found with this email address.'
+        message: "No account found with this email address.",
       });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
     user.resetPasswordOTP = otp;
-    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; 
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const response = await resend.emails.send({
+      from: "noreply@bookieshop.online",
       to: email,
-      subject: 'Reset Password OTP',
-      html: `
-        <h1>Password Reset</h1>
-        <p>Your OTP for resetting your password is: <strong>${otp}</strong></p>
-        <p>This OTP will expire in 15 minutes.</p>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    return res.json({
-      success: true,
-      message: 'OTP sent to your email successfully.'
+      subject: "Reset your password",
+      html: `<b>Your OTP: ${otp}</b>`,
     });
 
+    console.log(otp)
+
+    if (response.data?.id) {
+      return res.json({
+        success: true,
+        message: "OTP sent to your email successfully.",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+    });
   } catch (error) {
     return res.json({
       success: false,
-      message: 'Error sending OTP. Please try again.'
+      message: "Error sending OTP. Please try again.",
     });
   }
 };
@@ -313,25 +312,24 @@ const verifyResetPasswordOTP = async (req, res) => {
     const user = await User.findOne({
       email,
       resetPasswordOTP: parseInt(otp),
-      resetPasswordExpires: { $gt: Date.now() }
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user) {
       return res.json({
         success: false,
-        message: "Invalid or expired OTP!"
+        message: "Invalid or expired OTP!",
       });
     }
 
     return res.json({
       success: true,
-      message: "OTP verified successfully!"
+      message: "OTP verified successfully!",
     });
-
   } catch (error) {
     return res.json({
       success: false,
-      message: "Error verifying OTP. Please try again."
+      message: "Error verifying OTP. Please try again.",
     });
   }
 };
@@ -344,7 +342,7 @@ const resetPassword = async (req, res) => {
     if (!user) {
       return res.json({
         success: false,
-        message: "User not found!"
+        message: "User not found!",
       });
     }
 
@@ -357,22 +355,15 @@ const resetPassword = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Password reset successful!"
+      message: "Password reset successful!",
     });
-
   } catch (error) {
     return res.json({
       success: false,
-      message: "Error resetting password. Please try again."
+      message: "Error resetting password. Please try again.",
     });
   }
 };
-
-
-
-
-
-
 
 module.exports = {
   loadHomePage,
@@ -387,5 +378,5 @@ module.exports = {
   getResetPassword,
   sendResetPasswordOTP,
   verifyResetPasswordOTP,
-  resetPassword
-}
+  resetPassword,
+};

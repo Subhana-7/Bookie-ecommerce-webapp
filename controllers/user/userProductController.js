@@ -86,7 +86,8 @@ const productDetails = async (req, res) => {
 
     res.render('product-details', {
       product: product,
-      relatedProducts
+      relatedProducts,
+      isLoggedIn: !!req.session.user
     });
   } catch (error) {
     res.status(500).send("Error retrieving product details");

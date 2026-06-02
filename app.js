@@ -70,7 +70,7 @@ app.use("/admin", adminRouter);
 
 PORT = 7000 || process.env.PORT
 app.listen(PORT, () => {
-  console.log("server running");
+  console.log("server running on port 7000");
 })
 
 module.exports = app;
