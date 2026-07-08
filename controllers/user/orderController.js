@@ -465,7 +465,6 @@ const paymentFailed = async (req, res) => {
 
 
 
-
 const invoiceDownload = async (req, res) => {
   try {
     const id = req.params.id;
@@ -477,176 +476,180 @@ const invoiceDownload = async (req, res) => {
       return res.status(404).send("Order not found.");
     }
 
-    const doc = new PDFDocument({
-      margin: 50,
-      size: 'A4'
-    });
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="Invoice-${order.orderId}.pdf"`
     );
-
-    const colors = {
-      primary: '#2C3E50',
-      secondary: '#34495E',
-      accent: '#E74C3C',
-      light: '#ECF0F1',
-      text: '#2C3E50'
-    };
-
-    doc.save();
-    doc
-      .fillOpacity(0.1)
-      .fontSize(100)
-      .fillColor(colors.primary)
-      .rotate(45, { origin: [300, 400] })
-      .text('BOOKIE', 100, 300, {
-        width: 500,
-        align: 'center'
-      })
-      .restore();
-
-    doc
-      .fillColor(colors.primary)
-      .fontSize(26)
-      .text('BOOKIE', { align: 'left', continued: true })
-      .fontSize(12)
-      .fillColor(colors.secondary)
-      .text('   Premium E-Commerce', { continued: false });
-
-    doc
-      .moveDown(1)
-      .fillColor(colors.accent)
-      .fontSize(20)
-      .text('INVOICE', { align: 'right' });
-
-    doc
-      .moveDown(0.5)
-      .fillColor(colors.text)
-      .fontSize(10)
-      .text(`Invoice Date: ${moment().format('MMMM Do, YYYY')}`, { align: 'right' })
-      .text(`Order ID: ${order.orderId}`, { align: 'right' });
-
-    doc
-      .strokeColor(colors.light)
-      .lineWidth(2)
-      .moveTo(50, doc.y + 10)
-      .lineTo(550, doc.y + 10)
-      .stroke();
-
-    doc.moveDown(1);
-
-    const columnGap = 50;
-    const leftColumnX = 50;
-    const rightColumnX = 350;
-
-    doc
-      .fillColor(colors.primary)
-      .fontSize(14)
-      .text('Billing Details', leftColumnX, doc.y, { underline: true });
-
-    doc
-      .fillColor(colors.text)
-      .fontSize(10)
-      .text('Bookie E-Commerce Pvt. Ltd.')
-      .text('123 Fashion Street')
-      .text('Trendy District, Style City')
-      .text('Fashion State - 123456');
-
-    doc
-      .fillColor(colors.primary)
-      .fontSize(14)
-      .text('Shipping Address', rightColumnX, doc.y - 60, { underline: true });
-
-    doc
-      .fillColor(colors.text)
-      .fontSize(10)
-      .text(`${order.address.name}`, rightColumnX)
-      .text(`${order.address.streetName}, ${order.address.landmark}`)
-      .text(`${order.address.locality}`)
-      .text(`${order.address.city}, ${order.address.state} - ${order.address.pin}`)
-      .text(`Contact: ${order.address.contactNo}`);
-
-    doc.moveDown(1);
-
-    doc
-      .fillColor(colors.primary)
-      .fontSize(14)
-      .text('Order Summary', { underline: true });
-
-    const tableTop = doc.y + 10;
-    const headers = ['#', 'Product', 'Quantity', 'Unit Price', 'Total'];
-    const columnWidths = [30, 250, 70, 90, 100];
-
-    headers.forEach((header, i) => {
-      doc
-        .fillColor(colors.light)
-        .rect(50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0), tableTop, columnWidths[i], 25)
-        .fill(colors.secondary);
-
-      doc
-        .fillColor('white')
-        .fontSize(10)
-        .text(header, 50 + columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + 5, tableTop + 5);
-    });
-
-    let yPosition = tableTop + 35;
-    order.orderedItems.forEach((item, index) => {
-      const totalPrice = item.price * item.quantity;
-
-      doc
-        .fillColor(colors.text)
-        .fontSize(9)
-        .text(`${index + 1}`, 55, yPosition)
-        .text(item.product.productName, 80, yPosition, { width: 240 })
-        .text(`${item.quantity}`, 330, yPosition, { align: 'center' })
-        .text(`₹${item.price.toFixed(2)}`, 400, yPosition, { align: 'right' })
-        .text(`₹${totalPrice.toFixed(2)}`, 510, yPosition, { align: 'right' });
-
-      yPosition += 20;
-    });
-
-    doc
-      .fillColor(colors.secondary)
-      .rect(50, yPosition + 10, 500, 80)
-      .fill();
-
-    doc
-      .fillColor('white')
-      .fontSize(12)
-      .text('Subtotal:', 300, yPosition + 20, { continued: true })
-      .text(`₹${order.totalPrice.toFixed(2)}`, { align: 'right' });
-
-    doc
-      .text('Discount:', 300, yPosition + 35, { continued: true })
-      .text(`- ₹${order.discount.toFixed(2)}`, { align: 'right' });
-
-    doc
-      .text('Total:', 300, yPosition + 50, { continued: true })
-      .text(`₹${order.finalAmount.toFixed(2)}`, { align: 'right' });
-
-
-    doc
-      .fillColor(colors.secondary)
-      .fontSize(8)
-      .text('Thank you for your purchase!', 50, doc.page.height - 100, {
-        align: 'center',
-        width: 500
-      })
-      .text('www.bookie.com | support@bookie.com', 50, doc.page.height - 80, {
-        align: 'center',
-        width: 500
-      });
-
-    doc.end();
     doc.pipe(res);
 
+    const colors = {
+      header: '#2C3E50',
+      accent: '#2C3E50',
+      tableHead: '#34495E',
+      text: '#2C3E50',
+      muted: '#7F8C8D',
+      lightRow: '#F5F6F7'
+    };
+
+    const currency = (n) => `Rs. ${Number(n || 0).toFixed(2)}`;
+
+    const pageWidth = doc.page.width;
+    const marginX = 50;
+    const contentWidth = pageWidth - marginX * 2;
+
+    doc.rect(0, 0, pageWidth, 90).fill(colors.header);
+    doc
+      .fillColor('#FFFFFF')
+      .fontSize(22)
+      .text('BOOKIE', marginX, 30);
+    doc
+      .fontSize(10)
+      .fillColor('#D5DBDB')
+      .text('Premium E-Commerce', marginX, 58);
+
+    doc
+      .fillColor('#FFFFFF')
+      .fontSize(20)
+      .text('INVOICE', 0, 35, { align: 'right', width: pageWidth - marginX });
+
+    doc.fillColor(colors.text);
+    doc.y = 115;
+
+    const infoTop = doc.y;
+    const colWidth = contentWidth / 2;
+
+    doc
+      .fontSize(9)
+      .fillColor(colors.muted)
+      .text('BILLED TO', marginX, infoTop);
+    doc
+      .fontSize(11)
+      .fillColor(colors.text)
+      .text(order.address.name || '', marginX, infoTop + 14)
+      .fontSize(9)
+      .fillColor(colors.muted)
+      .text(`${order.address.streetName || ''}, ${order.address.landmark || ''}`, marginX, doc.y + 2)
+      .text(order.address.locality || '', marginX)
+      .text(`${order.address.city || ''}, ${order.address.state || ''} - ${order.address.pin || ''}`, marginX)
+      .text(`Contact: ${order.address.contactNo || ''}`, marginX);
+
+    doc
+      .fontSize(9)
+      .fillColor(colors.muted)
+      .text('INVOICE NO.', marginX + colWidth, infoTop, { width: colWidth, align: 'right' });
+    doc
+      .fontSize(11)
+      .fillColor(colors.text)
+      .text(order.orderId, marginX + colWidth, infoTop + 14, { width: colWidth, align: 'right' });
+
+
+    const invoiceDate = order.createdOn
+      ? moment(order.createdOn).format('MMMM Do, YYYY')
+      : moment().format('MMMM Do, YYYY');
+
+    doc
+      .fontSize(9)
+      .fillColor(colors.muted)
+      .text('DATE', marginX + colWidth, doc.y + 8, { width: colWidth, align: 'right' })
+      .fontSize(10)
+      .fillColor(colors.text)
+      .text(invoiceDate, marginX + colWidth, doc.y + 2, { width: colWidth, align: 'right' });
+
+    doc.moveDown(2);
+    doc.y = Math.max(doc.y, infoTop + 120);
+
+    const columns = [
+      { key: '#', width: 30, align: 'left' },
+      { key: 'Product', width: 230, align: 'left' },
+      { key: 'Qty', width: 60, align: 'center' },
+      { key: 'Unit Price', width: 90, align: 'right' },
+      { key: 'Total', width: 90, align: 'right' }
+    ];
+    const colX = [];
+    let cursor = marginX;
+    columns.forEach(c => { colX.push(cursor); cursor += c.width; });
+
+    const drawTableHeader = (y) => {
+      doc.rect(marginX, y, contentWidth, 24).fill(colors.tableHead);
+      columns.forEach((c, i) => {
+        doc
+          .fillColor('#FFFFFF')
+          .fontSize(9)
+          .text(c.key, colX[i] + 6, y + 7, { width: c.width - 10, align: c.align });
+      });
+      return y + 24;
+    };
+
+    let tableTop = doc.y + 10;
+    tableTop = drawTableHeader(tableTop);
+    let y = tableTop + 8;
+
+    const rowHeight = 22;
+    const bottomLimit = doc.page.height - 160;
+
+    order.orderedItems.forEach((item, index) => {
+      if (y + rowHeight > bottomLimit) {
+        doc.addPage();
+        y = 50;
+        y = drawTableHeader(y) + 8;
+      }
+
+      const lineTotal = item.price * item.quantity;
+      if (index % 2 === 1) {
+        doc.rect(marginX, y - 4, contentWidth, rowHeight).fill(colors.lightRow);
+      }
+
+      doc.fillColor(colors.text).fontSize(9);
+      doc.text(`${index + 1}`, colX[0] + 6, y, { width: columns[0].width - 10, align: columns[0].align });
+      doc.text(item.product?.productName || 'Product unavailable', colX[1] + 6, y, { width: columns[1].width - 10, align: columns[1].align });
+      doc.text(`${item.quantity}`, colX[2] + 6, y, { width: columns[2].width - 10, align: columns[2].align });
+      doc.text(currency(item.price), colX[3] + 6, y, { width: columns[3].width - 10, align: columns[3].align });
+      doc.text(currency(lineTotal), colX[4] + 6, y, { width: columns[4].width - 10, align: columns[4].align });
+
+      y += rowHeight;
+    });
+
+    if (y + 100 > doc.page.height - 60) {
+      doc.addPage();
+      y = 60;
+    }
+
+    const totalsBoxTop = y + 15;
+    const totalsBoxWidth = 220;
+    const totalsBoxX = marginX + contentWidth - totalsBoxWidth;
+
+    doc.rect(totalsBoxX, totalsBoxTop, totalsBoxWidth, 90).fill(colors.header);
+
+    const totalsRow = (label, value, offsetY, opts = {}) => {
+      doc
+        .fillColor(opts.bold ? '#FFFFFF' : '#D5DBDB')
+        .fontSize(opts.bold ? 12 : 10)
+        .text(label, totalsBoxX + 16, totalsBoxTop + offsetY, { width: totalsBoxWidth - 32, continued: true })
+        .text(value, { align: 'right' });
+    };
+
+    totalsRow('Subtotal', currency(order.totalPrice), 16);
+    totalsRow('Discount', `- ${currency(order.discount)}`, 38);
+    totalsRow('Total', currency(order.finalAmount), 62, { bold: true });
+
+    doc
+      .fillColor(colors.muted)
+      .fontSize(8)
+      .text('Thank you for your purchase!', marginX, doc.page.height - 70, { align: 'center', width: contentWidth })
+      .text('www.bookie.com | support@bookie.com', marginX, doc.page.height - 56, { align: 'center', width: contentWidth });
+
+    doc.end();
   } catch (error) {
-    res.status(500).send("Error generating invoice.");
+    console.error(error);
+    if (!res.headersSent) {
+      res.status(500).send("Error generating invoice.");
+    }
   }
 };
+
 
 
 
@@ -692,14 +695,17 @@ const loadOrderDetails = async (req, res) => {
 const getCancelOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body;
-    const order = await Order.findById(id);
+    const order = await Order.findById(id)
+      .populate('orderedItems.product')
+      .populate('address');
 
-    Order.findByIdAndUpdate(id, { status: 'cancelled', cancellationReason: reason });
+    if (!order) {
+      return res.redirect('/page-not-found');
+    }
 
     res.render("cancel-order", { order });
-  } catch {
-    res.redirect("page-not-found");
+  } catch (error) {
+    res.redirect("/page-not-found");
   }
 }
 
@@ -722,15 +728,26 @@ const cancelOrder = async (req, res) => {
 
     order.status = 'Cancelled';
     order.cancellationReason = reason;
+
+    order.orderedItems.forEach(item => {
+      if (item.status === 'Active') {
+        item.status = 'Cancelled';
+        item.cancellationReason = reason;
+        item.cancelledOn = new Date();
+      }
+    });
+
     await order.save();
 
-    const product = await Product.findById(order.product);
-    if (product) {
-      product.quantity += 1;
-      await product.save();
+    for (const item of order.orderedItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        await product.save();
+      }
     }
 
-    if (order.paymentMethod === "Razorpay") {
+    if (order.paymentMethod === "Razorpay" && order.paymentStatus === "completed") {
       const refundAmount = order.finalAmount;
 
       let wallet = await Wallet.findOne({ userId });
@@ -765,19 +782,19 @@ const cancelOrder = async (req, res) => {
 const getReturnOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body;
-    const order = await Order.findById(id);
+    const order = await Order.findById(id)
+      .populate('orderedItems.product')
+      .populate('address');
 
-    Order.findByIdAndUpdate(id, { status: 'Returned', returnRequestReason: reason });
+    if (!order) {
+      return res.redirect('/page-not-found');
+    }
 
     res.render("return-order", { order });
-  } catch {
-    res.redirect("page-not-found");
+  } catch (error) {
+    res.redirect("/page-not-found");
   }
 }
-
-
-
 
 
 const returnRequest = async (req, res) => {
@@ -796,6 +813,14 @@ const returnRequest = async (req, res) => {
 
     order.status = "Return Request";
     order.returnRequestReason = reason;
+
+    order.orderedItems.forEach(item => {
+      if (item.status === 'Active') {
+        item.status = 'Return Request';
+        item.returnRequestReason = reason;
+      }
+    });
+
     await order.save();
 
     res.status(200).json({
@@ -808,12 +833,176 @@ const returnRequest = async (req, res) => {
 
 
 
+const getCancelOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const order = await Order.findById(orderId)
+      .populate('orderedItems.product')
+      .populate('address');
 
+    if (!order) {
+      return res.redirect('/page-not-found');
+    }
 
+    const item = order.orderedItems.id(itemId);
+    if (!item) {
+      return res.redirect('/page-not-found');
+    }
 
+    res.render('cancel-order-item', { order, item });
+  } catch (error) {
+    res.redirect('/page-not-found');
+  }
+};
 
+const cancelOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { reason } = req.body;
+    const userId = req.session.user;
 
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: 'Please provide a reason for cancellation.' });
+    }
 
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    if (order.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to modify this order.' });
+    }
+
+    if (['Delivered', 'Cancelled', 'Returned'].includes(order.status)) {
+      return res.status(400).json({ message: 'This order can no longer be modified.' });
+    }
+
+    const item = order.orderedItems.id(itemId);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found in this order.' });
+    }
+
+    if (['Cancelled', 'Returned', 'Return Request'].includes(item.status)) {
+      return res.status(400).json({ message: 'This item has already been cancelled or returned.' });
+    }
+
+    item.status = 'Cancelled';
+    item.cancellationReason = reason;
+    item.cancelledOn = new Date();
+
+    await Product.updateOne(
+      { _id: item.product },
+      { $inc: { quantity: item.quantity } }
+    );
+
+    const refundAmount = item.price * item.quantity;
+
+    if (order.paymentMethod === 'Razorpay' && order.paymentStatus === 'completed') {
+      let wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        wallet = await Wallet.create({ userId, transactions: [] });
+      }
+
+      const lastBalance = wallet.transactions.length
+        ? wallet.transactions[wallet.transactions.length - 1].balance
+        : 0;
+      const newBalance = lastBalance + refundAmount;
+
+      wallet.transactions.push({
+        date: new Date(),
+        type: 'Credit',
+        amount: refundAmount,
+        balance: newBalance,
+        description: `Refund for cancelled item "${item.productName}" (Order #${order.orderId})`
+      });
+
+      await wallet.save();
+    }
+
+    order.finalAmount = Math.max(0, order.finalAmount - refundAmount);
+    order.totalPrice = Math.max(0, order.totalPrice - refundAmount);
+
+    const allCancelled = order.orderedItems.every(it => it.status === 'Cancelled');
+    if (allCancelled) {
+      order.status = 'Cancelled';
+      order.cancellationReason = order.cancellationReason || 'All items in this order were cancelled.';
+    }
+
+    await order.save();
+
+    res.status(200).json({ message: 'Item has been cancelled successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to cancel item.' });
+  }
+};
+
+const getReturnOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const order = await Order.findById(orderId)
+      .populate('orderedItems.product')
+      .populate('address');
+
+    if (!order) {
+      return res.redirect('/page-not-found');
+    }
+
+    const item = order.orderedItems.id(itemId);
+    if (!item) {
+      return res.redirect('/page-not-found');
+    }
+
+    res.render('return-order-item', { order, item });
+  } catch (error) {
+    res.redirect('/page-not-found');
+  }
+};
+
+const returnOrderItem = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { reason } = req.body;
+    const userId = req.session.user;
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: 'Please provide a reason for return.' });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found.' });
+    }
+
+    if (order.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to modify this order.' });
+    }
+
+    if (order.status !== 'Delivered') {
+      return res.status(400).json({ message: 'Only items from delivered orders can be returned.' });
+    }
+
+    const item = order.orderedItems.id(itemId);
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found in this order.' });
+    }
+
+    if (['Cancelled', 'Returned', 'Return Request'].includes(item.status)) {
+      return res.status(400).json({ message: 'This item has already been returned or cancelled.' });
+    }
+
+    item.status = 'Return Request';
+    item.returnRequestReason = reason;
+
+    await order.save();
+
+    res.status(200).json({
+      message: 'Return request for this item has been recorded and is pending admin approval.'
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to process return request.' });
+  }
+};
 
 
 module.exports = {
@@ -832,5 +1021,9 @@ module.exports = {
   invoiceDownload,
   getCancelOrder,
   getReturnOrder,
-  paymentFailed
+  paymentFailed,
+  getCancelOrderItem,
+  cancelOrderItem,
+  getReturnOrderItem,
+  returnOrderItem
 }

@@ -85,7 +85,7 @@
         <p class="total" id="totalPrice"><strong>Total:</strong> ₹<%= cart.items.reduce((sum, item)=> sum +
             item.totalPrice, 0).toFixed(2) %>
         </p>
-        <p class="total" id="discount"><strong>Discount:</strong> ₹<span id="discountAmount">0.00</span></p>
+        <p class="total" id="discount" style="color: #28a745; font-weight: 600;"><strong>Discount:</strong> -₹<span id="discountAmount">0.00</span></p>
         <p class="total"><strong>Final Price:</strong> <span id="finalPrice">₹<%= cart.items.reduce((sum, item)=> sum +
               item.totalPrice, 0).toFixed(2) %></span></p>
 

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Cancel Order</title>
+    <title>Cancel Item</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
@@ -15,6 +15,15 @@
         .card {
             border-radius: 12px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .btn-cancel {
@@ -45,12 +54,6 @@
         .btn-back:hover {
             background-color: #5a6268;
         }
-
-        .item-status-note {
-            font-size: 0.8rem;
-            font-style: italic;
-            color: #6c757d;
-        }
     </style>
 </head>
 
@@ -59,28 +62,28 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header bg-danger text-white">
-                <h5>Cancel Order</h5>
+                <h5>Cancel Item</h5>
             </div>
             <div class="card-body">
                 <h6>Order Details</h6>
                 <p><strong>Order ID:</strong> <%= order.orderId %></p>
                 <p><strong>Order Date:</strong> <%= order.createdOn.toDateString() %></p>
-                <p><strong>Items:</strong></p>
-                <ul>
-                    <% order.orderedItems.forEach(item => { %>
-                        <li>
-                            <strong><%= item.product ? item.product.productName : item.productName %></strong>
-                            - Quantity: <%= item.quantity %>
-                            (<strong>Price:</strong> ₹<%= item.price * item.quantity %>)
-                            <% if (item.status && item.status !== 'Active') { %>
-                                <span class="item-status-note">— already <%= item.status.toLowerCase() %>, will be left as is</span>
-                            <% } %>
-                        </li>
-                    <% }) %>
-                </ul>
 
-                <h6>Total Amount</h6>
-                <p><strong>₹<%= order.finalAmount %></strong></p>
+                <hr>
+
+                <h6>Item to Cancel</h6>
+                <div class="item-summary mb-3">
+                    <div>
+                        <strong><%= item.product ? item.product.productName : item.productName %></strong>
+                        <div class="text-muted">Quantity: <%= item.quantity %></div>
+                    </div>
+                    <div class="font-weight-bold">₹<%= item.price * item.quantity %></div>
+                </div>
+
+                <p class="text-muted">
+                    Only this item will be cancelled and its amount refunded (if paid online).
+                    The rest of your order will remain unaffected.
+                </p>
 
                 <hr>
 
@@ -91,8 +94,9 @@
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="/orders-list" class="btn btn-back">Back to Orders</a>
-                    <button id="confirmCancel" class="btn btn-cancel" data-order-id="<%= order._id %>">
+                    <a href="/order-details/<%= order._id %>" class="btn btn-back">Back to Order</a>
+                    <button id="confirmCancelItem" class="btn btn-cancel"
+                        data-order-id="<%= order._id %>" data-item-id="<%= item._id %>">
                         Confirm Cancellation
                     </button>
                 </div>
@@ -104,9 +108,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            $('#confirmCancel').on('click', function () {
+            $('#confirmCancelItem').on('click', function () {
                 const $btn = $(this);
                 const orderId = $btn.data('order-id');
+                const itemId = $btn.data('item-id');
                 const reason = $('#cancelReason').val().trim();
 
                 if (!reason) {
@@ -127,13 +132,13 @@
                     $btn.prop('disabled', true).text('Cancelling...');
 
                     $.ajax({
-                        url: `/cancel-order/${orderId}`,
+                        url: `/cancel-order-item/${orderId}/${itemId}`,
                         method: 'POST',
                         data: { reason },
                         success: function () {
-                            Swal.fire('Cancelled!', 'Your order has been successfully cancelled.', 'success')
+                            Swal.fire('Cancelled!', 'The item has been successfully cancelled.', 'success')
                                 .then(() => {
-                                    window.location.href = '/orders-list';
+                                    window.location.href = `/order-details/${orderId}`;
                                 });
                         },
                         error: function (xhr) {

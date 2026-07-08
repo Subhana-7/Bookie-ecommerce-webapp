@@ -30,6 +30,25 @@ const orderSchema = new Schema({
         price: {
             type: Number,
             default: 0
+        },
+        status: {
+            type: String,
+            enum: ['Active', 'Cancelled', 'Return Request', 'Returned'],
+            default: 'Active'
+        },
+        cancellationReason: {
+            type: String,
+            default: null
+        },
+        returnRequestReason: {
+            type: String,
+            default: null
+        },
+        cancelledOn: {
+            type: Date
+        },
+        returnedOn: {
+            type: Date
         }
     }],
     totalPrice: {

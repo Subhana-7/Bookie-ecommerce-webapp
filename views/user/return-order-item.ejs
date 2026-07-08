@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Cancel Order</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Item</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
@@ -17,19 +19,28 @@
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-cancel {
-            background-color: #dc3545;
+        .item-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-return {
+            background-color: #28a745;
             color: white;
             border-radius: 30px;
             font-size: 1rem;
             padding: 10px 20px;
         }
 
-        .btn-cancel:hover {
-            background-color: #c82333;
+        .btn-return:hover {
+            background-color: #218838;
         }
 
-        .btn-cancel:disabled {
+        .btn-return:disabled {
             opacity: 0.65;
             cursor: not-allowed;
         }
@@ -45,12 +56,6 @@
         .btn-back:hover {
             background-color: #5a6268;
         }
-
-        .item-status-note {
-            font-size: 0.8rem;
-            font-style: italic;
-            color: #6c757d;
-        }
     </style>
 </head>
 
@@ -58,42 +63,43 @@
 
     <div class="container mt-5">
         <div class="card">
-            <div class="card-header bg-danger text-white">
-                <h5>Cancel Order</h5>
+            <div class="card-header bg-success text-white">
+                <h5>Return Item</h5>
             </div>
             <div class="card-body">
                 <h6>Order Details</h6>
                 <p><strong>Order ID:</strong> <%= order.orderId %></p>
                 <p><strong>Order Date:</strong> <%= order.createdOn.toDateString() %></p>
-                <p><strong>Items:</strong></p>
-                <ul>
-                    <% order.orderedItems.forEach(item => { %>
-                        <li>
-                            <strong><%= item.product ? item.product.productName : item.productName %></strong>
-                            - Quantity: <%= item.quantity %>
-                            (<strong>Price:</strong> ₹<%= item.price * item.quantity %>)
-                            <% if (item.status && item.status !== 'Active') { %>
-                                <span class="item-status-note">— already <%= item.status.toLowerCase() %>, will be left as is</span>
-                            <% } %>
-                        </li>
-                    <% }) %>
-                </ul>
-
-                <h6>Total Amount</h6>
-                <p><strong>₹<%= order.finalAmount %></strong></p>
 
                 <hr>
 
-                <h6>Reason for Cancellation</h6>
+                <h6>Item to Return</h6>
+                <div class="item-summary mb-3">
+                    <div>
+                        <strong><%= item.product ? item.product.productName : item.productName %></strong>
+                        <div class="text-muted">Quantity: <%= item.quantity %></div>
+                    </div>
+                    <div class="font-weight-bold">₹<%= item.price * item.quantity %></div>
+                </div>
+
+                <p class="text-muted">
+                    This will submit a return request for this item only. It will stay pending
+                    until an admin approves it.
+                </p>
+
+                <hr>
+
+                <h6>Reason for Return</h6>
                 <div class="form-group">
-                    <textarea id="cancelReason" class="form-control" rows="3"
-                        placeholder="Enter your reason for cancellation"></textarea>
+                    <input type="text" id="returnReason" class="form-control"
+                        placeholder="Enter your reason for return" />
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="/orders-list" class="btn btn-back">Back to Orders</a>
-                    <button id="confirmCancel" class="btn btn-cancel" data-order-id="<%= order._id %>">
-                        Confirm Cancellation
+                    <a href="/order-details/<%= order._id %>" class="btn btn-back">Back to Order</a>
+                    <button id="confirmReturnItem" class="btn btn-return"
+                        data-order-id="<%= order._id %>" data-item-id="<%= item._id %>">
+                        Confirm Return
                     </button>
                 </div>
             </div>
@@ -104,13 +110,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            $('#confirmCancel').on('click', function () {
+            $('#confirmReturnItem').on('click', function () {
                 const $btn = $(this);
                 const orderId = $btn.data('order-id');
-                const reason = $('#cancelReason').val().trim();
+                const itemId = $btn.data('item-id');
+                const reason = $('#returnReason').val().trim();
 
                 if (!reason) {
-                    Swal.fire('Error', 'Please provide a reason for cancellation.', 'error');
+                    Swal.fire('Error', 'Please provide a reason for return.', 'error');
                     return;
                 }
 
@@ -119,27 +126,27 @@
                     text: 'You will not be able to undo this action!',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, cancel it!',
+                    confirmButtonText: 'Yes, return it!',
                     cancelButtonText: 'No, keep it'
                 }).then((result) => {
                     if (!result.isConfirmed) return;
 
-                    $btn.prop('disabled', true).text('Cancelling...');
+                    $btn.prop('disabled', true).text('Submitting...');
 
                     $.ajax({
-                        url: `/cancel-order/${orderId}`,
+                        url: `/return-order-item/${orderId}/${itemId}`,
                         method: 'POST',
                         data: { reason },
                         success: function () {
-                            Swal.fire('Cancelled!', 'Your order has been successfully cancelled.', 'success')
+                            Swal.fire('Submitted!', 'The return request has been recorded.', 'success')
                                 .then(() => {
-                                    window.location.href = '/orders-list';
+                                    window.location.href = `/order-details/${orderId}`;
                                 });
                         },
                         error: function (xhr) {
                             const msg = xhr.responseJSON?.message || 'Something went wrong. Please try again.';
                             Swal.fire('Error!', msg, 'error');
-                            $btn.prop('disabled', false).text('Confirm Cancellation');
+                            $btn.prop('disabled', false).text('Confirm Return');
                         }
                     });
                 });

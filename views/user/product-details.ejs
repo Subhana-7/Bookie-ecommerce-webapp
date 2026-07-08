@@ -468,13 +468,19 @@
                         </div>
 
                         <div class="price-section">
-                            <% let finalPrice=product.regularPrice; let discountPercentage=0; if (product.productOffer>
-                                0) {
-                                discountPercentage = product.productOffer;
-                                finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
-                                } else if (product.category && product.category.categoryOffer > 0) {
-                                discountPercentage = product.category.categoryOffer;
-                                finalPrice = product.regularPrice - (product.regularPrice * (discountPercentage / 100));
+                            <%
+                                let finalPrice = product.salePrice;
+
+                                const productOffer = product.productOffer || 0;
+                                const categoryOffer = product.category ? product.category.categoryOffer || 0 : 0;
+
+                                // Choose the higher offer
+                                const discountPercentage = Math.max(productOffer, categoryOffer);
+
+                                if (discountPercentage > 0) {
+                                    finalPrice =
+                                        product.regularPrice -
+                                        (product.regularPrice * discountPercentage / 100);
                                 }
                                 %>
 
@@ -600,11 +606,11 @@
             return;
         }
 
-        if (quantity > 12) {
+        if (quantity > 4) {
             Swal.fire({
                 icon: 'error',
                 title: 'Limit Exceeded',
-                text: 'You can only add a maximum of 12 of the same product to the cart.',
+                text: 'You can only add a maximum of 4 of the same product to the cart.',
             });
             return;
         }

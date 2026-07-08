@@ -21,7 +21,6 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-
     .container {
       background-color: white;
       border-radius: 8px;
@@ -109,6 +108,18 @@
       background-color: #6c757d;
       color: white;
     }
+
+    .item-return-flag {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.75em;
+      font-weight: 700;
+      color: white;
+      background-color: #fd7e14;
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
   </style>
 </head>
 
@@ -147,46 +158,53 @@
               </tr>
             </thead>
             <tbody>
-              <% orders.forEach(order=> { %>
-                <tr>
-                  <td>
-                    <%= order.orderId %>
-                  </td>
-                  <td>
-                    <%= order.createdOn.toDateString() %>
-                  </td>
-                  <td>
-                    <%= order.userId.name %>
-                  </td>
-                  <td>₹<%= order.finalAmount.toFixed(2) %>
-                  </td>
-                  <td>
-                    <form action="/admin/order-management/<%= order._id %>" method="POST">
-                      <select
-                        class="form-control status-select <%= `badge-${order.status.toLowerCase().replace(' ', '-')}` %>"
-                        name="status" onchange="this.form.submit()" <%=(order.status==='Delivered' ||
-                        order.status==='Cancelled' || order.status==='Returned' ) ? 'disabled' : '' %>>
-                        <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending</option>
-                        <option value="Processing" <%=order.status==='Processing' ? 'selected' : '' %>>Processing
-                        </option>
-                        <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped</option>
-                        <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>>Delivered</option>
-                        <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %> disabled>Cancelled
-                        </option>
-                        <option value="Return Request" <%=order.status==='Return Request' ? 'selected' : '' %>
-                          disabled>Return Request</option>
-                        <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %> disabled>Returned
-                        </option>
-                      </select>
-                    </form>
-                  </td>
-                  <td>
-                    <a href="/admin/admin-order-details/<%= order.orderId %>" class="btn btn-info btn-sm btn-view">
-                      <i class="fas fa-eye mr-1"></i>View
-                    </a>
-                  </td>
-                </tr>
-                <% }) %>
+              <% orders.forEach(order=> {
+                   const hasPendingItemReturn = order.orderedItems.some(item => item.status === 'Return Request');
+              %>
+  <tr>
+    <td><%= order.orderId %></td>
+    <td><%= order.createdOn.toDateString() %></td>
+    <td><%= order.userId.name %></td>
+    <td>₹<%= order.finalAmount.toFixed(2) %></td>
+    <td>
+      <%
+        // Define the state machine: current status -> allowed next statuses (includes itself)
+        const statusFlow = {
+          'Pending':        ['Pending', 'Processing', 'Cancelled'],
+          'Processing':     ['Processing', 'Shipped', 'Cancelled'],
+          'Shipped':        ['Shipped', 'Delivered'],
+          'Delivered':      ['Delivered'],              // locked, no admin action
+          'Return Request': ['Return Request', 'Returned', 'Delivered'], // approve or reject
+          'Cancelled':      ['Cancelled'],               // terminal
+          'Returned':       ['Returned']                // terminal
+        };
+        const allowedNext = statusFlow[order.status] || [order.status];
+        const isLocked = allowedNext.length <= 1;
+      %>
+      <form action="/admin/order-management/<%= order._id %>" method="POST">
+        <select
+          class="form-control status-select <%= `badge-${order.status.toLowerCase().replace(/\s+/g, '-')}` %>"
+          name="status"
+          onchange="this.form.submit()"
+          <%= isLocked ? 'disabled' : '' %>>
+          <% allowedNext.forEach(function(s) { %>
+            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>>
+              <%= s %>
+            </option>
+          <% }) %>
+        </select>
+      </form>
+      <% if (hasPendingItemReturn) { %>
+        <span class="item-return-flag">Item return pending</span>
+      <% } %>
+    </td>
+    <td>
+      <a href="/admin/admin-order-details/<%= order.orderId %>" class="btn btn-info btn-sm btn-view">
+        <i class="fas fa-eye mr-1"></i>View
+      </a>
+    </td>
+  </tr>
+<% }) %>
             </tbody>
           </table>
 

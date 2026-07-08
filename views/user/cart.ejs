@@ -296,13 +296,13 @@
             const row = $(this).closest('tr');
             const inputElement = $(this);
 
-            if (newQty > 12) {
+            if (newQty > 4) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: 'Quantity cannot exceed 12!',
+                    text: 'Quantity cannot exceed 4!',
                 });
-                inputElement.val(12);
+                inputElement.val(4);
                 return;
             }
 

@@ -15,7 +15,6 @@ const chatbox = async (req, res) => {
 
         console.log('User  Message:', userMessage);
 
-        // Send message to Rasa
         const response = await axios.post('http://localhost:5005/webhooks/rest/webhook', {
             sender: 'user',
             message: userMessage,

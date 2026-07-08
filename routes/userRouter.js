@@ -104,6 +104,14 @@ router.post("/cancel-order/:orderId", userAuth, orderController.cancelOrder);
 router.get("/return-order-page/:id", userAuth, orderController.getReturnOrder);
 router.post("/return-order/:orderId", userAuth, orderController.returnRequest);
 
+
+router.get('/cancel-order-item/:orderId/:itemId', userAuth, orderController.getCancelOrderItem);
+router.post('/cancel-order-item/:orderId/:itemId', userAuth, orderController.cancelOrderItem);
+ 
+router.get('/return-order-item/:orderId/:itemId', userAuth, orderController.getReturnOrderItem);
+router.post('/return-order-item/:orderId/:itemId', userAuth, orderController.returnOrderItem);
+
+
 //wishlist
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);
 router.post("/wishlist/add", userAuth, wishlistController.addItemToWishlist);

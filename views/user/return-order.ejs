@@ -31,6 +31,11 @@
             background-color: #218838;
         }
 
+        .btn-return:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
         .btn-back {
             background-color: #6c757d;
             color: white;
@@ -41,6 +46,12 @@
 
         .btn-back:hover {
             background-color: #5a6268;
+        }
+
+        .item-status-note {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: #6c757d;
         }
     </style>
 </head>
@@ -54,22 +65,20 @@
             </div>
             <div class="card-body">
                 <h6>Order Details</h6>
-                <p><strong>Order ID:</strong>
-                    <%= order.orderId %>
-                </p>
-                <p><strong>Order Date:</strong>
-                    <%= order.createdOn.toDateString() %>
-                </p>
+                <p><strong>Order ID:</strong> <%= order.orderId %></p>
+                <p><strong>Order Date:</strong> <%= order.createdOn.toDateString() %></p>
                 <p><strong>Items:</strong></p>
                 <ul>
-                    <% order.orderedItems.forEach(item=> { %>
+                    <% order.orderedItems.forEach(item => { %>
                         <li>
-                            <strong>
-                                <%= item.product.productName %>
-                            </strong> - Quantity: <%= item.quantity %>
-                                (<strong>Price:</strong> ₹<%= item.price * item.quantity %>)
+                            <strong><%= item.product ? item.product.productName : item.productName %></strong>
+                            - Quantity: <%= item.quantity %>
+                            (<strong>Price:</strong> ₹<%= item.price * item.quantity %>)
+                            <% if (item.status && item.status !== 'Active') { %>
+                                <span class="item-status-note">— already <%= item.status.toLowerCase() %>, will be left as is</span>
+                            <% } %>
                         </li>
-                        <% }) %>
+                    <% }) %>
                 </ul>
 
                 <h6>Total Amount</h6>
@@ -85,8 +94,9 @@
 
                 <div class="d-flex justify-content-between">
                     <a href="/orders-list" class="btn btn-back">Back to Orders</a>
-                    <button id="confirmReturn" class="btn btn-return" data-order-id="<%= order._id %>">Confirm
-                        Return</button>
+                    <button id="confirmReturn" class="btn btn-return" data-order-id="<%= order._id %>">
+                        Confirm Return
+                    </button>
                 </div>
             </div>
         </div>
@@ -97,7 +107,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             $('#confirmReturn').on('click', function () {
-                const orderId = $(this).data('order-id');
+                const $btn = $(this);
+                const orderId = $btn.data('order-id');
                 const reason = $('#returnReason').val().trim();
 
                 if (!reason) {
@@ -113,22 +124,26 @@
                     confirmButtonText: 'Yes, return it!',
                     cancelButtonText: 'No, keep it'
                 }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: `/return-order/${orderId}`,
-                            method: 'POST',
-                            data: { reason },
-                            success: function () {
-                                Swal.fire('Returned!', 'Your order has been successfully returned.', 'success')
-                                    .then(() => {
-                                        window.location.href = '/orders-list';
-                                    });
-                            },
-                            error: function () {
-                                Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
-                            }
-                        });
-                    }
+                    if (!result.isConfirmed) return;
+
+                    $btn.prop('disabled', true).text('Submitting...');
+
+                    $.ajax({
+                        url: `/return-order/${orderId}`,
+                        method: 'POST',
+                        data: { reason },
+                        success: function () {
+                            Swal.fire('Submitted!', 'Your return request has been recorded.', 'success')
+                                .then(() => {
+                                    window.location.href = '/orders-list';
+                                });
+                        },
+                        error: function (xhr) {
+                            const msg = xhr.responseJSON?.message || 'Something went wrong. Please try again.';
+                            Swal.fire('Error!', msg, 'error');
+                            $btn.prop('disabled', false).text('Confirm Return');
+                        }
+                    });
                 });
             });
         });

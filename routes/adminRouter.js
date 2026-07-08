@@ -60,6 +60,8 @@ router.get("/order-management", adminAuth, adminOrderController.getOrderManageme
 router.post("/order-management/:orderId", adminAuth, adminOrderController.orderManagement);
 router.get("/admin-order-details/:orderId", adminAuth, adminOrderController.getOrderDetails);
 
+router.post("/order-item-management/:orderId/:itemId", adminAuth, adminOrderController.manageItemReturnRequest);
+
 //Coupon Management
 router.get("/coupon-management", adminAuth, adminCouponController.loadCoupon);
 router.get("/create-coupon", adminAuth, adminCouponController.loadCreateCoupon);

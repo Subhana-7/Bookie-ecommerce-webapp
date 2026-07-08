@@ -60,8 +60,47 @@
       color: #800000;
     }
 
-    .cancel-reason {
-      display: none;
+    .item-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .item-status-badge {
+      font-size: 0.8em;
+      padding: 0.3em 0.7em;
+      border-radius: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-active {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .badge-cancelled {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .badge-return-request {
+      background-color: #fd7e14;
+      color: white;
+    }
+
+    .badge-returned {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .item-return-box {
+      background-color: rgb(206, 117, 0);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 0.75rem;
     }
   </style>
 </head>
@@ -78,152 +117,147 @@
 
           <div class="order-details">
             <h5 class="section-title">User Details</h5>
-            <p><strong>Name:</strong>
-              <%= order.userId.name %>
-            </p>
-            <p><strong>Email:</strong>
-              <%= order.userId.email %>
-            </p>
-            <p><strong>Phone:</strong>
-              <%= order.userId.phone %>
-            </p>
+            <p><strong>Name:</strong> <%= order.userId.name %></p>
+            <p><strong>Email:</strong> <%= order.userId.email %></p>
+            <p><strong>Phone:</strong> <%= order.userId.phone %></p>
           </div>
 
           <div class="order-details">
             <h5 class="section-title">Order Details</h5>
-            <p><strong>Order ID:</strong>
-              <%= order.orderId %>
-            </p>
-            <p><strong>Payment Method:</strong>
-              <%= order.paymentMethod %>
-            </p>
-            <p><strong>Payment Status:</strong>
-              <%= order.paymentStatus %>
-            </p>
-            <p><strong>Total Price:</strong> ₹<%= order.totalPrice.toFixed(2) %>
-            </p>
+            <p><strong>Order ID:</strong> <%= order.orderId %></p>
+            <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+            <p><strong>Payment Status:</strong> <%= order.paymentStatus %></p>
+            <p><strong>Total Price:</strong> ₹<%= order.totalPrice.toFixed(2) %></p>
 
-            <tr class="final-row">
-              <td colspan="4" class="text-end" style="font-weight: bold;"><strong>
-                  <%= order.couponApplied===true? "Final Amount (discount applied):" : "Final Amount:" %>
-                </strong>
-              </td>
-              <strong>
-                <td class="text-end price-column">₹<%= order.finalAmount.toLocaleString() %>
-              </strong></td>
-            </tr> <br>
+            <table class="table">
+              <tr class="final-row">
+                <td class="text-end" style="font-weight: bold;">
+                  <%= order.couponApplied === true ? "Final Amount (discount applied):" : "Final Amount:" %>
+                </td>
+                <td class="text-end price-column"><strong>₹<%= order.finalAmount.toLocaleString() %></strong></td>
+              </tr>
+            </table>
 
-            <% if (order.status==='Cancelled' ) { %>
-              <p><strong>Cancellation Reason:</strong>
-                <%= order.cancellationReason || "No reason provided" %>
-              </p>
-              <% } else if (order.status==='Return Pending' || order.status==='Returned' ) { %>
-                <p><strong>Return Reason:</strong>
-                  <%= order.returnRequestReason || "No reason provided" %>
-                </p>
-                <% } %>
+            <% if (order.status === 'Cancelled') { %>
+              <p><strong>Cancellation Reason:</strong> <%= order.cancellationReason || "No reason provided" %></p>
+            <% } else if (order.status === 'Return Request' || order.status === 'Returned') { %>
+              <p><strong>Return Reason:</strong> <%= order.returnRequestReason || "No reason provided" %></p>
+            <% } %>
 
-                  <form action="/admin/order-management/<%= order._id %>" method="POST">
-                    <div class="form-group">
-                      <label for="status">Order Status:</label>
-                      <select class="form-control" id="status" name="status" onchange="toggleCancelReason(this)"
-                        <%=['Delivered', 'Cancelled' , 'Return Pending' , 'Returned' ].includes(order.status)
-                        ? 'disabled' : '' %>>
-                        <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Pending</option>
-                        <option value="Pending" <%=order.status==='Pending' ? 'selected' : '' %>>Processing</option>
-                        <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>Shipped</option>
-                        <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>>Delivered</option>
-                        <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %> disabled>Cancelled
-                        </option>
-                        <option value="Return Request" <%=order.status==='Return Request' ? 'selected' : '' %>
-                          disabled>Return Request</option>
-                        <option value="Returned" <%=order.status==='Returned' ? 'selected' : '' %> disabled>Returned
-                        </option>
-                      </select>
-                    </div>
+            <%
+              const statusFlow = {
+                'Pending':        ['Pending', 'Processing', 'Cancelled'],
+                'Processing':     ['Processing', 'Shipped', 'Cancelled'],
+                'Shipped':        ['Shipped', 'Delivered'],
+                'Delivered':      ['Delivered'],
+                'Return Request': ['Return Request'],   // handled via Allow/Cancel Return buttons below
+                'Cancelled':      ['Cancelled'],
+                'Returned':       ['Returned']
+              };
+              const allowedNext = statusFlow[order.status] || [order.status];
+              const isLocked = allowedNext.length <= 1;
+            %>
 
-                    <% if (!['Delivered', 'Cancelled' , 'Returned' ,'Return Request'].includes(order.status)) { %>
-                      <button type="submit" class="btn btn-maroon btn-block">Update Status</button>
-                      <% } %>
-                  </form>
+            <form action="/admin/order-management/<%= order._id %>" method="POST">
+              <div class="form-group">
+                <label for="status">Order Status:</label>
+                <select class="form-control" id="status" name="status" <%= isLocked ? 'disabled' : '' %>>
+                  <% allowedNext.forEach(function(s) { %>
+                    <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <% if (!isLocked) { %>
+                <button type="submit" class="btn btn-maroon btn-block">Update Status</button>
+              <% } %>
+            </form>
           </div>
 
-          <% if (order.status==='Return Request' ) { %>
-            <div class="order-details mb-4 rounded" style="background-color: rgb(206, 117, 0); padding: 30px;  ">
-              <h5 class="section-title" style="color: rgb(135, 0, 0); text-decoration: underline;">Return Request</h5>
+          <% if (order.status === 'Return Request') { %>
+            <div class="order-details mb-4 rounded" style="background-color: rgb(206, 117, 0); padding: 30px;">
+              <h5 class="section-title" style="color: rgb(135, 0, 0); text-decoration: underline;">Return Request (Whole Order)</h5>
               <p class="alert" style="color: black; font-weight: bold; font-size: 20px;">
-                User requested to return this order! Please review the request and decide whether to allow or cancel the
-                return.
+                User requested to return this order! Please review the request and decide whether to allow or cancel the return.
               </p>
-
               <div class="d-flex justify-content-between">
                 <form action="/admin/order-management/<%= order._id %>" method="POST" class="w-48">
                   <input type="hidden" name="returnAction" value="allow">
                   <button type="submit" class="btn btn-success btn-block">Allow Return</button>
                 </form>
-
                 <form action="/admin/order-management/<%= order._id %>" method="POST" class="w-48">
                   <input type="hidden" name="returnAction" value="deny">
                   <button type="submit" class="btn btn-danger btn-block">Cancel Return</button>
                 </form>
               </div>
             </div>
+          <% } %>
+
+          <div class="order-details">
+            <h5 class="section-title">Shipping Address</h5>
+            <% if (order.address) { %>
+              <p><strong>Street:</strong> <%= order.address.streetName %></p>
+              <p><strong>City:</strong> <%= order.address.city %></p>
+              <p><strong>State:</strong> <%= order.address.state %></p>
+              <p><strong>Pin:</strong> <%= order.address.pin %></p>
+            <% } else { %>
+              <p>Address information not available.</p>
             <% } %>
+          </div>
 
+          <div class="order-details">
+            <h5 class="section-title">Product Details</h5>
+            <% order.orderedItems.forEach(item => {
+                 const itemStatusLower = (item.status || 'Active').toLowerCase().replace(/\s+/g, '-');
+                 const isPendingReturn = item.status === 'Return Request';
+            %>
+              <div class="item-card">
+                <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap: 0.5rem;">
+                  <div>
+                    <p class="mb-1"><strong>Product Name:</strong> <%= item.product ? item.product.productName : item.productName %></p>
+                    <p class="mb-1"><strong>Quantity:</strong> <%= item.quantity %></p>
+                    <p class="mb-1"><strong>Price:</strong> ₹<%= item.price.toFixed(2) %></p>
 
-              <div class="order-details">
-                <h5 class="section-title">Shipping Address</h5>
-                <% if (order.address) { %>
-                  <p><strong>Street:</strong>
-                    <%= order.address.streetName %>
-                  </p>
-                  <p><strong>City:</strong>
-                    <%= order.address.city %>
-                  </p>
-                  <p><strong>State:</strong>
-                    <%= order.address.state %>
-                  </p>
-                  <p><strong>Pin:</strong>
-                    <%= order.address.pin %>
-                  </p>
-                  <% } else { %>
-                    <p>Address information not available.</p>
+                    <% if (item.status === 'Cancelled') { %>
+                      <p class="mb-0 text-muted"><strong>Cancellation Reason:</strong> <%= item.cancellationReason || 'Not specified' %></p>
+                    <% } else if (item.status === 'Return Request' || item.status === 'Returned') { %>
+                      <p class="mb-0 text-muted"><strong>Return Reason:</strong> <%= item.returnRequestReason || 'Not specified' %></p>
                     <% } %>
-              </div>
-
-              <div class="order-details">
-                <h5 class="section-title">Product Details</h5>
-                <% order.orderedItems.forEach(item=> { %>
-                  <div class="address-details mb-3">
-                    <p><strong>Product Name:</strong>
-                      <%= item.product.productName %>
-                    </p>
-                    <p><strong>Quantity:</strong>
-                      <%= item.quantity %>
-                    </p>
-                    <p><strong>Price:</strong> ₹<%= item.price.toFixed(2) %>
-                    </p>
                   </div>
-                  <% }) %>
-              </div>
 
-              <button style="background-color:maroon;"><a style="color:white" href="/admin/order-management">Go
-                  back</a></button>
+                  <span class="item-status-badge badge-<%= itemStatusLower %>">
+                    <%= (item.status || 'Active').toUpperCase() %>
+                  </span>
+                </div>
+
+                <% if (isPendingReturn) { %>
+                  <div class="item-return-box">
+                    <p style="color: black; font-weight: bold;">
+                      User requested to return this item. Approve or deny below.
+                    </p>
+                    <div class="d-flex justify-content-between">
+                      <form action="/admin/order-item-management/<%= order._id %>/<%= item._id %>" method="POST" class="w-48">
+                        <input type="hidden" name="returnAction" value="allow">
+                        <button type="submit" class="btn btn-success btn-block">Allow Return</button>
+                      </form>
+                      <form action="/admin/order-item-management/<%= order._id %>/<%= item._id %>" method="POST" class="w-48">
+                        <input type="hidden" name="returnAction" value="deny">
+                        <button type="submit" class="btn btn-danger btn-block">Deny Return</button>
+                      </form>
+                    </div>
+                  </div>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
+
+          <button style="background-color:maroon;">
+            <a style="color:white" href="/admin/order-management">Go back</a>
+          </button>
         </div>
       </div>
     </div>
   </div>
-
-  <script>
-    function toggleCancelReason(select) {
-      const cancelReasonDiv = document.getElementById("cancelReasonDiv");
-      cancelReasonDiv.style.display = select.value === "Cancelled" ? "block" : "none";
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      toggleCancelReason(document.getElementById("status"));
-    });
-  </script>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>

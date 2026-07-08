@@ -224,7 +224,6 @@ const getCartItemCount = async (req, res) => {
 
 
 
-
 const addItemToCart = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -235,56 +234,89 @@ const addItemToCart = async (req, res) => {
       return res.status(400).json({ message: "Invalid quantity provided" });
     }
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate("category");
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    if (typeof product.salePrice !== "number") {
+
+    if (typeof product.regularPrice !== "number") {
       return res.status(500).json({ message: "Product price is invalid" });
     }
 
-    if (parsedQuantity > product.stock) {
-      return res.status(400).json({ message: `Cannot add more than ${product.stock} of the same product. Only ${product.stock} left in stock.` });
+    if (parsedQuantity > product.quantity) {
+      return res.status(400).json({
+        message: `Cannot add more than ${product.quantity} of the same product. Only ${product.quantity} left in stock.`,
+      });
     }
 
-    const totalPrice = product.salePrice * parsedQuantity;
+    const productOffer = product.productOffer || 0;
+    const categoryOffer = product.category?.categoryOffer || 0;
+
+    const discountPercentage = Math.max(productOffer, categoryOffer);
+
+    let finalPrice = product.salePrice;
+
+    if (discountPercentage > 0) {
+      finalPrice =
+        product.regularPrice -
+        (product.regularPrice * discountPercentage) / 100;
+    }
+
+    const totalPrice = finalPrice * parsedQuantity;
 
     let cart = await Cart.findOne({ userId });
+
     if (!cart) {
-      cart = new Cart({ userId, items: [] });
+      cart = new Cart({
+        userId,
+        items: [],
+      });
     }
 
-    const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+    const existingItemIndex = cart.items.findIndex(
+      (item) => item.productId.toString() === productId
+    );
+
     if (existingItemIndex > -1) {
-      const newQuantity = cart.items[existingItemIndex].quantity + parsedQuantity;
+      const newQuantity =
+        cart.items[existingItemIndex].quantity + parsedQuantity;
+
       if (newQuantity > 12) {
-        return res.status(400).json({ message: "Cannot add more than 12 of the same product." });
+        return res.status(400).json({
+          message: "Cannot add more than 12 of the same product.",
+        });
       }
-      if (newQuantity > product.stock) {
-        return res.status(400).json({ message: `Cannot add more than ${product.stock} of the same product. Only ${product.stock} left in stock.` });
+
+      if (newQuantity > product.quantity) {
+        return res.status(400).json({
+          message: `Cannot add more than ${product.quantity} of the same product. Only ${product.quantity} left in stock.`,
+        });
       }
 
       cart.items[existingItemIndex].quantity = newQuantity;
-      cart.items[existingItemIndex].totalPrice = newQuantity * product.salePrice;
+      cart.items[existingItemIndex].price = finalPrice;
+      cart.items[existingItemIndex].totalPrice = newQuantity * finalPrice;
     } else {
       if (parsedQuantity > 12) {
-        return res.status(400).json({ message: "Cannot add more than 12 of the same product." });
-      }
-      if (parsedQuantity > product.stock) {
-        return res.status(400).json({ message: `Cannot add more than ${product.stock} of the same product. Only ${product.stock} left in stock.` });
+        return res.status(400).json({
+          message: "Cannot add more than 12 of the same product.",
+        });
       }
 
       cart.items.push({
         productId,
         quantity: parsedQuantity,
-        price: product.salePrice,
+        price: finalPrice,
         totalPrice,
       });
     }
 
     await cart.save();
+
     return res.redirect("/cart");
   } catch (error) {
+    console.error(error);
     return res.redirect("/page-not-found");
   }
 };
