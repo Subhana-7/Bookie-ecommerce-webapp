@@ -590,7 +590,22 @@ const invoiceDownload = async (req, res) => {
     const rowHeight = 22;
     const bottomLimit = doc.page.height - 160;
 
-    order.orderedItems.forEach((item, index) => {
+    const billableItems = order.orderedItems.filter(
+      item => !['Cancelled', 'Returned'].includes(item.status)
+    );
+
+    if (billableItems.length === 0) {
+      doc
+        .fillColor(colors.muted)
+        .fontSize(11)
+        .text('All items in this order were cancelled or returned.', marginX, y, {
+          width: contentWidth,
+          align: 'center'
+        });
+      y += 30;
+    }
+
+    billableItems.forEach((item, index) => {
       if (y + rowHeight > bottomLimit) {
         doc.addPage();
         y = 50;
@@ -631,9 +646,12 @@ const invoiceDownload = async (req, res) => {
         .text(value, { align: 'right' });
     };
 
-    totalsRow('Subtotal', currency(order.totalPrice), 16);
+    const billableSubtotal = billableItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const billableTotal = Math.max(0, billableSubtotal - (order.discount || 0));
+
+    totalsRow('Subtotal', currency(billableSubtotal), 16);
     totalsRow('Discount', `- ${currency(order.discount)}`, 38);
-    totalsRow('Total', currency(order.finalAmount), 62, { bold: true });
+    totalsRow('Total', currency(billableTotal), 62, { bold: true });
 
     doc
       .fillColor(colors.muted)
@@ -830,7 +848,6 @@ const returnRequest = async (req, res) => {
     res.status(500).json({ message: "Failed to process return request." });
   }
 };
-
 
 
 const getCancelOrderItem = async (req, res) => {
